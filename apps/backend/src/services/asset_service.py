@@ -23,7 +23,7 @@ class AssetService:
         db: AsyncSession, category_id: str, purchase_date: datetime | None = None
     ) -> str:
         """
-        Generate asset number in format: YY-CATEGORY-SEQ.
+        Generate asset number in format: CATEGORY-YYYY-SEQ.
 
         Args:
             db: Database session
@@ -31,11 +31,11 @@ class AssetService:
             purchase_date: Purchase date (default: now)
 
         Returns:
-            Generated asset number (e.g., "24-NB-0001")
+            Generated asset number (e.g., "11-2024-0001")
 
         Example:
             >>> await generate_asset_number(db, category_id, datetime(2024, 1, 15))
-            "24-NB-0001"
+            "11-2024-0001"
         """
         # Get category code
         category_result = await db.execute(select(Category).where(Category.id == category_id))
@@ -43,20 +43,20 @@ class AssetService:
         if not category:
             raise ValueError(f"Category not found: {category_id}")
 
-        # Get year
-        year = (purchase_date or datetime.now()).year % 100  # Last 2 digits
+        # Get year (4 digits)
+        year = (purchase_date or datetime.now()).year
 
         # Get sequence number (count existing assets with same year and category)
         count_result = await db.execute(
             select(func.count(Asset.id)).where(
                 Asset.category_id == category_id,
-                Asset.asset_tag.like(f"{year:02d}-{category.code}-%"),
+                Asset.asset_tag.like(f"{category.code}-{year}-%"),
             )
         )
         count = count_result.scalar_one() or 0
         seq = count + 1
 
-        return f"{year:02d}-{category.code}-{seq:04d}"
+        return f"{category.code}-{year}-{seq:04d}"
 
     @staticmethod
     def calculate_grade(purchase_date: datetime | None) -> AssetGrade:

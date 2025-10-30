@@ -90,25 +90,30 @@ class Asset(BaseModel):
 class CreateAssetRequest(BaseModel):
     """Create asset request DTO."""
 
-    asset_tag: str = Field(..., min_length=1, max_length=50, description="Asset tag")
+    asset_tag: str | None = Field(None, min_length=1, max_length=50, description="Asset tag (auto-generated if not provided)")
+    model: str | None = Field(None, max_length=255, description="Asset model/specification")
+    serial_number: str | None = Field(None, max_length=255, description="Serial number")
     category_id: str = Field(..., description="Category ID")
     status: AssetStatus = Field(default=AssetStatus.STOCK, description="Initial status")
 
     location_id: str | None = Field(None, description="Location ID")
     purchase_date: datetime | None = None
     purchase_price: Decimal | None = Field(None, ge=0)
+    supplier: str | None = Field(None, max_length=255, description="Supplier name")
     notes: str | None = Field(None, max_length=1000)
 
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
                 "asset_tag": "SRS-11-2024-0001",
-                "name": "Dell Latitude 5420",
+                "model": "Dell Latitude 5420",
+                "serial_number": "ABC123456",
                 "category_id": "550e8400-e29b-41d4-a716-446655440001",
                 "status": "stock",
                 "location_id": "550e8400-e29b-41d4-a716-446655440002",
                 "purchase_date": "2024-01-15T00:00:00Z",
                 "purchase_price": "1200000",
+                "supplier": "Dell Korea",
             }
         }
     )

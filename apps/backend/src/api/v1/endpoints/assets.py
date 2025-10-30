@@ -25,6 +25,7 @@ from src.schemas.asset import (
     UpdateAssetRequest,
 )
 from src.schemas.common import PaginatedResponse
+from src.services.asset_service import AssetService
 
 router = APIRouter()
 
@@ -75,7 +76,6 @@ async def get_assets(
     # Apply search filter
     if search:
         search_filter = or_(
-            AssetModel.name.ilike(f"%{search}%"),
             AssetModel.asset_tag.ilike(f"%{search}%"),
             AssetModel.serial_number.ilike(f"%{search}%"),
             AssetModel.model.ilike(f"%{search}%"),
@@ -279,16 +279,6 @@ async def create_asset(
         HTTPException: 400 if asset tag already exists
         HTTPException: 404 if category or location not found
     """
-    # Check if asset tag already exists
-    existing = await db.execute(
-        select(AssetModel).where(AssetModel.asset_tag == request.asset_tag)
-    )
-    if existing.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Asset tag already exists",
-        )
-
     # Verify category exists
     category_result = await db.execute(
         select(Category).where(Category.id == request.category_id)
@@ -319,18 +309,37 @@ async def create_asset(
         elif years_old >= 2:
             grade = AssetGrade.B
 
+    # Generate asset tag if not provided
+    if request.asset_tag:
+        # Check if provided asset tag already exists
+        existing = await db.execute(
+            select(AssetModel).where(AssetModel.asset_tag == request.asset_tag)
+        )
+        if existing.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Asset tag already exists",
+            )
+        asset_tag = request.asset_tag
+    else:
+        # Auto-generate asset tag
+        asset_tag = await AssetService.generate_asset_number(
+            db, request.category_id, request.purchase_date
+        )
+
     # Create new asset
     asset_id = str(uuid.uuid4())
     asset = AssetModel(
         id=asset_id,
-        asset_tag=request.asset_tag,
-        name=request.name,
+        asset_tag=asset_tag,
+        model=request.model,
+        serial_number=request.serial_number,
         category_id=request.category_id,
         location_id=request.location_id,
         status=request.status,
         purchase_date=request.purchase_date,
         purchase_price=request.purchase_price,
-        warranty_end=request.warranty_end,
+        supplier=request.supplier,
         notes=request.notes,
         grade=grade,
     )
