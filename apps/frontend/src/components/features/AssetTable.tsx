@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreHorizontal, Edit, Trash2, Eye, QrCode } from 'lucide-react';
-import { formatDate } from '@/lib/format';
 import type { Asset } from '@/hooks/useAssets';
 
 /**

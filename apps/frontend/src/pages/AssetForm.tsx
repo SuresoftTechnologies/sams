@@ -196,9 +196,9 @@ export default function AssetForm() {
     };
 
     if (isEditMode) {
-      updateMutation.mutate(apiData as any);
+      updateMutation.mutate(apiData as UpdateAssetDto);
     } else {
-      createMutation.mutate(apiData as any);
+      createMutation.mutate(apiData as CreateAssetDto);
     }
   };
 

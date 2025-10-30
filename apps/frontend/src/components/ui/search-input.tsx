@@ -24,7 +24,7 @@
  * ```
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, X, Loader2 } from 'lucide-react';
@@ -97,7 +97,7 @@ export function SearchInput({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [enableShortcut]);
+  }, [enableShortcut, handleClear]);
 
   // Handle input change with debouncing
   const handleInputChange = (newValue: string) => {
@@ -119,7 +119,7 @@ export function SearchInput({
   };
 
   // Clear search
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setLocalValue('');
     onChange('');
     onSearch?.('');
@@ -131,7 +131,7 @@ export function SearchInput({
 
     // Return focus to input
     inputRef.current?.focus();
-  };
+  }, [onChange, onSearch]);
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
