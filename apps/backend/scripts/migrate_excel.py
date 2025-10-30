@@ -178,20 +178,58 @@ def map_status(status_str: str | None) -> AssetStatus:
 async def get_or_create_category(
     db: AsyncSession, name: str, code: str
 ) -> Category | None:
-    """카테고리 조회 또는 생성"""
+    """카테고리 조회 또는 생성
+
+    - 코드로 먼저 조회
+    - 없으면 이름으로 조회 (name은 unique 제약이 걸려 있으므로 선행 확인)
+    - 둘 다 없으면 생성
+    """
+
+    # 1) 코드로 기존 레코드 조회
     result = await db.execute(select(Category).where(Category.code == code))
     category = result.scalar_one_or_none()
 
-    if not category:
-        category = Category(
-            id=str(uuid.uuid4()),
-            name=name,
-            code=code,
-            description=f"{name} 카테고리",
-            is_active=True,
-        )
-        db.add(category)
-        await db.flush()
+    if category:
+        updated = False
+        # 이름이 다르면 최신 이름으로 갱신
+        if category.name != name:
+            category.name = name
+            updated = True
+        # 설명이 없으면 기본 설명 채움
+        if not category.description:
+            category.description = f"{name} 카테고리"
+            updated = True
+        if updated:
+            await db.flush()
+        return category
+
+    # 2) 이름으로 조회 (name 컬럼은 unique)
+    result = await db.execute(select(Category).where(Category.name == name))
+    category = result.scalar_one_or_none()
+
+    if category:
+        updated = False
+        # 코드가 다르면 최신 코드로 갱신
+        if category.code != code:
+            category.code = code
+            updated = True
+        if not category.description:
+            category.description = f"{name} 카테고리"
+            updated = True
+        if updated:
+            await db.flush()
+        return category
+
+    # 3) 존재하지 않으면 새로 생성
+    category = Category(
+        id=str(uuid.uuid4()),
+        name=name,
+        code=code,
+        description=f"{name} 카테고리",
+        is_active=True,
+    )
+    db.add(category)
+    await db.flush()
 
     return category
 

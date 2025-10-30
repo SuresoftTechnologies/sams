@@ -79,7 +79,7 @@ async def login(
     refresh_token = create_refresh_token({"sub": user.id})
 
     # Convert user model to schema
-    user_schema = UserSchema.model_validate(user)
+    user_schema = UserSchema.from_model(user)
 
     return LoginResponse(
         user=user_schema,
@@ -152,7 +152,7 @@ async def refresh_access_token(
     new_refresh_token = create_refresh_token({"sub": user.id})
 
     # Convert user model to schema
-    user_schema = UserSchema.model_validate(user)
+    user_schema = UserSchema.from_model(user)
 
     return LoginResponse(
         user=user_schema,
@@ -272,7 +272,7 @@ async def register_user(
     refresh_token = create_refresh_token({"sub": new_user.id})
 
     # Convert user model to schema
-    user_schema = UserSchema.model_validate(new_user)
+    user_schema = UserSchema.from_model(new_user)
 
     return LoginResponse(
         user=user_schema,

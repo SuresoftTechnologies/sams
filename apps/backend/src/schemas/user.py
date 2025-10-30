@@ -4,8 +4,12 @@ User schemas matching TypeScript shared-types.
 
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+if TYPE_CHECKING:  # pragma: no cover
+    from src.models.user import User as UserModel
 
 
 class UserRole(str, Enum):
@@ -49,6 +53,39 @@ class User(BaseModel):
             }
         }
     )
+
+    @classmethod
+    def from_model(cls, user: "UserModel") -> "User":
+        """Convert SQLAlchemy User model to Pydantic schema without triggering lazy loads."""
+
+        # Extract department without triggering async lazy loading
+        department_value = None
+        user_dict = getattr(user, "__dict__", {})
+        if "department" in user_dict:
+            department_obj = user_dict["department"]
+            if department_obj is not None:
+                department_value = getattr(department_obj, "name", None) or getattr(
+                    department_obj, "id", None
+                )
+
+        if department_value is None:
+            department_value = getattr(user, "department_id", None)
+
+        role_value = getattr(user, "role", None)
+        if hasattr(role_value, "value"):
+            role_value = role_value.value
+
+        return cls(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            role=role_value,
+            department=department_value,
+            employee_id=getattr(user, "employee_id", None),
+            is_active=user.is_active,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
 
 class CreateUserRequest(BaseModel):

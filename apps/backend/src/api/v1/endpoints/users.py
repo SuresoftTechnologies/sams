@@ -78,7 +78,7 @@ async def get_users(
     users = result.scalars().all()
 
     return PaginatedResponse(
-        items=[User.model_validate(user) for user in users],
+        items=[User.from_model(user) for user in users],
         total=total,
         skip=skip,
         limit=limit,
@@ -127,7 +127,7 @@ async def get_user(
             detail="User not found",
         )
 
-    return User.model_validate(user)
+    return User.from_model(user)
 
 
 @router.post("", response_model=User, status_code=status.HTTP_201_CREATED)
@@ -176,7 +176,7 @@ async def create_user(
     await db.commit()
     await db.refresh(user)
 
-    return User.model_validate(user)
+    return User.from_model(user)
 
 
 @router.put("/{user_id}", response_model=User)
@@ -221,7 +221,7 @@ async def update_user(
     await db.commit()
     await db.refresh(user)
 
-    return User.model_validate(user)
+    return User.from_model(user)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -315,4 +315,4 @@ async def change_user_role(
     await db.commit()
     await db.refresh(user)
 
-    return User.model_validate(user)
+    return User.from_model(user)
