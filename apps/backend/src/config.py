@@ -48,6 +48,7 @@ class Settings(BaseSettings):
 
     # QR Code
     QR_CODE_BASE_URL: str = "http://localhost:5173/assets"
+    APP_FRONTEND_URL: str = "http://localhost:5173"
 
     @property
     def MAX_UPLOAD_SIZE_BYTES(self) -> int:

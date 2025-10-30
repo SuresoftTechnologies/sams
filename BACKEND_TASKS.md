@@ -31,6 +31,7 @@
 - [x] 데이터베이스 의존성 추가
   - [x] sqlalchemy>=2.0.0
   - [x] psycopg[binary]>=3.1.0 (asyncpg 사용)
+  - [x] greenlet>=3.0.3 (SQLAlchemy async 지원)
   - [x] alembic>=1.13.0
 - [x] 인증 의존성 추가
   - [x] python-jose[cryptography]>=3.3.0
@@ -508,7 +509,7 @@ apps/backend/
 
 ---
 
-## 🌐 Phase 7: API 엔드포인트 구현
+## 🌐 Phase 7: API 엔드포인트 구현 ✅
 
 ### 7.1 인증 API (src/api/v1/endpoints/auth.py) ✅
 - [x] POST /auth/login - 로그인
@@ -518,68 +519,68 @@ apps/backend/
 - [x] PUT /auth/change-password - 비밀번호 변경
 - [x] POST /auth/register - 회원가입 (추가 구현)
 
-### 7.2 사용자 API (src/api/v1/endpoints/users.py)
-- [ ] GET /users - 사용자 목록 (Admin)
-- [ ] GET /users/:id - 사용자 상세
-- [ ] POST /users - 사용자 생성 (Admin)
-- [ ] PUT /users/:id - 사용자 수정 (Admin)
-- [ ] DELETE /users/:id - 사용자 삭제 (Admin)
-- [ ] PATCH /users/:id/role - 역할 변경 (Admin)
+### 7.2 사용자 API (src/api/v1/endpoints/users.py) ✅
+- [x] GET /users - 사용자 목록 (Admin)
+- [x] GET /users/:id - 사용자 상세
+- [x] POST /users - 사용자 생성 (Admin)
+- [x] PUT /users/:id - 사용자 수정 (Admin)
+- [x] DELETE /users/:id - 사용자 삭제 (Admin)
+- [x] PATCH /users/:id/role - 역할 변경 (Admin)
 
-### 7.3 자산 API (src/api/v1/endpoints/assets.py)
-- [ ] GET /assets - 자산 목록 (검색, 필터링, 페이지네이션)
-  - [ ] 쿼리 파라미터: skip, limit, search, category_id, status, location_id, grade
-  - [ ] 정렬: sort_by, sort_order
-- [ ] GET /assets/:id - 자산 상세
-- [ ] POST /assets - 자산 생성 (Admin/Manager)
-- [ ] PUT /assets/:id - 자산 수정 (Admin/Manager)
-- [ ] DELETE /assets/:id - 자산 삭제 (소프트 삭제, Admin)
-- [ ] GET /assets/:id/history - 자산 이력 조회
-- [ ] PATCH /assets/:id/status - 상태 변경
-- [ ] PATCH /assets/:id/location - 위치 변경
-- [ ] PATCH /assets/:id/user - 사용자 배정/회수
+### 7.3 자산 API (src/api/v1/endpoints/assets.py) ✅
+- [x] GET /assets - 자산 목록 (검색, 필터링, 페이지네이션)
+  - [x] 쿼리 파라미터: skip, limit, search, category_id, status, location_id, grade
+  - [x] 정렬: sort_by, sort_order
+- [x] GET /assets/:id - 자산 상세
+- [x] POST /assets - 자산 생성 (Admin/Manager)
+- [x] PUT /assets/:id - 자산 수정 (Admin/Manager)
+- [x] DELETE /assets/:id - 자산 삭제 (소프트 삭제, Admin)
+- [x] GET /assets/:id/history - 자산 이력 조회
+- [x] PATCH /assets/:id/status - 상태 변경
+- [x] PATCH /assets/:id/location - 위치 변경
+- [x] PATCH /assets/:id/user - 사용자 배정/회수
 
-### 7.4 카테고리 API (src/api/v1/endpoints/categories.py)
-- [ ] GET /categories - 카테고리 목록
-- [ ] GET /categories/:id - 카테고리 상세
-- [ ] POST /categories - 카테고리 생성 (Admin)
-- [ ] PUT /categories/:id - 카테고리 수정 (Admin)
-- [ ] DELETE /categories/:id - 카테고리 삭제 (Admin)
+### 7.4 카테고리 API (src/api/v1/endpoints/categories.py) ✅
+- [x] GET /categories - 카테고리 목록
+- [x] GET /categories/:id - 카테고리 상세
+- [x] POST /categories - 카테고리 생성 (Admin)
+- [x] PUT /categories/:id - 카테고리 수정 (Admin)
+- [x] DELETE /categories/:id - 카테고리 삭제 (Admin)
 
-### 7.5 위치 API (src/api/v1/endpoints/locations.py)
-- [ ] GET /locations - 위치 목록
-- [ ] GET /locations/:id - 위치 상세
-- [ ] POST /locations - 위치 생성 (Admin)
-- [ ] PUT /locations/:id - 위치 수정 (Admin)
-- [ ] DELETE /locations/:id - 위치 삭제 (Admin)
+### 7.5 위치 API (src/api/v1/endpoints/locations.py) ✅
+- [x] GET /locations - 위치 목록
+- [x] GET /locations/:id - 위치 상세
+- [x] POST /locations - 위치 생성 (Admin)
+- [x] PUT /locations/:id - 위치 수정 (Admin)
+- [x] DELETE /locations/:id - 위치 삭제 (Admin)
 
-### 7.6 워크플로우 API (src/api/v1/endpoints/workflows.py)
-- [ ] GET /workflows - 요청 목록 (본인 또는 담당 요청)
-- [ ] GET /workflows/:id - 요청 상세
-- [ ] POST /workflows/checkout - 반출 요청
-- [ ] POST /workflows/checkin - 반납 요청
-- [ ] PATCH /workflows/:id/approve - 요청 승인 (Manager/Admin)
-- [ ] PATCH /workflows/:id/reject - 요청 거부 (Manager/Admin)
-- [ ] PATCH /workflows/:id/cancel - 요청 취소
+### 7.6 워크플로우 API (src/api/v1/endpoints/workflows.py) ✅
+- [x] GET /workflows - 요청 목록 (본인 또는 담당 요청)
+- [x] GET /workflows/:id - 요청 상세
+- [x] POST /workflows/checkout - 반출 요청
+- [x] POST /workflows/checkin - 반납 요청
+- [x] PATCH /workflows/:id/approve - 요청 승인 (Manager/Admin)
+- [x] PATCH /workflows/:id/reject - 요청 거부 (Manager/Admin)
+- [x] PATCH /workflows/:id/cancel - 요청 취소
 
-### 7.7 QR코드 API (src/api/v1/endpoints/qrcode.py)
-- [ ] GET /qrcode/generate/:asset_id - QR코드 이미지 생성
-- [ ] GET /qrcode/decode - QR코드 인식/검증
-- [ ] POST /qrcode/bulk-generate - 대량 QR코드 생성
-- [ ] GET /qrcode/print/:asset_id - 인쇄용 템플릿
+### 7.7 QR코드 API (src/api/v1/endpoints/qrcode.py) ✅
+- [x] GET /qrcode/generate/:asset_id - QR코드 이미지 생성
+- [x] GET /qrcode/decode - QR코드 인식/검증
+- [x] POST /qrcode/bulk-generate - 대량 QR코드 생성
+- [x] GET /qrcode/print/:asset_id - 인쇄용 템플릿
 
-### 7.8 통계 API (src/api/v1/endpoints/statistics.py)
-- [ ] GET /statistics/overview - 대시보드 요약
-- [ ] GET /statistics/assets-by-category - 카테고리별 통계
-- [ ] GET /statistics/assets-by-location - 위치별 통계
-- [ ] GET /statistics/assets-by-status - 상태별 통계
-- [ ] GET /statistics/assets-by-grade - 등급별 통계
-- [ ] GET /statistics/workflow-stats - 워크플로우 통계
+### 7.8 통계 API (src/api/v1/endpoints/statistics.py) ✅
+- [x] GET /statistics/overview - 대시보드 요약
+- [x] GET /statistics/assets-by-category - 카테고리별 통계
+- [x] GET /statistics/assets-by-location - 위치별 통계
+- [x] GET /statistics/assets-by-status - 상태별 통계
+- [x] GET /statistics/assets-by-grade - 등급별 통계
+- [x] GET /statistics/workflow-stats - 워크플로우 통계
 
-### 7.9 라우터 통합 (src/api/v1/router.py)
-- [ ] 모든 엔드포인트 라우터 import
-- [ ] api_router에 include_router로 등록
-- [ ] 각 라우터에 적절한 prefix와 tags 설정
+### 7.9 라우터 통합 (src/api/v1/router.py) ✅
+- [x] 모든 엔드포인트 라우터 import
+- [x] api_router에 include_router로 등록
+- [x] 각 라우터에 적절한 prefix와 tags 설정
 
 ---
 
