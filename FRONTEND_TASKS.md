@@ -151,13 +151,13 @@ src/
 ## 🔌 Phase 5: React Router v7 설정
 
 ### 5.1 Root 컴포넌트 생성
-- [ ] src/root.tsx 생성
-- [ ] Outlet 컴포넌트로 자식 라우트 렌더링
-- [ ] 전역 레이아웃 설정
+- [x] src/root.tsx 생성
+- [x] Outlet 컴포넌트로 자식 라우트 렌더링
+- [x] 전역 레이아웃 설정
 
 ### 5.2 라우트 정의
-- [ ] src/routes.tsx 생성
-- [ ] 기본 라우트 구조:
+- [x] src/routes.tsx 생성
+- [x] 기본 라우트 구조:
   ```
   / (Root Layout)
   ├── /login (로그인)
@@ -169,7 +169,7 @@ src/
   ```
 
 ### 5.3 404 페이지
-- [ ] NotFound.tsx 생성
+- [x] NotFound.tsx 생성
 
 ---
 
