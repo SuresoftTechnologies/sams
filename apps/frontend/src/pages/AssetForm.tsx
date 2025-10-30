@@ -40,6 +40,7 @@ import {
   ChevronDown,
   Info,
   Upload,
+  Check,
 } from 'lucide-react';
 import { assetSchema, type AssetFormData } from '@/lib/validators';
 import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
@@ -2132,21 +2133,33 @@ export default function AssetForm() {
           <DialogFooter className="flex flex-col gap-2 pt-2 pb-2 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
             <div className="flex flex-wrap gap-2">
               {bulkEditableItems.length > 0 && (
-                <Button
-                  type="button"
-                  className="gap-2"
-                  onClick={handleBulkConfirmSelection}
-                  disabled={!hasBulkSelection || isBulkCreating}
-                >
-                  {isBulkCreating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      생성 중...
-                    </>
-                  ) : (
-                    '선택 항목 등록'
-                  )}
-                </Button>
+                allSelectedItemsCompleted ? (
+                  <Button
+                    type="button"
+                    className="gap-2"
+                    variant="secondary"
+                    onClick={() => setBulkDialogOpen(false)}
+                  >
+                    <Check className="h-4 w-4" />
+                    등록 완료
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    className="gap-2"
+                    onClick={handleBulkConfirmSelection}
+                    disabled={!hasBulkSelection || isBulkCreating}
+                  >
+                    {isBulkCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        생성 중...
+                      </>
+                    ) : (
+                      '선택 항목 등록'
+                    )}
+                  </Button>
+                )
               )}
             </div>
             <div className="flex flex-wrap gap-2">
