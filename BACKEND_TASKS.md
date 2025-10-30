@@ -719,10 +719,10 @@ apps/backend/
 
 ---
 
-## 📤 Phase 11: OpenAPI 타입 동기화
+## 📤 Phase 11: OpenAPI 타입 동기화 ✅
 
 ### 11.1 OpenAPI 스펙 생성 (scripts/export_openapi.py)
-- [ ] FastAPI 앱에서 OpenAPI JSON 생성 스크립트 작성
+- [x] FastAPI 앱에서 OpenAPI JSON 생성 스크립트 작성
   ```python
   import json
   from src.main import app
@@ -737,13 +737,13 @@ apps/backend/
   if __name__ == "__main__":
       export_openapi()
   ```
-- [ ] package.json에 스크립트 추가
+- [x] package.json에 스크립트 추가
   ```json
   "generate:openapi": "uv run python scripts/export_openapi.py"
   ```
 
 ### 11.2 Turborepo 통합
-- [ ] turbo.json에 의존성 설정
+- [x] turbo.json에 의존성 설정
   ```json
   {
     "pipeline": {

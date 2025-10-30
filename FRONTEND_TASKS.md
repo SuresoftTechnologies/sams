@@ -652,6 +652,19 @@ src/
 - [x] 경고 로깅 추가
 - [x] 반응형 디자인 최적화
 
+### 15.7 페이지 레이아웃 개선 ✅
+**완료일**: 2025-10-30
+
+**수정사항**:
+- [x] 모든 페이지에 하단 여백 추가 (`pb-8`)
+  - [x] AssetList.tsx
+  - [x] Dashboard.tsx
+  - [x] AssetDetail.tsx
+  - [x] AssetForm.tsx
+  - [x] Profile.tsx
+- [x] 콘텐츠가 화면 하단에 붙지 않도록 개선
+- [x] 더 나은 스크롤 경험 제공
+
 ---
 
 **Phase 15 요약**:
