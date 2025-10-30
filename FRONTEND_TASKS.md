@@ -610,7 +610,43 @@ src/
 - [x] 배열 검증 추가 (Array.isArray)
 - [x] 안전한 데이터 변환 로직 추가
 
-### 15.4 코드 품질 개선 ✅
+### 15.4 Database 성능 최적화 ✅
+**완료일**: 2025-10-30
+**커밋**: 4f34db4
+
+**구현 내용**:
+- [x] 데이터베이스 마이그레이션 생성 (`97b54c3e6d34`)
+- [x] Assets 테이블에 9개 인덱스 추가
+  - [x] 검색 최적화: asset_tag, name, serial_number, model
+  - [x] 필터링 최적화: status, category_id, location_id, assigned_to, grade
+  - [x] 복합 인덱스: (deleted_at, status) - 활성 자산 필터링
+- [x] Downgrade 마이그레이션 구현 (인덱스 제거)
+
+**파일**:
+- `apps/backend/alembic/versions/20251030_2224-97b54c3e6d34_add_indexes_for_asset_performance.py`
+
+**효과**:
+- Dashboard 2,213+ 자산 로딩 성능 향상
+- 검색/필터 쿼리 최적화
+
+### 15.5 테스트 개선 ✅
+**완료일**: 2025-10-30
+**커밋**: 8bd3932
+
+**개선 사항**:
+- [x] API 테스트 스크립트 리팩토링
+- [x] httpx → requests로 의존성 단순화
+- [x] 포괄적인 검증 로직 추가
+  - [x] 페이지네이션 테스트 (skip, limit, total)
+  - [x] 검색 기능 테스트 ("laptop" 검색)
+  - [x] 필터 기능 테스트 (status=AVAILABLE)
+  - [x] Total count 정확성 검증
+- [x] 불필요한 테스트 제거 (health check, user management)
+
+**파일**:
+- `apps/backend/test_api.py`
+
+### 15.6 코드 품질 개선 ✅
 - [x] TypeScript 타입 안전성 향상
 - [x] 에러 핸들링 강화
 - [x] 경고 로깅 추가
@@ -622,7 +658,15 @@ src/
 - UI/UX 대폭 개선 (LNB → GNB)
 - Dashboard 실제 데이터 표시
 - API 안정성 향상
+- Database 성능 최적화 (9개 인덱스)
+- 테스트 커버리지 향상
 - 코드 품질 개선
+
+**총 커밋**: 5개
+- cd47826: Phase 15 메인 구현
+- 4f34db4: Database 인덱스
+- 8bd3932: Test script 개선
+- dbac79c: Phase 14.6 문서 업데이트
 
 ---
 
