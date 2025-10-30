@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MoreHorizontal, Edit, Trash2, Eye, QrCode } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { Asset } from '@/hooks/useAssets';
@@ -142,9 +143,14 @@ export function AssetTable({
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
-                <TableCell colSpan={8} className="text-center">
-                  <div className="h-12 animate-pulse bg-muted rounded" />
-                </TableCell>
+                <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
               </TableRow>
             ))}
           </TableBody>

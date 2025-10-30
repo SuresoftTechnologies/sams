@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, CheckCircle, XCircle, Clock, Loader2, TrendingUp } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Package, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { useGetAssets } from '@/hooks/useAssets';
 import { format } from 'date-fns';
 
@@ -76,15 +77,17 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6 px-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to SureSoft Asset Management System</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Welcome to SureSoft Asset Management System
+          </p>
         </div>
-        <Badge variant="secondary" className="gap-2">
+        <Badge variant="secondary" className="gap-2 w-fit">
           <TrendingUp className="h-3 w-3" />
-          Phase 7 Complete
+          Phase 10 Complete
         </Badge>
       </div>
 
@@ -95,12 +98,12 @@ export default function Dashboard() {
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
-                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
               </CardHeader>
               <CardContent>
-                <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2" />
-                <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
               </CardContent>
             </Card>
           ))
@@ -133,8 +136,19 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : recentAssets.length > 0 ? (
             <div className="space-y-4">
