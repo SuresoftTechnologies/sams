@@ -638,54 +638,49 @@ apps/backend/
 
 ---
 
-## 🗃️ Phase 9: Repository 패턴 구현
+## 🗃️ Phase 9: Repository 패턴 구현 ✅
 
-### 9.1 Base Repository (src/repositories/base.py)
-- [ ] CRUDBase 클래스 생성
-  ```python
-  from typing import Generic, TypeVar, Type, List, Optional
-  from sqlalchemy.orm import Session
+### 9.1 Base Repository (src/repositories/base.py) ✅
+- [x] CRUDBase 클래스 생성 (Python 3.12 type parameter syntax 사용)
+- [x] get() - Get single record by ID
+- [x] get_multi() - Get multiple records with pagination
+- [x] create() - Create new record
+- [x] update() - Update existing record (supports both dict and Pydantic schema)
+- [x] delete() - Delete record (hard delete)
+- [x] count() - Count total records
+- [x] exists() - Check if record exists
 
-  ModelType = TypeVar("ModelType")
-  CreateSchemaType = TypeVar("CreateSchemaType")
-  UpdateSchemaType = TypeVar("UpdateSchemaType")
+### 9.2 Asset Repository (src/repositories/asset_repository.py) ✅
+- [x] AssetRepository 클래스 (CRUDBase 상속)
+- [x] get_by_asset_tag() - 자산 태그로 조회 (asset_number → asset_tag)
+- [x] get_by_qr_code() - QR 코드로 조회
+- [x] get_by_user() - 사용자별 자산 조회
+- [x] search() - 검색 기능 (name, asset_tag, model, serial_number, manufacturer)
+- [x] filter_assets() - 필터링 기능 (status, category, location, assignee, grade, search)
+- [x] get_with_pagination() - 페이지네이션 (with total count)
+- [x] get_by_category() - 카테고리별 조회
+- [x] get_by_location() - 위치별 조회
+- [x] soft_delete() - 소프트 삭제 (deleted_at 설정)
+- [x] restore() - 소프트 삭제 복원
+- [x] count_by_status() - 상태별 개수
+- [x] count_by_category() - 카테고리별 개수
+- [x] get_available_assets() - 사용 가능한 자산 조회
 
-  class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-      def __init__(self, model: Type[ModelType]):
-          self.model = model
-
-      def get(self, db: Session, id: any) -> Optional[ModelType]:
-          return db.query(self.model).filter(self.model.id == id).first()
-
-      def get_multi(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
-          return db.query(self.model).offset(skip).limit(limit).all()
-
-      def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
-          # 구현
-          ...
-
-      def update(self, db: Session, *, db_obj: ModelType, obj_in: UpdateSchemaType) -> ModelType:
-          # 구현
-          ...
-
-      def delete(self, db: Session, *, id: any) -> ModelType:
-          # 구현
-          ...
-  ```
-
-### 9.2 Asset Repository (src/repositories/asset_repository.py)
-- [ ] AssetRepository 클래스 (CRUDBase 상속)
-- [ ] get_by_asset_number() - 자산 번호로 조회
-- [ ] get_by_qr_code() - QR 코드로 조회
-- [ ] get_by_user() - 사용자별 자산 조회
-- [ ] search() - 검색 기능
-- [ ] filter_assets() - 필터링 기능
-- [ ] get_with_pagination() - 페이지네이션
-
-### 9.3 User Repository (src/repositories/user_repository.py)
-- [ ] UserRepository 클래스
-- [ ] get_by_email() - 이메일로 조회
-- [ ] authenticate() - 인증 확인
+### 9.3 User Repository (src/repositories/user_repository.py) ✅
+- [x] UserRepository 클래스 (CRUDBase 상속)
+- [x] get_by_email() - 이메일로 조회
+- [x] authenticate() - 인증 확인 (password verification 포함)
+- [x] create_with_password() - 비밀번호 해싱하여 사용자 생성
+- [x] update_password() - 비밀번호 업데이트
+- [x] get_by_role() - 역할별 조회
+- [x] get_active_users() - 활성 사용자 조회
+- [x] deactivate() - 사용자 비활성화
+- [x] activate() - 사용자 활성화
+- [x] verify_email() - 이메일 검증
+- [x] count_by_role() - 역할별 개수
+- [x] search_by_name_or_email() - 이름/이메일로 검색
+- [x] exists_by_email() - 이메일 존재 여부 확인
+- [x] update_last_login() - 마지막 로그인 시간 업데이트
 
 ---
 
