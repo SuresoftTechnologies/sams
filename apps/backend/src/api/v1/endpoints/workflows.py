@@ -22,6 +22,7 @@ from src.schemas.common import PaginatedResponse
 from src.schemas.workflow import (
     ApprovalRequest,
     CreateWorkflowRequest,
+    RejectionRequest,
     Workflow,
 )
 
@@ -406,7 +407,7 @@ async def create_checkin_request(
     return Workflow.model_validate(workflow)
 
 
-@router.patch("/{workflow_id}/approve", response_model=Workflow)
+@router.post("/{workflow_id}/approve", response_model=Workflow)
 async def approve_workflow(
     workflow_id: str,
     request: ApprovalRequest = Body(...),
@@ -548,10 +549,10 @@ async def approve_workflow(
     return Workflow.model_validate(workflow)
 
 
-@router.patch("/{workflow_id}/reject", response_model=Workflow)
+@router.post("/{workflow_id}/reject", response_model=Workflow)
 async def reject_workflow(
     workflow_id: str,
-    reject_reason: str = Body(..., description="Reason for rejection"),
+    request: RejectionRequest = Body(...),
     db: AsyncSession = Depends(get_db),
     current_user: UserModel = Depends(require_role(UserRole.ADMIN, UserRole.MANAGER)),
 ) -> Workflow:
@@ -560,7 +561,7 @@ async def reject_workflow(
 
     Args:
         workflow_id: Workflow ID
-        reject_reason: Reason for rejection
+        request: Rejection request with reason
         db: Database session
         current_user: Current authenticated manager/admin user
 
@@ -593,7 +594,7 @@ async def reject_workflow(
     workflow.status = WorkflowStatus.REJECTED
     workflow.approver_id = current_user.id
     workflow.rejected_at = datetime.now()
-    workflow.reject_reason = reject_reason
+    workflow.reject_reason = request.reason
 
     await db.commit()
     await db.refresh(workflow)
