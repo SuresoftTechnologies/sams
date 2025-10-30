@@ -24,6 +24,7 @@ import {
   Menu,
   LayoutDashboard,
   Package,
+  FileText,
 } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -60,6 +61,12 @@ const navItems: NavItem[] = [
     title: '자산',
     href: '/assets',
     icon: Package,
+  },
+  {
+    title: '신청',
+    href: '/requests',
+    icon: FileText,
+    requiredRoles: ['employee'],
   },
 ];
 

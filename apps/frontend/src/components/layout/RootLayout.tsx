@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router';
 import Header from './Header';
+import { useCurrentUser } from '@/hooks/useAuth';
 
 /**
  * RootLayout Component
@@ -17,6 +18,9 @@ import Header from './Header';
  */
 export default function RootLayout() {
   const location = useLocation();
+
+  // Restore user info on page load (if authenticated)
+  useCurrentUser();
 
   // Hide layout on login page
   const isLoginPage = location.pathname === '/login';
