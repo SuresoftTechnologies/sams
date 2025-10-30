@@ -56,7 +56,7 @@ erDiagram
         string purchase_order "품의서"
         string supplier "공급업체"
         text notes "비고"
-        string qr_code UK "QR코드"
+        
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at "소프트 삭제"
@@ -216,7 +216,7 @@ CREATE TABLE assets (
     supplier VARCHAR(200),
     warranty_until DATE,
     notes TEXT,
-    qr_code VARCHAR(100) UNIQUE,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
@@ -228,17 +228,17 @@ CREATE INDEX idx_assets_status ON assets(status);
 CREATE INDEX idx_assets_current_user ON assets(current_user_id);
 CREATE INDEX idx_assets_location ON assets(location_id);
 CREATE INDEX idx_assets_serial ON assets(serial_number);
-CREATE INDEX idx_assets_qr ON assets(qr_code);
 CREATE INDEX idx_assets_deleted ON assets(deleted_at) WHERE deleted_at IS NULL;
 ```
 
 **Business Rules**:
 - `asset_number`: 자동 생성 (형식: `YY-CATEGORY-SEQ`, 예: `25-11-0001`)
+  - 기존 QR코드에 이미 인코딩되어 있음
+  - QR 스캔 시 이 값으로 자산 조회 (MVP: 대여/반납용)
 - `grade`: 구매 연도 기반 자동 계산
   - A급: 2022~2025년
   - B급: 2018~2021년
   - C급: ~2017년
-- `qr_code`: 자산 ID 기반 QR코드 문자열
 
 ---
 
@@ -508,7 +508,7 @@ for sheet_name in ['데스크탑(11)', '노트북(12)', '모니터(14)']:
 
 ### Primary Indexes
 - **Primary Keys**: 모든 테이블에 UUID 기본키
-- **Unique Constraints**: email, asset_number, serial_number, qr_code
+- **Unique Constraints**: email, asset_number, serial_number
 
 ### Secondary Indexes
 - **Foreign Keys**: 모든 외래키에 인덱스

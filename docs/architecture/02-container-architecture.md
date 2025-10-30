@@ -99,7 +99,7 @@ graph TB
 
 **Responsibilities**:
 - 모바일 사용자 인터페이스
-- QR코드 스캔 (카메라 접근)
+- QR코드 스캔 후 대여/반납 (카메라 접근)
 - 푸시 알림 수신
 - 오프라인 지원
 
@@ -138,7 +138,7 @@ graph TB
 - **Workflow Module**: 반출/반납 프로세스
 - **Notification Module**: 알림 및 이메일 발송
 - **Integration Module**: HR, 구매 시스템 연동
-- **QRCode Module**: QR코드 생성 및 검증
+- **QRCode Module**: QR코드 스캔 후 자산 조회 (MVP: 대여/반납용)
 
 **API Endpoints**:
 - `POST /auth/login` - 로그인
@@ -149,7 +149,7 @@ graph TB
 - `POST /workflow/checkout` - 반출 요청
 - `POST /workflow/checkin` - 반납 요청
 - `POST /workflow/approve` - 승인 처리
-- `GET /qrcode/generate/:assetId` - QR코드 생성
+- `GET /api/assets/by-number/:assetNumber` - QR 스캔 후 자산번호로 조회
 - `GET /statistics/dashboard` - 대시보드 통계
 
 **Dependencies**:
@@ -276,12 +276,10 @@ graph TB
 **Responsibilities**:
 - 이미지 파일 저장 (자산 사진)
 - 첨부 파일 저장 (영수증, 문서)
-- QR코드 이미지 저장
 - 리포트 파일 저장 (PDF, Excel)
 
 **Bucket Structure**:
 - `assets/images/` - 자산 사진
-- `assets/qrcodes/` - QR코드 이미지
 - `documents/receipts/` - 영수증
 - `reports/` - 생성된 리포트
 - `backups/` - 데이터베이스 백업

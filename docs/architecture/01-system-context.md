@@ -195,7 +195,8 @@ sequenceDiagram
     AMS->>AMS: 신규 사용자 계정 생성
 ```
 
-### 4. QR코드 스캔 프로세스 (모바일)
+### 4. QR코드 스캔 프로세스 (모바일 - MVP)
+
 ```mermaid
 sequenceDiagram
     actor User as 사용자
@@ -203,13 +204,21 @@ sequenceDiagram
     participant AMS as AMS 시스템
     participant DB as Database
 
-    User->>Mobile: QR코드 스캔
+    User->>Mobile: QR코드 스캔 (대여/반납용)
     Mobile->>Mobile: QR 디코딩
-    Mobile->>AMS: 자산 ID로 정보 요청
-    AMS->>DB: 자산 조회
+    Note over Mobile: 결과: "14-2022-23"
+    Mobile->>AMS: GET /api/assets/by-number/14-2022-23
+    AMS->>DB: asset_number로 자산 조회
     DB-->>AMS: 자산 상세 정보
     AMS-->>Mobile: 자산 정보 반환
-    Mobile-->>User: 자산 상세 화면 표시
+    Mobile-->>User: 대여/반납 화면 표시
+    
+    User->>Mobile: "대여" 버튼 클릭
+    Mobile->>AMS: POST /api/workflows/checkout
+    AMS->>DB: 대여 요청 생성
+    DB-->>AMS: 성공
+    AMS-->>Mobile: 요청 완료
+    Mobile-->>User: "대여 요청이 제출되었습니다"
 ```
 
 ## 🌐 System Boundaries
@@ -218,7 +227,7 @@ sequenceDiagram
 - ✅ 자산 생애주기 관리 (등록 → 배정 → 반납 → 폐기)
 - ✅ 사용자 인증 및 권한 관리
 - ✅ 반출/반납 워크플로우 및 승인 프로세스
-- ✅ QR코드 생성 및 스캔 기능
+- ✅ QR코드 스캔 기능 (MVP: 대여/반납용)
 - ✅ 자산 검색, 필터링, 통계
 - ✅ 알림 및 이메일 발송
 - ✅ 대시보드 및 리포팅

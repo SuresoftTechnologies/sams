@@ -532,6 +532,7 @@ apps/backend/
   - [x] 쿼리 파라미터: skip, limit, search, category_id, status, location_id, grade
   - [x] 정렬: sort_by, sort_order
 - [x] GET /assets/:id - 자산 상세
+- [ ] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용, MVP)
 - [x] POST /assets - 자산 생성 (Admin/Manager)
 - [x] PUT /assets/:id - 자산 수정 (Admin/Manager)
 - [x] DELETE /assets/:id - 자산 삭제 (소프트 삭제, Admin)
@@ -563,11 +564,15 @@ apps/backend/
 - [x] PATCH /workflows/:id/reject - 요청 거부 (Manager/Admin)
 - [x] PATCH /workflows/:id/cancel - 요청 취소
 
-### 7.7 QR코드 API (src/api/v1/endpoints/qrcode.py) ✅
-- [x] GET /qrcode/generate/:asset_id - QR코드 이미지 생성
-- [x] GET /qrcode/decode - QR코드 인식/검증
-- [x] POST /qrcode/bulk-generate - 대량 QR코드 생성
-- [x] GET /qrcode/print/:asset_id - 인쇄용 템플릿
+### 7.7 QR코드 기능 (MVP: assets.py에 통합)
+- [ ] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용)
+  - QR 스캔 결과(예: "14-2022-23")로 자산 정보 조회
+  - 대여/반납 화면 연결용
+  - 기존 QR 코드 활용 (새로 생성하지 않음)
+
+> **Note**: QR 생성 기능은 MVP 범위 밖 (Phase 2+)
+> - QR 이미지 생성/재발급 기능은 추후 구현
+> - 현재는 기존에 부착된 QR 코드 스캔만 지원
 
 ### 7.8 통계 API (src/api/v1/endpoints/statistics.py) ✅
 - [x] GET /statistics/overview - 대시보드 요약
@@ -590,7 +595,6 @@ apps/backend/
 - [ ] create_asset() - 자산 생성 로직
   - [ ] 자산 번호 자동 생성 (YY-CATEGORY-SEQ)
   - [ ] 등급 자동 계산 (구매 연도 기반)
-  - [ ] QR 코드 자동 생성
   - [ ] 이력 생성
 - [ ] update_asset() - 자산 수정 로직
   - [ ] 변경 사항 추적
@@ -611,24 +615,15 @@ apps/backend/
 - [ ] cancel_workflow() - 요청 취소
 - [ ] get_user_workflows() - 사용자 요청 목록
 
-### 8.3 QR코드 서비스 (src/services/qrcode_service.py)
-- [ ] generate_qr_code() - QR 코드 생성
-  ```python
-  import qrcode
-  from io import BytesIO
+### 8.3 QR코드 서비스 (MVP 범위 밖 - Phase 2+)
 
-  def generate_qr_code(asset_id: str) -> BytesIO:
-      qr = qrcode.QRCode(version=1, box_size=10, border=5)
-      qr.add_data(f"https://ams.suresoft.com/assets/{asset_id}")
-      qr.make(fit=True)
-      img = qr.make_image(fill_color="black", back_color="white")
-      buffer = BytesIO()
-      img.save(buffer, format="PNG")
-      buffer.seek(0)
-      return buffer
-  ```
-- [ ] decode_qr_code() - QR 코드 디코딩
-- [ ] generate_bulk_qr_codes() - 대량 생성
+> **MVP에서는 구현하지 않음**
+> - 기존 QR 코드 활용 (자산번호로 조회만 지원)
+> - GET /assets/by-number/:assetNumber로 충분
+
+**Phase 2+ 구현 예정**:
+- [ ] generate_qr_code() - QR 이미지 재발급
+- [ ] generate_bulk_qr_codes() - 대량 재발급
 - [ ] generate_printable_label() - 인쇄용 라벨 생성
 
 ### 8.4 통계 서비스 (src/services/statistics_service.py)
