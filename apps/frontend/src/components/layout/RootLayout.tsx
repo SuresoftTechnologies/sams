@@ -33,7 +33,7 @@ export default function RootLayout() {
 
       {/* Main content area - with left margin for sidebar on desktop */}
       <main className="md:pl-64 pt-14">
-        <div className="container mx-auto py-6 px-4 max-w-screen-2xl">
+        <div className="container mx-auto py-4 md:py-6 max-w-screen-2xl">
           <Outlet />
         </div>
       </main>

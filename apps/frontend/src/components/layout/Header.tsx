@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,8 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { User, LogOut, Settings } from 'lucide-react';
+import { User, LogOut, Settings, Menu, LayoutDashboard, Package } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
 
 /**
@@ -17,13 +25,16 @@ import { useUser, useLogout } from '@/hooks/useAuth';
  *
  * Top navigation bar with:
  * - Logo and app title
- * - Main navigation links
+ * - Main navigation links (desktop)
+ * - Mobile menu (hamburger)
  * - User dropdown menu (profile, settings, logout)
  * - Role badge display
+ * - Responsive design for mobile/tablet/desktop
  */
 export default function Header() {
   const user = useUser();
   const logoutMutation = useLogout();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -48,7 +59,65 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 max-w-screen-2xl items-center">
+      <div className="container flex h-14 max-w-screen-2xl items-center px-4">
+        {/* Mobile Menu Toggle */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden mr-2">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-2">
+                <img src="/logo.png" alt="SureSoft" className="h-6 w-auto" />
+                <span>AMS</span>
+              </SheetTitle>
+            </SheetHeader>
+            <nav className="flex flex-col gap-3 mt-6">
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/assets"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+              >
+                <Package className="h-5 w-5" />
+                <span>Assets</span>
+              </Link>
+              <div className="border-t pt-3 mt-3">
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span>Profile</span>
+                </Link>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  disabled={logoutMutation.isPending}
+                  className="w-full justify-start gap-3 px-3 text-red-600 hover:text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>{logoutMutation.isPending ? 'Logging out...' : 'Log out'}</span>
+                </Button>
+              </div>
+            </nav>
+          </SheetContent>
+        </Sheet>
+
         {/* Logo & Title */}
         <div className="mr-4 flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-3">
@@ -63,8 +132,8 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Main Navigation */}
-        <nav className="flex flex-1 items-center space-x-6 text-sm font-medium">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex flex-1 items-center space-x-6 text-sm font-medium">
           <Link
             to="/dashboard"
             className="transition-colors hover:text-foreground/80 text-foreground/60"
@@ -78,6 +147,9 @@ export default function Header() {
             Assets
           </Link>
         </nav>
+
+        {/* Spacer for mobile */}
+        <div className="flex-1 md:hidden" />
 
         {/* User Menu */}
         <div className="flex items-center justify-end space-x-2">
@@ -103,7 +175,13 @@ export default function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem asChild className="md:hidden">
+                <Link to="/profile" className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hidden md:flex">
                 <Link to="/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
