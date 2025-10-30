@@ -1,3 +1,16 @@
+/**
+ * Enhanced Asset List Page
+ *
+ * Implements Priority 1 UX Improvements:
+ * 1. Enhanced Pagination System (50 items/page, with controls)
+ * 2. Enhanced Search Functionality (debounced, multi-field)
+ * 3. Loading States & Skeletons
+ * 4. Improved Asset Display (category/location names, status colors)
+ *
+ * Based on UX Design Specification for handling 2,213 assets
+ * Performance target: <300ms page changes, <500ms search
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
@@ -20,40 +33,15 @@ import { AssetQRCode } from '@/components/features/AssetQRCode';
 import type { Asset } from '@/hooks/useAssets';
 import { ManagerOrAbove } from '@/components/layout/RoleGuard';
 
-/**
- * AssetList Page - Enhanced Version
- *
- * Main page for displaying and managing assets
- * Implements Priority 1 UX Improvements:
- * - Enhanced Pagination System (50 items/page with controls)
- * - Enhanced Search Functionality (debounced, multi-field, keyboard shortcuts)
- * - Loading States & Skeletons
- * - Improved Asset Display (with category/location names, status colors)
- *
- * Features:
- * - Table and card view toggle
- * - Server-side pagination with URL sync
- * - Debounced search (300ms)
- * - Advanced filtering
- * - Create, edit, delete actions (manager/admin only)
- * - QR code viewing
- * - Keyboard shortcuts (/ for search, Esc to clear)
- *
- * Performance targets:
- * - Page load: <2s
- * - Page change: <300ms
- * - Search: <500ms
- */
-
 type ViewMode = 'table' | 'cards';
 
-export default function AssetList() {
+export default function AssetListEnhanced() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [filters, setFilters] = useState<AssetFilterValues>({});
   const [qrAsset, setQrAsset] = useState<Asset | null>(null);
 
-  // Enhanced Pagination Hook with URL sync
+  // Enhanced Pagination Hook
   const {
     currentPage,
     pageSize,
@@ -66,7 +54,7 @@ export default function AssetList() {
     syncWithUrl: true,
   });
 
-  // Enhanced Search Hook with debouncing and URL sync
+  // Enhanced Search Hook with debouncing
   const {
     searchQuery,
     debouncedSearchQuery,
@@ -75,9 +63,10 @@ export default function AssetList() {
   } = useSearch({
     debounceMs: 300,
     syncWithUrl: true,
+    minLength: 0, // Search from first character
   });
 
-  // Fetch assets with server-side pagination
+  // Fetch assets with pagination
   const paginationParams = getPaginationParams();
   const { data, isLoading } = useGetAssets({
     ...paginationParams,
@@ -89,25 +78,27 @@ export default function AssetList() {
 
   const deleteAssetMutation = useDeleteAsset();
 
-  // Get assets and pagination info from response
-  const assets = data?.items ?? [];
+  // Calculate pagination metadata
   const totalItems = data?.total ?? 0;
   const totalPages = Math.ceil(totalItems / pageSize);
+  const assets = data?.items ?? [];
 
-  // Reset to page 1 when filters or search changes
+  // Reset to page 1 when filters change
   const handleFiltersChange = (newFilters: AssetFilterValues) => {
     setFilters(newFilters);
     resetPage();
   };
 
+  // Reset to page 1 when search changes
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     resetPage();
   };
 
+  // Handle page size change
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
-    // resetPage is called automatically in usePagination hook
+    // resetPage is called automatically in usePagination
   };
 
   // Asset actions
@@ -128,7 +119,7 @@ export default function AssetList() {
     }
   };
 
-  // Check if any filters/search are active
+  // Check if any filters are active
   const hasActiveFilters =
     !!filters.status || !!filters.categoryId || !!filters.locationId || !!searchQuery;
 
@@ -142,7 +133,6 @@ export default function AssetList() {
             Manage and track all your company assets
           </p>
         </div>
-        {/* Only managers and admins can create assets */}
         <ManagerOrAbove>
           <Button onClick={() => navigate('/assets/new')} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
@@ -151,7 +141,7 @@ export default function AssetList() {
         </ManagerOrAbove>
       </div>
 
-      {/* Enhanced Search Bar with keyboard shortcuts */}
+      {/* Enhanced Search Bar */}
       <div className="w-full">
         <SearchInput
           value={searchQuery}
@@ -171,12 +161,14 @@ export default function AssetList() {
         </div>
       </div>
 
-      {/* Filters and View Toggle */}
+      {/* Filters and Content */}
       <div className="flex flex-col lg:flex-row gap-4">
+        {/* Filter Sidebar */}
         <div className="lg:w-64 shrink-0">
           <AssetFilters filters={filters} onFiltersChange={handleFiltersChange} />
         </div>
 
+        {/* Main Content */}
         <div className="flex-1 space-y-4">
           {/* Toolbar: Count + View Toggle */}
           <div className="flex items-center justify-between">
@@ -225,7 +217,6 @@ export default function AssetList() {
           ) : (
             <AssetCardGrid>
               {isLoading ? (
-                // Show skeleton loaders matching page size
                 Array.from({ length: pageSize }).map((_, i) => (
                   <AssetCardSkeleton key={i} />
                 ))
@@ -269,7 +260,7 @@ export default function AssetList() {
             </AssetCardGrid>
           )}
 
-          {/* Enhanced Pagination Controls */}
+          {/* Enhanced Pagination */}
           {totalPages > 1 && !isLoading && (
             <Pagination
               currentPage={currentPage}
@@ -281,6 +272,19 @@ export default function AssetList() {
               showPageSize={true}
               pageSizeOptions={[25, 50, 100, 200]}
             />
+          )}
+
+          {/* Performance Info (development only) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
+              <div>Page: {currentPage} / {totalPages}</div>
+              <div>Page Size: {pageSize}</div>
+              <div>Total Items: {totalItems}</div>
+              <div>Items Shown: {assets.length}</div>
+              <div>Search: {debouncedSearchQuery || 'None'}</div>
+              <div>Is Loading: {isLoading ? 'Yes' : 'No'}</div>
+              <div>Is Debouncing: {isDebouncing ? 'Yes' : 'No'}</div>
+            </div>
           )}
         </div>
       </div>
