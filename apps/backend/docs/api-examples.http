@@ -1,0 +1,166 @@
+### SureSoft AMS - Authentication API Examples
+### Base URL
+@baseUrl = http://localhost:8000/api/v1
+@email = admin@suresoft.com
+@password = admin123!
+
+###############################################################################
+# 1. Register New User
+###############################################################################
+
+### Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "john.doe@suresoft.com",
+  "password": "SecurePass123!",
+  "name": "John Doe",
+  "department": "IT"
+}
+
+###############################################################################
+# 2. Login
+###############################################################################
+
+### Login with credentials
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Extract tokens from login response
+@accessToken = {{login.response.body.access_token}}
+@refreshToken = {{login.response.body.refresh_token}}
+
+###############################################################################
+# 3. Get Current User Info
+###############################################################################
+
+### Get current authenticated user
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+###############################################################################
+# 4. Change Password
+###############################################################################
+
+### Change password for current user
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "old_password": "{{password}}",
+  "new_password": "NewSecurePass456!"
+}
+
+###############################################################################
+# 5. Refresh Token
+###############################################################################
+
+### Refresh access token using refresh token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refreshToken}}"
+}
+
+###############################################################################
+# 6. Logout
+###############################################################################
+
+### Logout (invalidate session)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+###############################################################################
+# 7. Test Protected Routes with Different Roles
+###############################################################################
+
+### Test with invalid token (should return 401)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer invalid_token_here
+
+### Test without authorization header (should return 403)
+GET {{baseUrl}}/auth/me
+
+###############################################################################
+# 8. Example User Management (if implemented)
+###############################################################################
+
+### Get all users (admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{accessToken}}
+
+### Get user by ID
+GET {{baseUrl}}/users/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{accessToken}}
+
+### Create new user (admin only)
+POST {{baseUrl}}/users
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "new.user@suresoft.com",
+  "password": "SecurePass123!",
+  "name": "New User",
+  "role": "employee",
+  "department": "Sales"
+}
+
+### Update user
+PUT {{baseUrl}}/users/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "department": "Engineering"
+}
+
+### Deactivate user (admin only)
+DELETE {{baseUrl}}/users/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer {{accessToken}}
+
+###############################################################################
+# Testing Different User Roles
+###############################################################################
+
+### Login as Manager
+# @name loginManager
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@suresoft.com",
+  "password": "manager123!"
+}
+
+@managerToken = {{loginManager.response.body.access_token}}
+
+### Login as Employee
+# @name loginEmployee
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "employee@suresoft.com",
+  "password": "employee123!"
+}
+
+@employeeToken = {{loginEmployee.response.body.access_token}}
+
+### Test manager access
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{managerToken}}
+
+### Test employee access
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{employeeToken}}
