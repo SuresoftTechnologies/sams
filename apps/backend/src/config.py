@@ -65,7 +65,6 @@ class Settings(BaseSettings):
     SMTP_FROM_NAME: str = "SureSoft AMS"
     SMTP_USE_TLS: bool = True
 
-
     # DeepSeek OCR API (Vision 모델)
     DEEPSEEK_API_BASE: str = "http://10.10.10.200:19751/v1"
     DEEPSEEK_OCR_MODEL: str = "deepseek-ai/DeepSeek-OCR"  # Vision 모델 (OCR용)
@@ -80,7 +79,7 @@ class Settings(BaseSettings):
 
     # Receipt Analysis Settings
     USE_VISION_FOR_ANALYSIS: bool = False  # True: Vision 직접 분석, False: Chat 모델 사용 (권장)
-
+    
     # OCR Settings
     DEFAULT_OCR_METHOD: str = "deepseek"  # Only DeepSeek OCR is supported
     OCR_LANGUAGE: str = "kor+eng"  # Not used for DeepSeek (kept for backward compatibility)

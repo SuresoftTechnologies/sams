@@ -80,9 +80,3 @@ api_router.include_router(
     prefix="/receipts",
     tags=["Receipts"],
 )
-
-api_router.include_router(
-    email.router,
-    prefix="/email",
-    tags=["Email"],
-)

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import {
   Form,
   FormControl,
@@ -29,11 +30,26 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { ArrowLeft, Save, Loader2, ChevronDown, Info } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  ChevronDown,
+  Info,
+  Upload,
+} from 'lucide-react';
 import { assetSchema, type AssetFormData } from '@/lib/validators';
 import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
 import { useGetCategories } from '@/hooks/useCategories';
 import { useGetLocations } from '@/hooks/useLocations';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /**
  * Asset Form Page
@@ -85,6 +101,13 @@ export default function AssetForm() {
     userHistory: false,
     additional: false,
   });
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [bulkFileInputKey, setBulkFileInputKey] = useState(0);
+  const [bulkUrl, setBulkUrl] = useState('');
+  const [bulkMessage, setBulkMessage] = useState<{ tone: 'error' | 'info'; text: string } | null>(
+    null,
+  );
 
   const form = useForm<AssetFormData>({
     resolver: zodResolver(assetSchema),
@@ -172,6 +195,27 @@ export default function AssetForm() {
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  useEffect(() => {
+    if (!bulkDialogOpen) {
+      setBulkFile(null);
+      setBulkFileInputKey((prev) => prev + 1);
+      setBulkUrl('');
+      setBulkMessage(null);
+    }
+  }, [bulkDialogOpen]);
+
+  const handleBulkAnalyze = () => {
+    if (!bulkFile && !bulkUrl.trim()) {
+      setBulkMessage({ tone: 'error', text: '파일 업로드 또는 URL 입력 중 하나를 선택해 주세요.' });
+      return;
+    }
+
+    setBulkMessage({
+      tone: 'info',
+      text: '분석 API 연동은 후속 단계에서 구현될 예정입니다. 입력값 준비가 완료되었습니다.',
+    });
+  };
+
   if (isEditMode && isLoadingAsset) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -182,18 +226,28 @@ export default function AssetForm() {
 
   return (
     <div className="space-y-6 pb-8 max-w-5xl mx-auto">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/assets')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {isEditMode ? '자산 편집' : '새 자산 생성'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isEditMode ? `편집 중: ${asset?.model || asset?.asset_tag}` : '시스템에 새 자산을 추가합니다'}
-          </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/assets')}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {isEditMode ? '자산 편집' : '새 자산 생성'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEditMode
+                ? `편집 중: ${asset?.model || asset?.asset_tag}`
+                : '시스템에 새 자산을 추가합니다'}
+            </p>
+          </div>
         </div>
+        {!isEditMode && (
+          <Button variant="secondary" className="gap-2" onClick={() => setBulkDialogOpen(true)}>
+            <Upload className="h-4 w-4" />
+            세금계산서 기반 자산 일괄 등록
+          </Button>
+        )}
       </div>
 
       <Form {...form}>
@@ -840,6 +894,102 @@ export default function AssetForm() {
           </div>
         </form>
       </Form>
+
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>세금계산서 기반 자산 일괄 등록</DialogTitle>
+            <DialogDescription>
+              세금계산서 파일 또는 전자세금계산서 열람 URL을 입력해 자산 정보를 일괄 분석할 준비를 합니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-receipt-file">세금계산서 파일 업로드</Label>
+              <Input
+                id="bulk-receipt-file"
+                type="file"
+                accept="application/pdf,image/*"
+                key={bulkFileInputKey}
+                disabled={Boolean(bulkUrl.trim())}
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  setBulkFile(file);
+                  if (file) {
+                    setBulkUrl('');
+                  }
+                  setBulkMessage(null);
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                PDF, JPG, PNG 형식의 세금계산서 파일을 업로드하면 OCR 분석이 준비됩니다.
+              </p>
+              {bulkFile && (
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-primary">선택된 파일: {bulkFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setBulkFile(null);
+                      setBulkFileInputKey((prev) => prev + 1);
+                      setBulkUrl('');
+                      setBulkMessage(null);
+                    }}
+                  >
+                    선택 해제
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bulk-receipt-url">세금계산서 URL</Label>
+              <Input
+                id="bulk-receipt-url"
+                type="url"
+                placeholder="https://example.com/invoice"
+                value={bulkUrl}
+                disabled={Boolean(bulkFile)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setBulkUrl(value);
+                  if (value.trim()) {
+                    setBulkFile(null);
+                    setBulkFileInputKey((prev) => prev + 1);
+                  }
+                  setBulkMessage(null);
+                }}
+              />
+              <p className="text-sm text-muted-foreground">
+                전자세금계산서 열람 페이지 URL을 입력하면 원본 다운로드 없이도 분석을 준비합니다.
+              </p>
+            </div>
+
+            {bulkMessage && (
+              <p
+                className={`text-sm ${
+                  bulkMessage.tone === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                }`}
+              >
+                {bulkMessage.text}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setBulkDialogOpen(false)}>
+              단일 자산 등록 계속
+            </Button>
+            <Button onClick={handleBulkAnalyze} disabled={!bulkFile && !bulkUrl.trim()}>
+              <Upload className="h-4 w-4" />
+              분석 준비 확인
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
