@@ -31,7 +31,7 @@ router = APIRouter()
 @router.get("", response_model=PaginatedResponse[Asset])
 async def get_assets(
     skip: int = Query(default=0, ge=0, description="Number of items to skip"),
-    limit: int = Query(default=20, ge=1, le=100, description="Number of items per page"),
+    limit: int = Query(default=20, ge=1, le=5000, description="Number of items per page (max 5000 for dashboard stats)"),
     search: str | None = Query(None, description="Search by name or asset tag"),
     status: AssetStatus | None = Query(None, description="Filter by status"),
     category_id: str | None = Query(None, description="Filter by category"),
@@ -93,12 +93,26 @@ async def get_assets(
     if grade:
         query = query.where(AssetModel.grade == grade)
 
-    # Get total count
-    count_query = select(func.count()).select_from(
-        select(AssetModel)
-        .where(AssetModel.deleted_at.is_(None))
-        .subquery()
-    )
+    # Get total count with applied filters
+    # Create a count query from the filtered base query (without joins)
+    count_query = select(func.count(AssetModel.id)).where(AssetModel.deleted_at.is_(None))
+
+    # Apply the same search filter
+    if search:
+        count_query = count_query.where(search_filter)
+
+    # Apply the same filters
+    if status:
+        count_query = count_query.where(AssetModel.status == status)
+    if category_id:
+        count_query = count_query.where(AssetModel.category_id == category_id)
+    if location_id:
+        count_query = count_query.where(AssetModel.location_id == location_id)
+    if assigned_to:
+        count_query = count_query.where(AssetModel.assigned_to == assigned_to)
+    if grade:
+        count_query = count_query.where(AssetModel.grade == grade)
+
     total_result = await db.execute(count_query)
     total = total_result.scalar_one()
 

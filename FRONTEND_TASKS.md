@@ -536,11 +536,82 @@ src/
 
 ---
 
+## 🎨 Phase 15: UI/UX 개선 및 버그 수정 ✅
+
+### 15.1 레이아웃 개편 ✅
+**완료일**: 2025-10-30
+**사용 Agent**: ui-ux-designer
+
+**변경사항**:
+- [x] LNB (Left Navigation Bar) 제거
+- [x] GNB (Global Navigation Bar) 전환
+  - [x] 데스크톱: 수평 네비게이션 메뉴
+  - [x] 모바일: 햄버거 메뉴 (슬라이드 패널)
+- [x] 전체 너비 레이아웃으로 변경
+- [x] 비활성화된 메뉴 항목 제거 (Dashboard, Assets만 유지)
+- [x] 네비게이션 아이콘 정리 (불필요한 import 제거)
+
+**수정된 파일**:
+- `apps/frontend/src/components/layout/Header.tsx` - 네비게이션 통합
+- `apps/frontend/src/components/layout/RootLayout.tsx` - Sidebar 제거
+
+### 15.2 Dashboard 실제 데이터 연동 ✅
+**완료일**: 2025-10-30
+**사용 Agent**: ui-ux-designer
+
+**구현 기능**:
+- [x] 실제 API 데이터 연동 (Mock 데이터 제거)
+- [x] 통계 카드 4개
+  - [x] Total Assets: 2,213개 + 카테고리/위치 수
+  - [x] Available: 사용 가능 자산 (퍼센트)
+  - [x] In Use: 사용 중 자산 (퍼센트)
+  - [x] Maintenance: 정비 중 자산 (퍼센트)
+- [x] 카테고리 분포 (상위 8개, 진행률 바)
+- [x] 상위 위치 Top 10
+- [x] 최근 자산 5개
+
+**생성된 파일**:
+- `apps/frontend/src/hooks/useDashboardStats.ts` ✨ NEW
+
+**업데이트된 파일**:
+- `apps/frontend/src/pages/Dashboard.tsx`
+
+### 15.3 API 버그 수정 ✅
+**완료일**: 2025-10-30
+
+**문제점**:
+- ❌ `limit=10000` 요청 시 백엔드 422 에러 (최대 100 제한)
+- ❌ `categoriesData.find is not a function` 에러
+
+**해결책**:
+- [x] 백엔드 limit 증가: 100 → **5000**
+  - `apps/backend/src/api/v1/endpoints/assets.py`
+- [x] 프론트엔드 limit 조정: 10000 → **3000**
+  - `apps/frontend/src/hooks/useDashboardStats.ts`
+- [x] 배열 검증 추가 (Array.isArray)
+- [x] 안전한 데이터 변환 로직 추가
+
+### 15.4 코드 품질 개선 ✅
+- [x] TypeScript 타입 안전성 향상
+- [x] 에러 핸들링 강화
+- [x] 경고 로깅 추가
+- [x] 반응형 디자인 최적화
+
+---
+
+**Phase 15 요약**:
+- UI/UX 대폭 개선 (LNB → GNB)
+- Dashboard 실제 데이터 표시
+- API 안정성 향상
+- 코드 품질 개선
+
+---
+
 **Phase 14 완료 보고서**: `UX_IMPROVEMENTS_SUMMARY.md` 및 `UX_DESIGN_SPECIFICATION.md` 참조
 
 **예상 소요 시간**: 18-24시간 (2-3일)
-**우선순위**: Phase 1-7 필수, Phase 8-13 단계적 진행, Phase 14 데이터 기반 개선
+**우선순위**: Phase 1-7 필수, Phase 8-13 단계적 진행, Phase 14-15 UX 개선
 
 **생성일**: 2025-10-29
-**업데이트**: 2025-10-30 (Phase 14 추가)
+**업데이트**: 2025-10-30 (Phase 14-15 추가)
 **프로젝트**: SureSoft SAMS (슈커톤 해커톤)
