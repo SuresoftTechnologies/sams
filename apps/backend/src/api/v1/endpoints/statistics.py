@@ -302,3 +302,86 @@ async def get_workflow_statistics(
         "by_status": status_counts,
         "by_type": type_counts,
     }
+
+
+@router.get("/workflow-timeline")
+async def get_workflow_timeline(
+    date_range: str = "30d",
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> dict:
+    """
+    Get workflow timeline data for specified date range.
+
+    Args:
+        date_range: Date range (7d, 30d, or 90d)
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Timeline data with workflow counts by date and type
+    """
+    from datetime import date, timedelta
+    from src.models.workflow import WorkflowType
+
+    # Parse date range
+    days_map = {"7d": 7, "30d": 30, "90d": 90}
+    days = days_map.get(date_range, 30)
+
+    # Calculate date range
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days - 1)
+
+    # Query workflows grouped by date and type
+    from sqlalchemy import cast, Date
+
+    query = (
+        select(
+            cast(WorkflowModel.created_at, Date).label("date"),
+            WorkflowModel.type,
+            func.count(WorkflowModel.id).label("count")
+        )
+        .where(
+            cast(WorkflowModel.created_at, Date) >= start_date,
+            cast(WorkflowModel.created_at, Date) <= end_date
+        )
+        .group_by(
+            cast(WorkflowModel.created_at, Date),
+            WorkflowModel.type
+        )
+        .order_by(cast(WorkflowModel.created_at, Date))
+    )
+
+    result = await db.execute(query)
+    rows = result.all()
+
+    # Build timeline with all dates (fill gaps with zeros)
+    timeline_dict = {}
+    current = start_date
+    while current <= end_date:
+        timeline_dict[current] = {
+            "date": current.isoformat(),
+            "checkout": 0,
+            "checkin": 0,
+            "transfer": 0,
+            "maintenance": 0,
+            "rental": 0,
+            "return": 0,
+            "disposal": 0,
+        }
+        current += timedelta(days=1)
+
+    # Fill in actual data
+    for row in rows:
+        if row.date in timeline_dict:
+            timeline_dict[row.date][row.type.value] = row.count
+
+    # Convert to sorted list
+    timeline = [timeline_dict[d] for d in sorted(timeline_dict.keys())]
+
+    return {
+        "timeline": timeline,
+        "date_range": date_range,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+    }

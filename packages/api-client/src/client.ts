@@ -508,6 +508,27 @@ export class ApiClient {
     }>> => {
       return this.request('/api/v1/statistics/assets-by-grade');
     },
+
+    /**
+     * Get workflow timeline data
+     */
+    workflowTimeline: (dateRange: '7d' | '30d' | '90d' = '30d'): Promise<{
+      timeline: Array<{
+        date: string;
+        checkout: number;
+        checkin: number;
+        transfer: number;
+        maintenance: number;
+        rental: number;
+        return: number;
+        disposal: number;
+      }>;
+      date_range: string;
+      start_date: string;
+      end_date: string;
+    }> => {
+      return this.request(`/api/v1/statistics/workflow-timeline?date_range=${dateRange}`);
+    },
   };
 
   /**
