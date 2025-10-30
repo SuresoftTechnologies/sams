@@ -6,7 +6,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  TrendingUp,
   LayoutGrid,
   MapPin,
   Activity,
@@ -124,19 +123,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 px-4 py-4 md:py-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">대시보드</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
-            SureSoft 자산 관리 시스템에 오신 것을 환영합니다
-          </p>
-        </div>
-        <Badge variant="secondary" className="gap-2 w-fit">
-          <TrendingUp className="h-3 w-3" />
-          Phase 15 완료
-        </Badge>
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">대시보드</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          SureSoft 자산 관리 시스템에 오신 것을 환영합니다
+        </p>
       </div>
 
       {/* Statistics Cards */}
