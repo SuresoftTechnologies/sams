@@ -27,11 +27,6 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export const assetSchema = z.object({
   // Basic Info
   assetTag: z.string().optional().or(z.literal('')), // Auto-generated, readonly in edit mode
-  name: z
-    .string()
-    .min(1, '자산명은 필수입니다')
-    .min(VALIDATION.NAME_MIN_LENGTH, `자산명은 최소 ${VALIDATION.NAME_MIN_LENGTH}자 이상이어야 합니다`)
-    .max(VALIDATION.NAME_MAX_LENGTH, `자산명은 ${VALIDATION.NAME_MAX_LENGTH}자 미만이어야 합니다`),
   model: z.string().optional().or(z.literal('')),
   serialNumber: z
     .string()

@@ -24,7 +24,6 @@ export type { Asset } from '@sams/api-client';
 const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
   return {
     asset_tag: data.serialNumber || `ASSET-${Date.now()}`,
-    name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
     status: AssetStatus.STOCK,
@@ -37,7 +36,6 @@ const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
 
 const mapFormToUpdateDto = (data: AssetFormData): UpdateAssetDto => {
   return {
-    name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
     purchase_date: data.purchaseDate,
@@ -95,7 +93,7 @@ export function useCreateAsset() {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
 
       toast.success('Asset created successfully', {
-        description: `${data.name} has been added to the system.`,
+        description: `Asset ${data.asset_tag} has been added to the system.`,
       });
 
       // Navigate to asset detail page
@@ -127,7 +125,7 @@ export function useUpdateAsset(id: string) {
       queryClient.invalidateQueries({ queryKey: ['asset', id] });
 
       toast.success('Asset updated successfully', {
-        description: `${data.name} has been updated.`,
+        description: `Asset ${data.asset_tag} has been updated.`,
       });
 
       // Navigate to asset detail page

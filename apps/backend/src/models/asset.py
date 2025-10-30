@@ -44,10 +44,8 @@ class Asset(Base):
     asset_tag: Mapped[str] = mapped_column(
         String(50), unique=True, nullable=False, index=True
     )  # e.g., SRS-11-2024-0001
-    name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    model: Mapped[str | None] = mapped_column(String(100))
+    model: Mapped[str | None] = mapped_column(String(100))  # 규격/모델명
     serial_number: Mapped[str | None] = mapped_column(String(100), unique=True, index=True)
-    manufacturer: Mapped[str | None] = mapped_column(String(100))
 
     # Status and grade
     status: Mapped[AssetStatus] = mapped_column(
@@ -67,12 +65,11 @@ class Asset(Base):
     )
 
     # Purchase information
-    purchase_date: Mapped[datetime | None] = mapped_column(sa.Date)
-    purchase_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
-    supplier: Mapped[str | None] = mapped_column(String(100))
+    purchase_date: Mapped[datetime | None] = mapped_column(sa.Date)  # 구매연일
+    purchase_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))  # 구매가
+    supplier: Mapped[str | None] = mapped_column(String(100))  # 구매처
     purchase_request: Mapped[str | None] = mapped_column(String(100))  # 구매 품의
     tax_invoice_date: Mapped[datetime | None] = mapped_column(sa.Date)  # 세금계산서 발행일
-    warranty_end: Mapped[datetime | None] = mapped_column(sa.Date)
     
     # Excel columns: furniture/detailed category
     furniture_category: Mapped[str | None] = mapped_column(String(50))  # 집기품목
@@ -125,4 +122,4 @@ class Asset(Base):
         return self.deleted_at is not None
 
     def __repr__(self) -> str:
-        return f"<Asset(id={self.id}, tag={self.asset_tag}, name={self.name}, status={self.status})>"
+        return f"<Asset(id={self.id}, tag={self.asset_tag}, model={self.model}, status={self.status})>"

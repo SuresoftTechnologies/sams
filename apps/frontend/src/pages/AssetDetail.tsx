@@ -164,7 +164,7 @@ export default function AssetDetail() {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{asset.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{asset.model || asset.asset_tag}</h1>
               {getGradeBadge(asset.grade)}
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-muted-foreground">
@@ -517,7 +517,7 @@ export default function AssetDetail() {
           <DialogHeader>
             <DialogTitle>자산 삭제</DialogTitle>
             <DialogDescription>
-              "{asset.name}"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
+              "{asset.model || asset.asset_tag}"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

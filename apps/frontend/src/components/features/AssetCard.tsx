@@ -86,7 +86,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <CardTitle className="text-lg">{asset.name}</CardTitle>
+            <CardTitle className="text-lg">{asset.model || asset.asset_tag}</CardTitle>
             {asset.serial_number && (
               <code className="text-xs text-muted-foreground">{asset.serial_number}</code>
             )}

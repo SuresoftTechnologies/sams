@@ -96,7 +96,6 @@ export default function AssetForm() {
     resolver: zodResolver(assetSchema),
     defaultValues: {
       assetTag: '',
-      name: '',
       model: '',
       serialNumber: '',
       categoryId: '',
@@ -136,7 +135,6 @@ export default function AssetForm() {
     if (isEditMode && asset) {
       form.reset({
         assetTag: asset.asset_tag || '',
-        name: asset.name,
         model: asset.model || '',
         serialNumber: asset.serial_number || '',
         categoryId: asset.category_id,
@@ -169,7 +167,6 @@ export default function AssetForm() {
     // Convert form data to snake_case for API
     const apiData = {
       asset_tag: data.assetTag,
-      name: data.name,
       model: data.model,
       serial_number: data.serialNumber,
       category_id: data.categoryId,
@@ -227,7 +224,7 @@ export default function AssetForm() {
             {isEditMode ? '자산 편집' : '새 자산 생성'}
           </h1>
           <p className="text-muted-foreground">
-            {isEditMode ? `편집 중: ${asset?.name}` : '시스템에 새 자산을 추가합니다'}
+            {isEditMode ? `편집 중: ${asset?.model || asset?.asset_tag}` : '시스템에 새 자산을 추가합니다'}
           </p>
         </div>
       </div>
@@ -272,19 +269,7 @@ export default function AssetForm() {
                       />
                     )}
 
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>자산명 *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="예: MacBook Pro 16인치" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    
 
                     <FormField
                       control={form.control}

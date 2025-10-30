@@ -42,8 +42,8 @@ export interface DashboardStats {
   // Recent assets
   recentAssets: Array<{
     id: string;
-    name: string;
     asset_tag: string;
+    model?: string;
     status: string;
     category_name?: string;
     created_at: string;
@@ -125,8 +125,8 @@ export function useDashboardStats() {
           // Recent assets
           recentAssets: recentAssetsData.items.map(asset => ({
             id: asset.id,
-            name: asset.name,
             asset_tag: asset.asset_tag,
+            model: asset.model,
             status: asset.status,
             category_name: asset.category_name,
             created_at: asset.created_at,

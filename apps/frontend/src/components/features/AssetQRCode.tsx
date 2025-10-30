@@ -39,7 +39,7 @@ export function AssetQRCode({
   // Generate QR code value with asset information
   const qrValue = JSON.stringify({
     id: asset.id,
-    name: asset.name,
+    model: asset.model,
     serialNumber: asset.serial_number,
     assetTag: asset.id, // In real app, use actual asset tag
     url: `${window.location.origin}/assets/${asset.id}`,
@@ -94,7 +94,7 @@ export function AssetQRCode({
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Asset QR Code - ${asset.name}</title>
+          <title>Asset QR Code - ${asset.model || asset.asset_tag}</title>
           <style>
             body {
               font-family: system-ui, -apple-system, sans-serif;
@@ -135,7 +135,7 @@ export function AssetQRCode({
           <div class="qr-container">
             ${svgData}
             <div class="asset-info">
-              <h2>${asset.name}</h2>
+              <h2>${asset.model || asset.asset_tag}</h2>
               ${asset.serial_number ? `<p>Serial: ${asset.serial_number}</p>` : ''}
               <p>Asset ID: ${asset.id}</p>
             </div>
@@ -178,7 +178,7 @@ export function AssetQRCode({
         {/* Asset Info */}
         {includeLabel && (
           <div className="text-center space-y-1">
-            <p className="font-semibold text-lg">{asset.name}</p>
+            <p className="font-semibold text-lg">{asset.model || asset.asset_tag}</p>
             {asset.serial_number && (
               <p className="text-sm text-muted-foreground">
                 Serial: <code>{asset.serial_number}</code>
@@ -221,7 +221,7 @@ export function AssetQRCodeSimple({
 }: AssetQRCodeSimpleProps) {
   const qrValue = JSON.stringify({
     id: asset.id,
-    name: asset.name,
+    model: asset.model,
     serialNumber: asset.serial_number,
     url: `${window.location.origin}/assets/${asset.id}`,
   });

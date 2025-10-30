@@ -403,7 +403,7 @@ export default function Dashboard() {
                       to={`/assets/${asset.id}`}
                       className="text-sm font-medium leading-none hover:underline block truncate"
                     >
-                      {asset.name}
+                      {asset.model || asset.asset_tag}
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       {asset.asset_tag}

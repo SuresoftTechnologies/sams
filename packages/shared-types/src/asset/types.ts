@@ -45,7 +45,6 @@ export interface Asset {
   asset_tag: string;  // 자산번호 (e.g., SRS-11-2024-0001)
 
   // Basic Info
-  name: string;  // 자산명
   category_id: string;
   category_name?: string;
   model?: string;  // 규격/모델명
@@ -124,7 +123,6 @@ export interface AssetWithRelations extends Asset {
 export interface CreateAssetDto {
   // Basic Info
   asset_tag?: string;  // Auto-generated if not provided
-  name: string;
   category_id: string;
   model?: string;
   serial_number?: string;
@@ -169,7 +167,6 @@ export interface CreateAssetDto {
  */
 export interface UpdateAssetDto {
   // Basic Info
-  name?: string;
   model?: string;
   serial_number?: string;
   manufacturer?: string;

@@ -154,7 +154,7 @@ async def decode_qr_code(
     return {
         "id": asset.id,
         "asset_tag": asset.asset_tag,
-        "name": asset.name,
+        "model": asset.model,
         "status": asset.status,
         "category_id": asset.category_id,
         "location_id": asset.location_id,
@@ -202,7 +202,7 @@ async def bulk_generate_qr_codes(
         qr_codes.append({
             "asset_id": asset.id,
             "asset_tag": asset.asset_tag,
-            "name": asset.name,
+            "model": asset.model,
             "qr_code_url": f"/api/v1/qrcode/generate/{asset.id}",
         })
 
@@ -249,7 +249,7 @@ async def get_printable_qr_label(
     return {
         "asset_id": asset.id,
         "asset_tag": asset.asset_tag,
-        "name": asset.name,
+        "model": asset.model,
         "category": asset.category.name if asset.category else None,
         "location": asset.location.name if asset.location else None,
         "qr_code_url": f"/api/v1/qrcode/generate/{asset.id}?size=200",
