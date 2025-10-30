@@ -41,6 +41,12 @@ import {
   Info,
   Upload,
   Check,
+  FileText,
+  Settings,
+  CheckCircle2,
+  AlertCircle,
+  MapPin,
+  X,
 } from 'lucide-react';
 import { assetSchema, type AssetFormData } from '@/lib/validators';
 import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
@@ -68,6 +74,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
  * Complete asset form with all 23+ fields from database schema
  * Organized into collapsible sections for better UX
  */
+
+// Sentinel value for unassigned location in bulk creation dialog
+const LOCATION_UNASSIGNED = '__LOCATION_UNASSIGNED__';
 
 // Helper function to calculate grade from purchase date
 const calculateGrade = (purchaseDate?: string): string => {
@@ -143,7 +152,7 @@ export default function AssetForm() {
   // Fetch categories, locations, and users from API
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategories();
   const { data: locationsData, isLoading: locationsLoading } = useGetLocations();
-  const { data: usersData, isLoading: usersLoading } = useGetUsers({ limit: 100 });
+  const { data: usersData } = useGetUsers({ limit: 100 });
 
   // Ensure we always have arrays
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
@@ -171,6 +180,7 @@ export default function AssetForm() {
   const [bulkEditableItems, setBulkEditableItems] = useState<BulkEditableLineItem[]>([]);
   const [bulkDefaultLocationId, setBulkDefaultLocationId] = useState<string | null>(null);
   const initialBulkItemsRef = useRef<BulkEditableLineItem[]>([]);
+  const [bulkWizardStep, setBulkWizardStep] = useState<'upload' | 'configure' | 'complete'>('upload');
 
   const validateBulkFile = (file: File): string | null => {
     const extension = file.name?.split('.').pop()?.toLowerCase() ?? '';
@@ -205,7 +215,7 @@ export default function AssetForm() {
       if (!['http:', 'https:'].includes(parsed.protocol)) {
         return '이미지 URL은 http 또는 https로 시작해야 합니다.';
       }
-    } catch (error) {
+    } catch {
       return '올바른 형식의 이미지 URL을 입력해 주세요.';
     }
 
@@ -386,6 +396,7 @@ export default function AssetForm() {
       setIsBulkCreating(false);
       setBulkCreationProgress({ completed: 0, total: 0 });
       initialBulkItemsRef.current = [];
+      setBulkWizardStep('upload');
     }
   }, [bulkDialogOpen]);
 
@@ -462,23 +473,45 @@ export default function AssetForm() {
           return item;
         }
 
-        const matchedCategory =
-          categories.find((category) => category.code === bulkResult.suggested_category_code) ??
-          categories.find((category) => {
-            const normalizedCategoryName = category.name.trim();
-            const candidates = [item.extractedName, item.itemType]
-              .map((value) => value?.trim())
-              .filter((value): value is string => Boolean(value));
-            return candidates.some((candidate) => candidate === normalizedCategoryName);
-          });
+        // Match category based on item_type first, then fall back to name matching
+        const itemTypeValue = item.itemType?.trim().toLowerCase();
+        
+        const matchedCategory = categories.find((category) => {
+          const categoryName = category.name.trim().toLowerCase();
+          
+          // Try exact match first
+          if (itemTypeValue && categoryName === itemTypeValue) {
+            return true;
+          }
+          
+          // Try partial match - category name contains item type or vice versa
+          if (itemTypeValue && (
+            categoryName.includes(itemTypeValue) || 
+            itemTypeValue.includes(categoryName)
+          )) {
+            return true;
+          }
+          
+          // Try matching with extractedName
+          const extractedNameValue = item.extractedName?.trim().toLowerCase();
+          if (extractedNameValue && (
+            categoryName === extractedNameValue ||
+            categoryName.includes(extractedNameValue) ||
+            extractedNameValue.includes(categoryName)
+          )) {
+            return true;
+          }
+          
+          return false;
+        });
 
-    if (!matchedCategory) {
+        if (!matchedCategory) {
           return item;
-    }
+        }
 
         return {
-              ...item,
-              categoryId: matchedCategory.id,
+          ...item,
+          categoryId: matchedCategory.id,
         };
       })
     );
@@ -968,6 +1001,7 @@ export default function AssetForm() {
         tone: 'success',
         text: '분석이 완료되었습니다. 추출된 항목을 검토해 주세요.',
       });
+      setBulkWizardStep('configure');
 
       toast.success('영수증 분석 완료', {
         id: loadingToastId,
@@ -1670,166 +1704,323 @@ export default function AssetForm() {
       </Form>
 
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>세금계산서 기반 자산 일괄 등록</DialogTitle>
-            <DialogDescription>
-              세금계산서 파일 또는 전자세금계산서 열람 URL을 입력해 자산 정보를 일괄 분석할 준비를 합니다.
-            </DialogDescription>
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="flex-shrink-0 px-6 pt-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <DialogTitle className="text-xl">세금계산서 기반 자산 일괄 등록</DialogTitle>
+                <DialogDescription className="mt-1">
+                  {bulkWizardStep === 'upload' && '세금계산서를 업로드하거나 URL을 입력하여 분석을 시작하세요.'}
+                  {bulkWizardStep === 'configure' && '추출된 항목을 검토하고 필요한 정보를 입력하세요.'}
+                  {bulkWizardStep === 'complete' && '자산 등록이 완료되었습니다.'}
+                </DialogDescription>
+              </div>
+            </div>
+
+            {/* Step Indicator */}
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
+                bulkWizardStep === 'upload'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">1. 업로드</span>
+                <span className="sm:hidden">1</span>
+              </div>
+              <div className="h-px flex-1 bg-border" />
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
+                bulkWizardStep === 'configure'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">2. 구성</span>
+                <span className="sm:hidden">2</span>
+              </div>
+              <div className="h-px flex-1 bg-border" />
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
+                bulkWizardStep === 'complete'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
+              }`}>
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden sm:inline">3. 완료</span>
+                <span className="sm:hidden">3</span>
+              </div>
+            </div>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[70vh] pr-2">
-            <div className="space-y-5 pb-4 sm:pb-6">
-            <div className="space-y-2">
-              <Label htmlFor="bulk-receipt-file">세금계산서 파일 업로드</Label>
-              <Input
-                id="bulk-receipt-file"
-                type="file"
-                accept="application/pdf,image/*"
-                key={bulkFileInputKey}
-                disabled={Boolean(bulkUrl.trim())}
-                onChange={(event) => {
-                  const file = event.target.files?.[0] ?? null;
-                  if (file) {
-                    const validationMessage = validateBulkFile(file);
-                    if (validationMessage) {
-                      setBulkMessage({ tone: 'error', text: validationMessage });
-                      setBulkFile(null);
-                      setBulkResult(null);
-                      setBulkFileInputKey((prev) => prev + 1);
-                      return;
-                    }
-                  }
+          <ScrollArea className="flex-1 overflow-y-auto">
+            <div className="space-y-5 px-6 pb-4 sm:pb-6">
 
-                  setBulkFile(file);
-                  if (file) {
-                    setBulkUrl('');
-                  }
-                  setBulkResult(null);
-                  setBulkMessage(null);
-                }}
-              />
-              <p className="text-sm text-muted-foreground">
-                PDF, JPG, PNG 형식의 세금계산서 파일을 업로드하면 OCR 분석이 준비됩니다.
-              </p>
-              {bulkFile && (
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-primary">선택된 파일: {bulkFile.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setBulkFile(null);
-                      setBulkFileInputKey((prev) => prev + 1);
-                      setBulkUrl('');
-                      setBulkMessage(null);
-                    }}
-                  >
-                    선택 해제
-                  </Button>
-                </div>
-              )}
-            </div>
+              {/* STEP 1: UPLOAD */}
+              {bulkWizardStep === 'upload' && (
+                <div className="space-y-6 py-4">
+                  {/* File Upload Card */}
+                  <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 transition-colors hover:border-muted-foreground/50">
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <Upload className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <Label htmlFor="bulk-receipt-file" className="text-base font-semibold">
+                            파일 업로드
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            PDF, JPG, PNG 형식의 세금계산서를 선택하세요.
+                          </p>
+                        </div>
+                      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bulk-receipt-url">세금계산서 URL</Label>
-              <Input
-                id="bulk-receipt-url"
-                type="url"
-                placeholder="https://example.com/invoice"
-                value={bulkUrl}
-                disabled={Boolean(bulkFile)}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setBulkUrl(value);
-                  if (value.trim()) {
-                    setBulkFile(null);
-                    setBulkFileInputKey((prev) => prev + 1);
-                  }
-                  setBulkResult(null);
-                  setBulkMessage(null);
-                }}
-              />
-              <p className="text-sm text-muted-foreground">
-                전자세금계산서 열람 페이지 URL을 입력하면 원본 다운로드 없이도 분석을 준비합니다.
-              </p>
-            </div>
+                      <Input
+                        id="bulk-receipt-file"
+                        type="file"
+                        accept="application/pdf,image/*"
+                        key={bulkFileInputKey}
+                        disabled={Boolean(bulkUrl.trim())}
+                        className="cursor-pointer"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] ?? null;
+                          if (file) {
+                            const validationMessage = validateBulkFile(file);
+                            if (validationMessage) {
+                              setBulkMessage({ tone: 'error', text: validationMessage });
+                              setBulkFile(null);
+                              setBulkResult(null);
+                              setBulkFileInputKey((prev) => prev + 1);
+                              return;
+                            }
+                          }
 
-            {bulkMessage && (
-              <p
-                className={`text-sm ${getBulkMessageClassName(bulkMessage.tone)}`}
-              >
-                {bulkMessage.text}
-              </p>
-            )}
+                          setBulkFile(file);
+                          if (file) {
+                            setBulkUrl('');
+                          }
+                          setBulkResult(null);
+                          setBulkMessage(null);
+                        }}
+                      />
 
-            {bulkResult && (
-              <div className="space-y-4">
-                <div className="space-y-3 rounded-md border border-dashed border-primary/40 bg-primary/5 p-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-primary">분석 요약</p>
-                    <p className="text-sm text-muted-foreground">
-                      추천 자산명: <span className="font-medium text-foreground">{bulkResult.suggested_name}</span>
-                    </p>
-                    {bulkResult.suggested_notes && (
-                      <p className="text-xs text-muted-foreground">{bulkResult.suggested_notes}</p>
-                    )}
+                      {bulkFile && (
+                        <div className="flex items-center justify-between gap-3 rounded-md bg-primary/5 p-3 border border-primary/20">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <FileText className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-sm font-medium text-primary truncate">{bulkFile.name}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setBulkFile(null);
+                              setBulkFileInputKey((prev) => prev + 1);
+                              setBulkUrl('');
+                              setBulkMessage(null);
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                    <span>추출 항목 {bulkResult.analysis.line_items.length}개</span>
-                    <span>처리 시간 {bulkResult.processing_time.toFixed(1)}초</span>
-                    <span>신뢰도 {(bulkResult.analysis.confidence * 100).toFixed(0)}%</span>
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">또는</span>
+                    </div>
                   </div>
 
-                  {bulkResult.warnings.length > 0 && (
-                    <div className="rounded-md border border-dashed border-amber-400/60 bg-amber-100/60 p-3 text-xs text-amber-700 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-200">
-                      <p className="font-medium">주의가 필요한 항목</p>
-                      <ul className="mt-1 space-y-1 list-disc list-inside">
-                        {bulkResult.warnings.map((warning, index) => (
-                          <li key={`${warning}-${index}`}>{warning}</li>
-                        ))}
-                      </ul>
+                  {/* URL Input Card */}
+                  <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 transition-colors hover:border-muted-foreground/50">
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="rounded-full bg-primary/10 p-2">
+                          <FileText className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <Label htmlFor="bulk-receipt-url" className="text-base font-semibold">
+                            URL 입력
+                          </Label>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            전자세금계산서 열람 페이지 주소를 입력하세요.
+                          </p>
+                        </div>
+                      </div>
+
+                      <Input
+                        id="bulk-receipt-url"
+                        type="url"
+                        placeholder="https://example.com/invoice"
+                        value={bulkUrl}
+                        disabled={Boolean(bulkFile)}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setBulkUrl(value);
+                          if (value.trim()) {
+                            setBulkFile(null);
+                            setBulkFileInputKey((prev) => prev + 1);
+                          }
+                          setBulkResult(null);
+                          setBulkMessage(null);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  {bulkMessage && (
+                    <div className={`rounded-lg p-4 ${
+                      bulkMessage.tone === 'error'
+                        ? 'bg-destructive/10 border border-destructive/20'
+                        : bulkMessage.tone === 'success'
+                        ? 'bg-emerald-500/10 border border-emerald-500/20'
+                        : 'bg-muted border border-border'
+                    }`}>
+                      <div className="flex items-start gap-3">
+                        {bulkMessage.tone === 'error' && <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />}
+                        {bulkMessage.tone === 'success' && <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-500 flex-shrink-0 mt-0.5" />}
+                        {bulkMessage.tone === 'info' && <Info className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />}
+                        <p className={`text-sm ${getBulkMessageClassName(bulkMessage.tone)}`}>
+                          {bulkMessage.text}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Analysis in Progress */}
+                  {bulkIsAnalyzing && (
+                    <div className="rounded-lg bg-primary/5 border border-primary/20 p-6">
+                      <div className="flex items-center gap-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-primary">영수증 분석 중...</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            OCR 및 LLM을 통해 세금계산서 내용을 추출하고 있습니다.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
+              )}
 
-                {bulkEditableItems.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium">추출된 자산 항목</p>
-                        <p className="text-xs text-muted-foreground">
-                          {bulkEditableItems.length}건 • 선택 {selectedBulkItemCount}건 • 총 {totalBulkAssetCount}개 생성 예정
-                        </p>
+              {/* STEP 2: CONFIGURE */}
+              {bulkWizardStep === 'configure' && bulkResult && (
+                <div className="space-y-6 py-4">
+                  {/* Analysis Summary Card */}
+                  <div className="rounded-lg border border-primary/40 bg-gradient-to-br from-primary/5 to-primary/10 p-5">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="rounded-full bg-primary/20 p-2">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="whitespace-nowrap">
-                          선택 {selectedBulkItemCount}건
-                        </Badge>
-                      <Badge variant="outline" className="whitespace-nowrap">
-                          생성 예정 {totalBulkAssetCount}개
-                      </Badge>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">분석 완료</h3>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          {bulkResult.analysis.line_items.length}개 항목이 추출되었습니다
+                        </p>
                       </div>
                     </div>
 
-                    <p className="text-xs text-muted-foreground">
-                      각 항목의 카테고리, 수량, 단가, 구매일을 검토하고 필요 시 수정하세요.
-                    </p>
-
-                    {isBulkCreating && (
-                      <div className="flex items-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-xs font-medium text-primary sm:text-sm">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>
-                          자산 생성 중... ({bulkCreationProgress.completed}/{bulkCreationProgress.total})
-                        </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">추천 자산명</p>
+                        <p className="font-medium text-sm">{bulkResult.suggested_name}</p>
                       </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">처리 시간</p>
+                        <p className="font-medium text-sm">{bulkResult.processing_time.toFixed(1)}초</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">신뢰도</p>
+                        <p className="font-medium text-sm">{(bulkResult.analysis.confidence * 100).toFixed(0)}%</p>
+                      </div>
+                    </div>
+
+                    {bulkResult.suggested_notes && (
+                      <p className="text-xs text-muted-foreground border-t border-primary/20 pt-3">
+                        {bulkResult.suggested_notes}
+                      </p>
                     )}
 
-                    <div className="space-y-2 rounded-md border border-dashed border-muted-foreground/40 bg-muted/10 p-3">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-1 flex-wrap items-center gap-2">
+                    {bulkResult.warnings.length > 0 && (
+                      <div className="mt-4 rounded-md border border-amber-400/60 bg-amber-100/60 dark:bg-amber-950/40 p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-4 w-4 text-amber-700 dark:text-amber-200 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-amber-700 dark:text-amber-200 mb-1">주의사항</p>
+                            <ul className="space-y-1 text-xs text-amber-700 dark:text-amber-200">
+                              {bulkResult.warnings.map((warning, index) => (
+                                <li key={`${warning}-${index}`} className="flex items-start gap-1.5">
+                                  <span className="mt-1">•</span>
+                                  <span>{warning}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {bulkEditableItems.length > 0 ? (
+                    <>
+                      {/* Stats Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 p-4">
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold">추출된 항목</p>
+                          <p className="text-xs text-muted-foreground">
+                            총 {bulkEditableItems.length}건 • 선택 {selectedBulkItemCount}건
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            선택 {selectedBulkItemCount}건
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            생성 예정 {totalBulkAssetCount}개
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Progress Indicator */}
+                      {isBulkCreating && (
+                        <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
+                          <div className="flex items-center gap-3">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary flex-shrink-0" />
+                            <div className="flex-1">
+                              <p className="font-semibold text-sm text-primary">자산 생성 중...</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {bulkCreationProgress.completed} / {bulkCreationProgress.total} 완료
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold text-primary">
+                                {Math.round((bulkCreationProgress.completed / bulkCreationProgress.total) * 100)}%
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bulk Location Assignment */}
+                      <div className="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">일괄 위치 지정</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              선택된 항목에 동일한 위치를 한번에 적용할 수 있습니다
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Select
                             value={
                               bulkDefaultLocationId === null
@@ -1843,12 +2034,12 @@ export default function AssetForm() {
                             }
                             disabled={locationsLoading || locations.length === 0}
                           >
-                            <SelectTrigger className="w-full sm:w-[260px]">
+                            <SelectTrigger className="flex-1">
                               <SelectValue
                                 placeholder={
                                   locationsLoading
                                     ? '위치 목록 로딩 중...'
-                                    : '공용으로 적용할 위치를 선택하세요'
+                                    : '적용할 위치를 선택하세요'
                                 }
                               />
                             </SelectTrigger>
@@ -1870,52 +2061,61 @@ export default function AssetForm() {
                             </SelectContent>
                           </Select>
 
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={applyBulkLocationToSelected}
-                            disabled={
-                              locations.length === 0 ||
-                              locationsLoading ||
-                              !hasBulkSelection ||
-                              bulkDefaultLocationId === null ||
-                              isBulkCreating
-                            }
-                          >
-                            선택 항목에 적용
-                          </Button>
-
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={clearLocationsFromSelected}
-                            disabled={!hasBulkSelection || isBulkCreating}
-                          >
-                            선택 항목 위치 초기화
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={applyBulkLocationToSelected}
+                              disabled={
+                                locations.length === 0 ||
+                                locationsLoading ||
+                                !hasBulkSelection ||
+                                bulkDefaultLocationId === null ||
+                                isBulkCreating
+                              }
+                              className="whitespace-nowrap"
+                            >
+                              적용
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={clearLocationsFromSelected}
+                              disabled={!hasBulkSelection || isBulkCreating}
+                              className="whitespace-nowrap"
+                            >
+                              초기화
+                            </Button>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground sm:max-w-sm sm:text-right">
-                          위치 열을 제거한 대신 공용 위치를 선택해 적용합니다. 필요 시 선택된 항목의 위치를 초기화할 수 있습니다.
+                      </div>
+
+                      {/* Items Table - Responsive Design */}
+                      <div className="space-y-2">
+                        <p className="text-sm font-semibold">항목 상세 정보</p>
+                        <p className="text-xs text-muted-foreground">
+                          각 항목의 카테고리, 수량, 단가, 구매일을 검토하고 수정하세요
                         </p>
                       </div>
-                    </div>
 
-                    <div className="max-h-72 overflow-auto rounded-md border">
-                      <div className="min-w-[900px]">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-16 text-center">등록</TableHead>
-                              <TableHead className="w-12 text-center">#</TableHead>
-                              <TableHead className="w-64">카테고리</TableHead>
-                              <TableHead className="w-48">모델/규격</TableHead>
-                              <TableHead className="w-28">수량</TableHead>
-                              <TableHead className="w-32">단가(원)</TableHead>
-                              <TableHead className="w-36">구매일</TableHead>
-                              <TableHead className="w-64">생성 상태</TableHead>
-                            </TableRow>
+                      <div className="rounded-lg border overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <div className="inline-block min-w-full align-middle">
+                            <div className="min-w-[900px]">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead className="w-16 text-center">등록</TableHead>
+                                    <TableHead className="w-12 text-center">#</TableHead>
+                                    <TableHead className="w-64">카테고리</TableHead>
+                                    <TableHead className="w-48">모델/규격</TableHead>
+                                    <TableHead className="w-28">수량</TableHead>
+                                    <TableHead className="w-32">단가(원)</TableHead>
+                                    <TableHead className="w-36">구매일</TableHead>
+                                    <TableHead className="w-64">생성 상태</TableHead>
+                                  </TableRow>
                           </TableHeader>
                           <TableBody>
                             {bulkEditableItems.map((item, index) => {
@@ -2107,76 +2307,117 @@ export default function AssetForm() {
                                 </TableRow>
                               );
                             })}
-                          </TableBody>
-                        </Table>
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    </>
+                  ) : (
+                    <div className="rounded-lg border border-dashed p-8 text-center">
+                      <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        분석 결과에서 추출된 항목이 없습니다. 다른 영수증으로 재시도해 주세요.
+                      </p>
                     </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    분석 결과에서 추출된 항목이 없습니다. 다른 영수증으로 재시도해 주세요.
-                  </p>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+
             </div>
           </ScrollArea>
 
-          <DialogFooter className="flex flex-col gap-2 pt-2 pb-2 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
-            <div className="flex flex-wrap gap-2">
-              {bulkEditableItems.length > 0 && (
-                allSelectedItemsCompleted ? (
+          <DialogFooter className="flex-shrink-0 border-t px-6 py-4">
+            {/* STEP 1: UPLOAD - Footer */}
+            {bulkWizardStep === 'upload' && (
+              <div className="flex w-full justify-between items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setBulkDialogOpen(false)}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleBulkAnalyze}
+                  disabled={bulkIsAnalyzing || (!bulkFile && !bulkUrl.trim())}
+                  className="gap-2"
+                >
+                  {bulkIsAnalyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      분석 중...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      분석 시작
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* STEP 2: CONFIGURE - Footer */}
+            {bulkWizardStep === 'configure' && (
+              <div className="flex w-full justify-between items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setBulkWizardStep('upload');
+                    setBulkResult(null);
+                    setBulkEditableItems([]);
+                  }}
+                  disabled={isBulkCreating}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  다시 업로드
+                </Button>
+                <div className="flex gap-2">
                   <Button
                     type="button"
-                    className="gap-2"
-                    variant="secondary"
+                    variant="ghost"
                     onClick={() => setBulkDialogOpen(false)}
+                    disabled={isBulkCreating}
                   >
-                    <Check className="h-4 w-4" />
-                    등록 완료
+                    닫기
                   </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    className="gap-2"
-                    onClick={handleBulkConfirmSelection}
-                    disabled={!hasBulkSelection || isBulkCreating}
-                  >
-                    {isBulkCreating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        생성 중...
-                      </>
-                    ) : (
-                      '선택 항목 등록'
-                    )}
-                  </Button>
-                )
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-            <Button variant="ghost" onClick={() => setBulkDialogOpen(false)}>
-              단일 자산 등록 계속
-            </Button>
-            <Button
-              type="button"
-              className="gap-2"
-              onClick={handleBulkAnalyze}
-              disabled={bulkIsAnalyzing || isBulkCreating || (!bulkFile && !bulkUrl.trim())}
-            >
-              {bulkIsAnalyzing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  분석 중...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  영수증 분석 실행
-                </>
-              )}
-            </Button>
-            </div>
+                  {allSelectedItemsCompleted ? (
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={() => setBulkDialogOpen(false)}
+                      className="gap-2"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      완료
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={handleBulkConfirmSelection}
+                      disabled={!hasBulkSelection || isBulkCreating}
+                      className="gap-2"
+                    >
+                      {isBulkCreating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          생성 중...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4" />
+                          선택 항목 등록
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
