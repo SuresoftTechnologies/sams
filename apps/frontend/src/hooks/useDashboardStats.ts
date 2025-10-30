@@ -1,5 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
 import { useGetAssets } from './useAssets';
 import { useGetCategories } from './useCategories';
 import { useGetLocations } from './useLocations';
@@ -19,10 +17,12 @@ export interface DashboardStats {
 
   // Status distribution
   statusDistribution: {
-    available: number;
-    in_use: number;
-    maintenance: number;
-    retired: number;
+    issued: number;
+    loaned: number;
+    general: number;
+    stock: number;
+    server_room: number;
+    disposed: number;
   };
 
   // Category distribution (top categories)
@@ -62,13 +62,14 @@ export function useDashboardStats() {
   const { data: locationsData, isLoading: locationsLoading } = useGetLocations();
 
   // Check if using statistics API endpoint
-  const { data: statsApiData } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: () => api.statistics.dashboard(),
-    staleTime: 60 * 1000, // 1 minute
-    retry: false, // Don't retry if endpoint doesn't exist
-    enabled: false, // Disabled for now, using client-side aggregation
-  });
+  // Disabled for now, using client-side aggregation
+  // const { data: statsApiData } = useQuery({
+  //   queryKey: ['dashboard-stats'],
+  //   queryFn: () => api.statistics.dashboard(),
+  //   staleTime: 60 * 1000, // 1 minute
+  //   retry: false, // Don't retry if endpoint doesn't exist
+  //   enabled: false,
+  // });
 
   // Calculate statistics from assets data
   const stats = useMemo<DashboardStats | null>(() => {
@@ -89,10 +90,12 @@ export function useDashboardStats() {
 
     // Status distribution
     const statusDistribution = {
-      available: assets.filter(a => a.status === 'available').length,
-      in_use: assets.filter(a => a.status === 'in_use').length,
-      maintenance: assets.filter(a => a.status === 'maintenance').length,
-      retired: assets.filter(a => a.status === 'retired').length,
+      issued: assets.filter(a => a.status === 'issued').length,
+      loaned: assets.filter(a => a.status === 'loaned').length,
+      general: assets.filter(a => a.status === 'general').length,
+      stock: assets.filter(a => a.status === 'stock').length,
+      server_room: assets.filter(a => a.status === 'server_room').length,
+      disposed: assets.filter(a => a.status === 'disposed').length,
     };
 
     // Category distribution

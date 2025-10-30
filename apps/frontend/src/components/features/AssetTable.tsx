@@ -96,29 +96,37 @@ export function AssetTable({
 
   const getStatusBadgeVariant = (status: Asset['status']) => {
     switch (status) {
-      case 'available':
-        return 'default';
-      case 'in_use':
-        return 'secondary';
-      case 'maintenance':
-        return 'outline';
-      case 'retired':
-        return 'destructive';
+      case 'issued':
+        return 'default'; // blue
+      case 'loaned':
+        return 'secondary'; // purple
+      case 'general':
+        return 'outline'; // green
+      case 'stock':
+        return 'secondary'; // gray
+      case 'server_room':
+        return 'default'; // cyan
+      case 'disposed':
+        return 'destructive'; // red
       default:
-        return 'default';
+        return 'outline';
     }
   };
 
   const getStatusLabel = (status: Asset['status']) => {
     switch (status) {
-      case 'available':
-        return '사용 가능';
-      case 'in_use':
-        return '사용 중';
-      case 'maintenance':
-        return '유지보수';
-      case 'retired':
-        return '폐기됨';
+      case 'issued':
+        return '지급장비';
+      case 'loaned':
+        return '대여용';
+      case 'general':
+        return '일반장비';
+      case 'stock':
+        return '재고';
+      case 'server_room':
+        return '서버실';
+      case 'disposed':
+        return '불용';
       default:
         return status;
     }

@@ -14,11 +14,12 @@ import { AssetStatus, AssetGrade, LocationSite } from '@sams/shared-types';
  * Asset Status Options
  */
 export const ASSET_STATUSES = [
-  { value: AssetStatus.AVAILABLE, label: '사용 가능', color: 'green' },
-  { value: AssetStatus.ASSIGNED, label: '할당됨', color: 'blue' },
-  { value: AssetStatus.IN_TRANSIT, label: '이동 중', color: 'yellow' },
-  { value: AssetStatus.MAINTENANCE, label: '유지보수', color: 'orange' },
-  { value: AssetStatus.DISPOSED, label: '폐기됨', color: 'red' },
+  { value: AssetStatus.ISSUED, label: '지급장비', color: 'blue' },
+  { value: AssetStatus.LOANED, label: '대여용', color: 'purple' },
+  { value: AssetStatus.GENERAL, label: '일반장비', color: 'green' },
+  { value: AssetStatus.STOCK, label: '재고', color: 'gray' },
+  { value: AssetStatus.SERVER_ROOM, label: '서버실', color: 'cyan' },
+  { value: AssetStatus.DISPOSED, label: '불용', color: 'red' },
 ] as const;
 
 /**

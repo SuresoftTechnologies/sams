@@ -122,12 +122,14 @@ export default function AssetDetail() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      available: { variant: 'default' as const, label: '사용 가능' },
-      in_use: { variant: 'secondary' as const, label: '사용 중' },
-      maintenance: { variant: 'destructive' as const, label: '유지보수' },
-      retired: { variant: 'outline' as const, label: '폐기됨' },
+      issued: { variant: 'default' as const, label: '지급장비' },
+      loaned: { variant: 'secondary' as const, label: '대여용' },
+      general: { variant: 'outline' as const, label: '일반장비' },
+      stock: { variant: 'secondary' as const, label: '재고' },
+      server_room: { variant: 'default' as const, label: '서버실' },
+      disposed: { variant: 'destructive' as const, label: '불용' },
     };
-    const config = variants[status as keyof typeof variants] || variants.available;
+    const config = variants[status as keyof typeof variants] || variants.general;
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 

@@ -12,7 +12,7 @@ export interface Asset {
   id: string;
   asset_tag: string;
   name: string;
-  status?: 'available' | 'assigned' | 'maintenance' | 'disposed' | 'in_transit';
+  status?: 'issued' | 'loaned' | 'general' | 'stock' | 'server_room' | 'disposed';
   category_id: string;
   location_id?: string | null;
   assignee_id?: string | null;
@@ -156,7 +156,7 @@ export interface AssetQueryParams {
   search?: string;
   category_id?: string;
   location_id?: string;
-  status?: 'available' | 'in_use' | 'maintenance' | 'retired';
+  status?: 'issued' | 'loaned' | 'general' | 'stock' | 'server_room' | 'disposed';
   sort_by?: string;
   order?: 'asc' | 'desc';
 }
@@ -173,11 +173,12 @@ export interface UserQueryParams {
  * Asset Status Enum
  */
 export const AssetStatus = {
-  AVAILABLE: 'available',
-  ASSIGNED: 'assigned',
-  MAINTENANCE: 'maintenance',
+  ISSUED: 'issued',
+  LOANED: 'loaned',
+  GENERAL: 'general',
+  STOCK: 'stock',
+  SERVER_ROOM: 'server_room',
   DISPOSED: 'disposed',
-  IN_TRANSIT: 'in_transit',
 } as const;
 
 export type AssetStatusType = (typeof AssetStatus)[keyof typeof AssetStatus];

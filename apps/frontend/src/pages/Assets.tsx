@@ -44,15 +44,26 @@ export default function Assets() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      available: 'default',
-      in_use: 'secondary',
-      maintenance: 'destructive',
-      retired: 'outline',
+      issued: 'default',
+      loaned: 'secondary',
+      general: 'outline',
+      stock: 'secondary',
+      server_room: 'default',
+      disposed: 'destructive',
+    } as const;
+
+    const labels = {
+      issued: '지급장비',
+      loaned: '대여용',
+      general: '일반장비',
+      stock: '재고',
+      server_room: '서버실',
+      disposed: '불용',
     } as const;
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || 'default'}>
-        {status.replace('_', ' ')}
+      <Badge variant={variants[status as keyof typeof variants] || 'outline'}>
+        {labels[status as keyof typeof labels] || status}
       </Badge>
     );
   };

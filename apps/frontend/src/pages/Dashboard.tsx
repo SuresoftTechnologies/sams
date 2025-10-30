@@ -3,12 +3,16 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Package,
-  CheckCircle,
-  Clock,
-  AlertCircle,
+  UserCheck,
+  HandHelping,
+  Box,
+  Archive,
+  Server,
+  XCircle,
   LayoutGrid,
   MapPin,
   Activity,
+  AlertCircle,
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { format } from 'date-fns';
@@ -41,36 +45,69 @@ export default function Dashboard() {
           description: `${stats.totalCategories}개 카테고리, ${stats.totalLocations}개 위치`,
         },
         {
-          label: '사용 가능',
-          value: stats.statusDistribution.available.toLocaleString(),
-          icon: CheckCircle,
-          color: 'text-green-500',
+          label: '지급장비',
+          value: stats.statusDistribution.issued.toLocaleString(),
+          icon: UserCheck,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50 dark:bg-blue-950',
+          description: '사용자에게 지급됨',
+          percentage: stats.totalAssets > 0
+            ? Math.round((stats.statusDistribution.issued / stats.totalAssets) * 100)
+            : 0,
+        },
+        {
+          label: '대여용',
+          value: stats.statusDistribution.loaned.toLocaleString(),
+          icon: HandHelping,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-50 dark:bg-purple-950',
+          description: '대여 가능',
+          percentage: stats.totalAssets > 0
+            ? Math.round((stats.statusDistribution.loaned / stats.totalAssets) * 100)
+            : 0,
+        },
+        {
+          label: '일반장비',
+          value: stats.statusDistribution.general.toLocaleString(),
+          icon: Box,
+          color: 'text-green-600',
           bgColor: 'bg-green-50 dark:bg-green-950',
-          description: '배포 준비 완료',
+          description: '일반 자산',
           percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.available / stats.totalAssets) * 100)
+            ? Math.round((stats.statusDistribution.general / stats.totalAssets) * 100)
             : 0,
         },
         {
-          label: '사용 중',
-          value: stats.statusDistribution.in_use.toLocaleString(),
-          icon: Clock,
-          color: 'text-amber-500',
-          bgColor: 'bg-amber-50 dark:bg-amber-950',
-          description: '현재 배포됨',
+          label: '재고',
+          value: stats.statusDistribution.stock.toLocaleString(),
+          icon: Archive,
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-50 dark:bg-gray-950',
+          description: '창고 보관 중',
           percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.in_use / stats.totalAssets) * 100)
+            ? Math.round((stats.statusDistribution.stock / stats.totalAssets) * 100)
             : 0,
         },
         {
-          label: '유지보수',
-          value: stats.statusDistribution.maintenance.toLocaleString(),
-          icon: AlertCircle,
-          color: 'text-red-500',
+          label: '서버실',
+          value: stats.statusDistribution.server_room.toLocaleString(),
+          icon: Server,
+          color: 'text-cyan-600',
+          bgColor: 'bg-cyan-50 dark:bg-cyan-950',
+          description: '서버실 운영',
+          percentage: stats.totalAssets > 0
+            ? Math.round((stats.statusDistribution.server_room / stats.totalAssets) * 100)
+            : 0,
+        },
+        {
+          label: '불용',
+          value: stats.statusDistribution.disposed.toLocaleString(),
+          icon: XCircle,
+          color: 'text-red-600',
           bgColor: 'bg-red-50 dark:bg-red-950',
-          description: '유지보수 중',
+          description: '폐기 처리됨',
           percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.maintenance / stats.totalAssets) * 100)
+            ? Math.round((stats.statusDistribution.disposed / stats.totalAssets) * 100)
             : 0,
         },
       ]
@@ -84,12 +121,18 @@ export default function Dashboard() {
   // Get badge variant for status
   const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (status) {
-      case 'available':
-        return 'default';
-      case 'in_use':
-        return 'secondary';
-      case 'maintenance':
-        return 'destructive';
+      case 'issued':
+        return 'default'; // blue
+      case 'loaned':
+        return 'secondary'; // purple
+      case 'general':
+        return 'outline'; // green
+      case 'stock':
+        return 'secondary'; // gray
+      case 'server_room':
+        return 'default'; // cyan
+      case 'disposed':
+        return 'destructive'; // red
       default:
         return 'outline';
     }
@@ -133,23 +176,41 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {isLoading ? (
-          // Loading skeleton
-          Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-10 w-10 rounded-lg" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-20 mb-2" />
-                <Skeleton className="h-3 w-32" />
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          statsCards.map((stat) => {
+      {isLoading ? (
+        <div className="space-y-4">
+          {/* Total Assets Card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-10 rounded-lg" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-20 mb-2" />
+              <Skeleton className="h-3 w-32" />
+            </CardContent>
+          </Card>
+
+          {/* Status Cards Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-20 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Total Assets Card - Full Width */}
+          {statsCards[0] && (() => {
+            const stat = statsCards[0];
             const Icon = stat.icon;
             return (
               <Card key={stat.label} className="hover:shadow-md transition-shadow">
@@ -162,19 +223,42 @@ export default function Dashboard() {
                 <CardContent>
                   <div className="flex items-baseline gap-2">
                     <div className="text-2xl font-bold">{stat.value}</div>
-                    {stat.percentage !== undefined && (
-                      <span className="text-xs text-muted-foreground">
-                        ({stat.percentage}%)
-                      </span>
-                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
                 </CardContent>
               </Card>
             );
-          })
-        )}
-      </div>
+          })()}
+
+          {/* Status Cards - 2x3 Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {statsCards.slice(1).map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={stat.label} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                    <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                      <Icon className={`h-5 w-5 ${stat.color}`} />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      {stat.percentage !== undefined && (
+                        <span className="text-xs text-muted-foreground">
+                          ({stat.percentage}%)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Category Distribution */}
