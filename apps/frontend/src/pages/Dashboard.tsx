@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router';
 import { TrendIndicator } from '@/components/charts/TrendIndicator';
@@ -168,7 +169,15 @@ export default function Dashboard() {
 
   // Memoized format status helper
   const formatStatus = useCallback((status: string) => {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+    const statusMap: Record<string, string> = {
+      issued: '지급됨',
+      loaned: '대여용',
+      general: '일반',
+      stock: '재고',
+      server_room: '서버실',
+      disposed: '불용',
+    };
+    return statusMap[status] || status;
   }, []);
 
   // Memoized get badge variant helper
@@ -475,7 +484,7 @@ export default function Dashboard() {
                         className="text-xs text-muted-foreground whitespace-nowrap"
                         dateTime={asset.created_at}
                       >
-                        {format(new Date(asset.created_at), 'MMM d, yyyy')}
+                        {format(new Date(asset.created_at), 'yyyy. M. d', { locale: ko })}
                       </time>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useGetAsset, useDeleteAsset, useGetAssetHistory } from '@/hooks/useAssets';
+import { useCategories } from '@/hooks/useCategories';
+import { useLocations } from '@/hooks/useLocations';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import {
@@ -51,8 +53,66 @@ export default function AssetDetail() {
   const navigate = useNavigate();
   const { data: asset, isLoading, error } = useGetAsset(id!);
   const { data: historyData, isLoading: isHistoryLoading } = useGetAssetHistory(id!, { limit: 10 });
+  const { data: categories } = useCategories();
+  const { data: locations } = useLocations();
   const deleteMutation = useDeleteAsset();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Create lookup maps for locations and categories
+  const locationMap = useMemo(() => {
+    if (!locations) return {};
+    return locations.reduce((acc, loc) => {
+      acc[loc.id] = loc.name;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [locations]);
+
+  const categoryMap = useMemo(() => {
+    if (!categories) return {};
+    return categories.reduce((acc, cat) => {
+      acc[cat.id] = cat.name;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [categories]);
+
+  // Helper function to check if two values are effectively equal
+  const areValuesEqual = (key: string, val1: unknown, val2: unknown): boolean => {
+    // Handle null/undefined
+    if (val1 === val2) return true;
+    if (val1 == null && val2 == null) return true;
+    if (val1 == null || val2 == null) return false;
+
+    // Handle date fields - compare normalized date strings
+    const dateFields = ['purchase_date', 'warranty_expiry', 'created_at', 'updated_at'];
+    if (dateFields.includes(key)) {
+      try {
+        const date1 = new Date(String(val1));
+        const date2 = new Date(String(val2));
+        // Compare dates (ignoring time)
+        return date1.toISOString().split('T')[0] === date2.toISOString().split('T')[0];
+      } catch {
+        return String(val1) === String(val2);
+      }
+    }
+
+    return val1 === val2;
+  };
+
+  // Helper function to format change values with lookup maps
+  const formatDisplayValue = (key: string, value: unknown): string => {
+    // Handle location_id lookup
+    if (key === 'location_id' && typeof value === 'string') {
+      return locationMap[value] || value;
+    }
+
+    // Handle category_id lookup
+    if (key === 'category_id' && typeof value === 'string') {
+      return categoryMap[value] || value;
+    }
+
+    // Use default formatter for other fields
+    return formatChangeValue(key, value);
+  };
 
   const handleDelete = () => {
     if (id) {
@@ -552,17 +612,18 @@ export default function AssetDetail() {
                               const oldVal = event.old_values?.[key];
                               const newVal = event.new_values?.[key];
 
-                              if (oldVal === newVal) return null;
+                              // Skip if values are equal (using smart comparison for dates)
+                              if (areValuesEqual(key, oldVal, newVal)) return null;
 
                               return (
                                 <div key={key} className="flex items-center gap-2">
                                   <span className="text-muted-foreground">{getFieldLabel(key)}:</span>
                                   <span className="line-through text-muted-foreground">
-                                    {formatChangeValue(key, oldVal)}
+                                    {formatDisplayValue(key, oldVal)}
                                   </span>
                                   <span>→</span>
                                   <span className="font-medium">
-                                    {formatChangeValue(key, newVal)}
+                                    {formatDisplayValue(key, newVal)}
                                   </span>
                                 </div>
                               );

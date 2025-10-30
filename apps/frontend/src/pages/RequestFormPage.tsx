@@ -385,7 +385,7 @@ export default function RequestFormPage() {
                                 `}>
                                   {asset.status === 'loaned' ? '대여가능' :
                                    asset.status === 'stock' ? '재고' :
-                                   asset.status === 'disposed' ? '폐기' :
+                                   asset.status === 'disposed' ? '불용' :
                                    asset.status === 'general' ? '일반' :
                                    asset.status}
                                 </span>

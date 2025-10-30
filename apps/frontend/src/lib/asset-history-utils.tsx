@@ -78,7 +78,7 @@ export function getHistoryActionLabel(action: HistoryAction): string {
     status_changed: '상태 변경',
     maintenance_start: '유지보수 시작',
     maintenance_end: '유지보수 완료',
-    disposed: '폐기됨',
+    disposed: '불용처리됨',
     deleted: '삭제됨',
     restored: '복원됨',
   };
@@ -102,7 +102,7 @@ export function formatChangeValue(key: string, value: unknown): string {
       general: '일반',
       stock: '재고',
       server_room: '서버실',
-      disposed: '폐기',
+      disposed: '불용',
     };
     return statusMap[String(value)] || String(value);
   }
