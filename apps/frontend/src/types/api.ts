@@ -1,37 +1,122 @@
 /**
  * API Type Definitions
  *
- * Re-exports types from @ams/api-client for convenient access.
- * Defines common API response/error types.
+ * Type definitions for API requests/responses.
+ * TODO: Generate from OpenAPI schema once backend is ready.
  */
-
-import type { components, operations } from '@ams/api-client';
 
 /**
- * Component schemas from OpenAPI
+ * Component schemas (temporary - will be replaced with OpenAPI generated types)
  */
-export type Asset = components['schemas']['Asset'];
-export type AssetCreate = components['schemas']['AssetCreate'];
-export type AssetUpdate = components['schemas']['AssetUpdate'];
-export type AssetRead = components['schemas']['AssetRead'];
+export interface Asset {
+  id: string;
+  asset_tag: string;
+  name: string;
+  status?: 'available' | 'assigned' | 'maintenance' | 'disposed' | 'in_transit';
+  category_id: string;
+  location_id?: string | null;
+  assignee_id?: string | null;
+  model?: string | null;
+  serial_number?: string | null;
+  manufacturer?: string | null;
+  purchase_date?: string | null;
+  purchase_price?: number | null;
+  warranty_expiry?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-export type User = components['schemas']['User'];
-export type UserCreate = components['schemas']['UserCreate'];
-export type UserUpdate = components['schemas']['UserUpdate'];
-export type UserRead = components['schemas']['UserRead'];
+export interface AssetCreate {
+  asset_tag?: string;
+  name: string;
+  category_id: string;
+  location_id?: string;
+  status?: string;
+  model?: string;
+  serial_number?: string;
+  manufacturer?: string;
+  purchase_date?: string;
+  purchase_price?: number;
+  warranty_expiry?: string;
+  notes?: string;
+}
 
-export type AssetHistory = components['schemas']['AssetHistory'];
-export type AssetHistoryCreate = components['schemas']['AssetHistoryCreate'];
+export type AssetUpdate = Partial<AssetCreate>;
+export type AssetRead = Asset;
 
-export type Category = components['schemas']['Category'];
-export type CategoryCreate = components['schemas']['CategoryCreate'];
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'manager' | 'employee';
+  department_id?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
-export type Location = components['schemas']['Location'];
-export type LocationCreate = components['schemas']['LocationCreate'];
+export type UserCreate = Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string };
+export type UserUpdate = Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>;
+export type UserRead = User;
 
-export type LoginRequest = components['schemas']['LoginRequest'];
-export type RegisterRequest = components['schemas']['RegisterRequest'];
-export type TokenResponse = components['schemas']['TokenResponse'];
+export interface AssetHistory {
+  id: string;
+  asset_id: string;
+  action: string;
+  from_user_id?: string | null;
+  to_user_id?: string | null;
+  from_location_id?: string | null;
+  to_location_id?: string | null;
+  old_values?: Record<string, any> | null;
+  new_values?: Record<string, any> | null;
+  created_by: string;
+  created_at: string;
+}
+
+export type AssetHistoryCreate = Omit<AssetHistory, 'id' | 'created_at'>;
+
+export interface Category {
+  id: string;
+  name: string;
+  code: string;
+  description?: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type CategoryCreate = Omit<Category, 'id' | 'created_at'>;
+
+export interface Location {
+  id: string;
+  name: string;
+  code: string;
+  site?: string | null;
+  building?: string | null;
+  floor?: string | null;
+  room?: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type LocationCreate = Omit<Location, 'id' | 'created_at'>;
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  full_name: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
 
 /**
  * API Response Types
@@ -87,29 +172,23 @@ export interface UserQueryParams {
 /**
  * Asset Status Enum
  */
-export enum AssetStatus {
-  AVAILABLE = 'available',
-  IN_USE = 'in_use',
-  MAINTENANCE = 'maintenance',
-  RETIRED = 'retired',
-}
+export const AssetStatus = {
+  AVAILABLE: 'available',
+  ASSIGNED: 'assigned',
+  MAINTENANCE: 'maintenance',
+  DISPOSED: 'disposed',
+  IN_TRANSIT: 'in_transit',
+} as const;
+
+export type AssetStatusType = (typeof AssetStatus)[keyof typeof AssetStatus];
 
 /**
  * User Role Enum
  */
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  VIEWER = 'viewer',
-}
+export const UserRole = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  EMPLOYEE: 'employee',
+} as const;
 
-/**
- * Operation types (for reference)
- */
-export type LoginOperation = operations['login_api_v1_auth_login_post'];
-export type RegisterOperation = operations['register_api_v1_auth_register_post'];
-export type GetAssetsOperation = operations['get_assets_api_v1_assets_get'];
-export type CreateAssetOperation = operations['create_asset_api_v1_assets_post'];
-export type GetAssetOperation = operations['get_asset_api_v1_assets__asset_id__get'];
-export type UpdateAssetOperation = operations['update_asset_api_v1_assets__asset_id__patch'];
-export type DeleteAssetOperation = operations['delete_asset_api_v1_assets__asset_id__delete'];
+export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];

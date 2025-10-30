@@ -14,6 +14,7 @@ import { useGetAssets, useDeleteAsset } from '@/hooks/useAssets';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AssetQRCode } from '@/components/features/AssetQRCode';
 import type { Asset } from '@/hooks/useAssets';
+import { ManagerOrAbove } from '@/components/layout/RoleGuard';
 
 /**
  * AssetList Page
@@ -21,10 +22,10 @@ import type { Asset } from '@/hooks/useAssets';
  * Main page for displaying and managing assets
  * - Table and card view toggle
  * - Filtering and search
- * - Create, edit, delete actions
+ * - Create, edit, delete actions (manager/admin only)
  * - QR code viewing
  *
- * Demonstrates usage of all Phase 8 components
+ * Demonstrates usage of all Phase 8 components and role-based access
  */
 
 type ViewMode = 'table' | 'cards';
@@ -90,10 +91,13 @@ export default function AssetList() {
             Manage and track all your company assets
           </p>
         </div>
-        <Button onClick={() => navigate('/assets/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Asset
-        </Button>
+        {/* Only managers and admins can create assets */}
+        <ManagerOrAbove>
+          <Button onClick={() => navigate('/assets/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Asset
+          </Button>
+        </ManagerOrAbove>
       </div>
 
       {/* Filters and View Toggle */}

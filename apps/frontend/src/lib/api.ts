@@ -3,15 +3,13 @@
  *
  * Centralized API client using @ams/api-client package.
  * Handles authentication, error handling, and request/response interceptors.
+ * Supports automatic token refresh on 401 errors.
  *
  * @example
  * ```typescript
- * import { api, setAuthToken } from '@/lib/api';
+ * import { api } from '@/lib/api';
  *
- * // Set token after login
- * setAuthToken(token);
- *
- * // Make API calls
+ * // Make authenticated API calls
  * const assets = await api.get('/api/v1/assets');
  * ```
  */
@@ -22,55 +20,27 @@ import {
   setAuthToken as setApiAuthToken,
   getApiConfig,
 } from '@ams/api-client';
+import { authStorage, type TokenResponse } from './auth-storage';
 
 /**
- * Token storage keys
+ * Flag to prevent infinite token refresh loop
  */
-const TOKEN_KEY = 'ams_access_token';
-const REFRESH_TOKEN_KEY = 'ams_refresh_token';
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
 
 /**
- * Get stored access token
+ * Subscribe to token refresh completion
  */
-export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+function subscribeTokenRefresh(callback: (token: string) => void): void {
+  refreshSubscribers.push(callback);
 }
 
 /**
- * Get stored refresh token
+ * Notify all subscribers when token is refreshed
  */
-export function getStoredRefreshToken(): string | null {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-}
-
-/**
- * Store authentication tokens
- */
-export function storeTokens(accessToken: string, refreshToken: string): void {
-  localStorage.setItem(TOKEN_KEY, accessToken);
-  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-  setApiAuthToken(accessToken);
-}
-
-/**
- * Clear authentication tokens
- */
-export function clearTokens(): void {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-  setApiAuthToken(null);
-}
-
-/**
- * Set authorization token
- */
-export function setAuthToken(token: string | null): void {
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
-    setApiAuthToken(token);
-  } else {
-    clearTokens();
-  }
+function onTokenRefreshed(token: string): void {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
 }
 
 /**
@@ -87,9 +57,48 @@ export function initializeApiClient(): void {
   });
 
   // Restore token from localStorage
-  const token = getStoredToken();
+  const token = authStorage.getAccessToken();
   if (token) {
     setApiAuthToken(token);
+  }
+}
+
+/**
+ * Refresh access token using refresh token
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = authStorage.getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const config = getApiConfig();
+    const response = await fetch(`${config.baseUrl}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+
+    const data: TokenResponse = await response.json();
+
+    // Store new tokens
+    authStorage.setTokens(data);
+    setApiAuthToken(data.access_token);
+
+    return data.access_token;
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    // Clear invalid tokens
+    authStorage.clearTokens();
+    setApiAuthToken(null);
+    return null;
   }
 }
 
@@ -97,18 +106,19 @@ export function initializeApiClient(): void {
  * API Error class
  */
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public data?: unknown
-  ) {
+  public status?: number;
+  public data?: unknown;
+
+  constructor(message: string, status?: number, data?: unknown) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
   }
 }
 
 /**
- * Enhanced API fetch with error handling
+ * Enhanced API fetch with error handling and automatic token refresh
  */
 async function fetchWithErrorHandling<TResponse>(
   path: string,
@@ -117,14 +127,51 @@ async function fetchWithErrorHandling<TResponse>(
   try {
     return await apiFetch<TResponse>(path, options);
   } catch (error) {
-    // Handle 401 Unauthorized - redirect to login
+    // Handle 401 Unauthorized - try token refresh
     if (error instanceof Response && error.status === 401) {
-      clearTokens();
-      // Redirect to login page
-      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      // Don't try to refresh if this is already a refresh request or login request
+      if (path.includes('/auth/refresh') || path.includes('/auth/login')) {
+        authStorage.clearTokens();
+        setApiAuthToken(null);
+        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        throw new ApiError('Unauthorized. Please login again.', 401);
       }
-      throw new ApiError('Unauthorized. Please login again.', 401);
+
+      // Try to refresh token
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        const newToken = await refreshAccessToken();
+
+        if (newToken) {
+          isRefreshing = false;
+          onTokenRefreshed(newToken);
+
+          // Retry original request with new token
+          return await apiFetch<TResponse>(path, options);
+        } else {
+          // Refresh failed, redirect to login
+          isRefreshing = false;
+          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          throw new ApiError('Session expired. Please login again.', 401);
+        }
+      } else {
+        // Wait for token refresh to complete
+        return new Promise<TResponse>((resolve, reject) => {
+          subscribeTokenRefresh(async () => {
+            try {
+              const result = await apiFetch<TResponse>(path, options);
+              resolve(result);
+            } catch (retryError) {
+              reject(retryError);
+            }
+          });
+        });
+      }
     }
 
     // Handle 403 Forbidden
@@ -148,8 +195,18 @@ export const api = {
   /**
    * GET request
    */
-  async get<TResponse>(path: string, params?: Record<string, string | number | boolean>): Promise<TResponse> {
-    const url = params ? `${path}?${new URLSearchParams(params).toString()}` : path;
+  async get<TResponse>(
+    path: string,
+    params?: Record<string, string | number | boolean>
+  ): Promise<TResponse> {
+    let url = path;
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        searchParams.append(key, String(value));
+      });
+      url = `${path}?${searchParams.toString()}`;
+    }
     return fetchWithErrorHandling<TResponse>(url, {
       method: 'GET',
     });
@@ -201,7 +258,7 @@ export const api = {
     const config = getApiConfig();
     const url = `${config.baseUrl}${path}`;
 
-    const token = getStoredToken();
+    const token = authStorage.getAccessToken();
     const headers: Record<string, string> = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -238,13 +295,18 @@ export const api = {
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  return !!getStoredToken();
+  return authStorage.isAuthenticated();
 }
 
 /**
  * Get current API configuration
  */
 export { getApiConfig };
+
+/**
+ * Re-export auth storage for convenience
+ */
+export { authStorage };
 
 // Initialize on module load
 initializeApiClient();

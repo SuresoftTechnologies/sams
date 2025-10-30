@@ -8,7 +8,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { User, LogOut, Settings } from 'lucide-react';
+import { useUser, useLogout } from '@/hooks/useAuth';
 
 /**
  * Header Component
@@ -17,17 +19,31 @@ import { User, LogOut, Settings } from 'lucide-react';
  * - Logo and app title
  * - Main navigation links
  * - User dropdown menu (profile, settings, logout)
+ * - Role badge display
  */
 export default function Header() {
-  // TODO: Get user data from auth context/store
-  const user = {
-    name: 'Demo User',
-    email: 'demo@suresoft.com',
-  };
+  const user = useUser();
+  const logoutMutation = useLogout();
 
   const handleLogout = () => {
-    console.log('Logout clicked');
-    // TODO: Implement logout logic in Phase 9
+    logoutMutation.mutate();
+  };
+
+  // Don't render header on login page or if no user
+  if (!user) {
+    return null;
+  }
+
+  // Role color mapping
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'destructive';
+      case 'manager':
+        return 'default';
+      default:
+        return 'secondary';
+    }
   };
 
   return (
@@ -35,12 +51,14 @@ export default function Header() {
       <div className="container flex h-14 max-w-screen-2xl items-center">
         {/* Logo & Title */}
         <div className="mr-4 flex items-center space-x-2">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-              SS
-            </div>
-            <span className="hidden font-bold sm:inline-block">
-              SureSoft AMS
+          <Link to="/" className="flex items-center space-x-3">
+            <img
+              src="/logo.png"
+              alt="SureSoft Logo"
+              className="h-7 w-auto object-contain"
+            />
+            <span className="hidden font-bold text-lg sm:inline-block text-muted-foreground">
+              AMS
             </span>
           </Link>
         </div>
@@ -73,10 +91,15 @@ export default function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
+                  <p className="text-sm font-medium leading-none">{user.full_name}</p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
                   </p>
+                  <div className="mt-2">
+                    <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
+                      {user.role.toUpperCase()}
+                    </Badge>
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -94,9 +117,10 @@ export default function Header() {
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="cursor-pointer text-red-600 focus:text-red-600"
+                disabled={logoutMutation.isPending}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{logoutMutation.isPending ? 'Logging out...' : 'Log out'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

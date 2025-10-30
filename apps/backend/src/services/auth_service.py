@@ -71,7 +71,7 @@ async def login(
     token_data = {
         "sub": user.id,
         "email": user.email,
-        "role": user.role.value,
+        "role": user.role if isinstance(user.role, str) else user.role.value,
     }
 
     # Generate tokens

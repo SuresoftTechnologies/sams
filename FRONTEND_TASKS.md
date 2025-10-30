@@ -273,21 +273,30 @@ src/
 
 ---
 
-## 🔐 Phase 9: 인증/인가
+## 🔐 Phase 9: 인증/인가 ✅
 
-### 9.1 인증 상태 관리
-- [ ] Zustand store for auth (선택적)
-- [ ] localStorage에 토큰 저장
-- [ ] API Client에 토큰 자동 주입
+### 9.1 인증 상태 관리 ✅
+- [x] lib/auth-storage.ts - 토큰 저장소 구현
+- [x] stores/auth-store.ts - Zustand store 생성
+- [x] lib/api.ts - Bearer token 자동 주입 및 자동 갱신
+- [x] services/auth-service.ts - 인증 API 서비스
 
-### 9.2 Protected Routes
-- [ ] components/ProtectedRoute.tsx
-- [ ] 로그인 체크
-- [ ] 미인증 시 /login 리다이렉트
+### 9.2 Protected Routes ✅
+- [x] components/layout/ProtectedRoute.tsx - 보호된 라우트 컴포넌트
+- [x] AdminRoute, ManagerRoute 래퍼 생성
+- [x] routes.tsx - 모든 라우트에 보호 적용
+- [x] 로그인 체크 및 사용자 데이터 로딩
+- [x] 미인증 시 /login 리다이렉트
+- [x] 권한 없음 시 403 페이지
 
-### 9.3 권한 기반 UI
-- [ ] Role-based rendering
-- [ ] Admin 전용 기능
+### 9.3 권한 기반 UI ✅
+- [x] hooks/useRole.ts - 역할 체크 훅
+- [x] components/layout/RoleGuard.tsx - 역할 기반 렌더링
+- [x] components/layout/Header.tsx - 사용자 정보 및 역할 표시
+- [x] components/layout/Sidebar.tsx - 역할별 메뉴 필터링
+- [x] pages/AssetList.tsx - Manager/Admin 전용 버튼
+
+**완료 보고서**: PHASE_9_COMPLETION_REPORT.md
 
 ---
 

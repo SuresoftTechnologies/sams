@@ -5,10 +5,11 @@
  * These are example patterns - delete this file before production.
  */
 
-import { api, setAuthToken, clearTokens, isAuthenticated } from '@/lib/api';
-import { authService } from '@/services/auth.service';
-import { assetService } from '@/services/asset.service';
-import type { Asset, LoginRequest } from '@/types/api';
+import { api, isAuthenticated, authStorage } from '@/lib/api';
+import { authService } from '@/services/auth-service';
+import { assetService } from '@/services/asset-service';
+import type { Asset } from '@/types/api';
+import type { LoginRequest } from '@/services/auth-service';
 
 /**
  * Example 1: Authentication Flow

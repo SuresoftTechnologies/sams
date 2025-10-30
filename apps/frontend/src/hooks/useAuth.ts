@@ -1,90 +1,46 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
-import type { LoginFormData } from '@/lib/validators';
+import { authService, type LoginRequest } from '@/services/auth-service';
+import { useAuthStore, type User } from '@/stores/auth-store';
 
 /**
  * Authentication Hooks
  *
  * Custom hooks for auth operations using TanStack Query
- * - useLogin: Login mutation
- * - useLogout: Logout mutation
- * - useCurrentUser: Get current user query
- *
- * TODO Phase 9: Connect to actual API endpoints
+ * - useLogin: Login mutation with token storage and state management
+ * - useLogout: Logout mutation with cleanup
+ * - useCurrentUser: Get current user query with caching
  */
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface LoginResponse {
-  user: User;
-  token: string;
-}
-
-// Mock login API call
-const loginApi = async (credentials: LoginFormData): Promise<LoginResponse> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Mock validation
-  if (credentials.email === 'demo@suresoft.com' && credentials.password === 'demo123') {
-    return {
-      user: {
-        id: '1',
-        name: 'Demo User',
-        email: credentials.email,
-        role: 'admin',
-      },
-      token: 'mock-jwt-token-12345',
-    };
-  }
-
-  throw new Error('Invalid credentials');
-};
-
-// Mock logout API call
-const logoutApi = async (): Promise<void> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  // Clear token from storage
-  localStorage.removeItem('auth_token');
-};
-
-// Mock get current user API call
-const getCurrentUserApi = async (): Promise<User | null> => {
-  const token = localStorage.getItem('auth_token');
-  if (!token) return null;
-
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  return {
-    id: '1',
-    name: 'Demo User',
-    email: 'demo@suresoft.com',
-    role: 'admin',
-  };
-};
 
 /**
  * Login mutation hook
+ * Handles authentication, token storage, and user state management
  */
 export function useLogin() {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: loginApi,
+    mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (data) => {
-      // Store token
-      localStorage.setItem('auth_token', data.token);
+      // Store tokens and user in auth store
+      login(
+        {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          token_type: data.token_type,
+        },
+        data.user
+      );
+
+      // Cache user data in react-query
+      queryClient.setQueryData(['currentUser'], data.user);
 
       // Show success message
       toast.success('Login successful', {
-        description: `Welcome back, ${data.user.name}!`,
+        description: `Welcome back, ${data.user.full_name}!`,
       });
 
       // Navigate to dashboard
@@ -100,32 +56,76 @@ export function useLogin() {
 
 /**
  * Logout mutation hook
+ * Clears tokens, user state, and cache
  */
 export function useLogout() {
   const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logoutApi,
+    mutationFn: () => authService.logout(),
     onSuccess: () => {
+      // Clear auth store
+      logout();
+
+      // Clear all cached queries
+      queryClient.clear();
+
+      // Show success message
       toast.success('Logged out successfully');
+
+      // Navigate to login page
       navigate('/login');
     },
     onError: (error: Error) => {
-      toast.error('Logout failed', {
+      // Even if server logout fails, clear local state
+      logout();
+      queryClient.clear();
+
+      toast.error('Logout completed with errors', {
         description: error.message,
       });
+
+      navigate('/login');
     },
   });
 }
 
 /**
  * Get current user query hook
+ * Fetches user profile from /auth/me endpoint
  */
 export function useCurrentUser() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const setUser = useAuthStore((state) => state.setUser);
+
   return useQuery({
     queryKey: ['currentUser'],
-    queryFn: getCurrentUserApi,
+    queryFn: async () => {
+      const user = await authService.getCurrentUser();
+      // Sync with auth store
+      setUser(user);
+      return user;
+    },
+    enabled: isAuthenticated, // Only fetch if authenticated
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: false,
   });
+}
+
+/**
+ * Check if user has specific role
+ */
+export function useHasRole(...roles: User['role'][]): boolean {
+  const user = useAuthStore((state) => state.user);
+  if (!user) return false;
+  return roles.includes(user.role);
+}
+
+/**
+ * Get current user from store (no API call)
+ */
+export function useUser(): User | null {
+  return useAuthStore((state) => state.user);
 }

@@ -126,18 +126,23 @@ pnpm test -- --cov-report=html
 ### Database Migrations
 
 ```bash
-# Create migration
-pnpm db:migrate:create "add_users_table"
-
 # Apply migrations
 pnpm db:migrate
 
-# Rollback
-pnpm db:migrate -- downgrade -1
+# Create new migration
+pnpm db:migrate:create "description of changes"
 
-# Reset database
+# Seed initial data (users, categories, locations)
+pnpm db:seed
+
+# Reset database (drop all tables and reapply migrations)
 pnpm db:reset
+
+# Reset and seed
+pnpm db:reset && pnpm db:seed
 ```
+
+See [Database Migrations Guide](docs/DATABASE_MIGRATIONS.md) for detailed documentation.
 
 ## 🌐 API Documentation
 

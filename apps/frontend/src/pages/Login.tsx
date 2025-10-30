@@ -45,14 +45,16 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xl">
-              SS
-            </div>
+          <div className="flex items-center justify-center mb-6">
+            <img
+              src="/logo.png"
+              alt="SureSoft Logo"
+              className="h-12 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access SureSoft AMS
+            Enter your credentials to access Asset Management System
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -21,8 +21,6 @@ class User(BaseModel):
     User model - matches @ams/shared-types User interface.
     """
 
-    model_config = ConfigDict(from_attributes=True)
-
     id: str = Field(..., description="Unique user ID (UUID)")
     email: EmailStr = Field(..., description="Email address")
     name: str = Field(..., description="Full name")
@@ -36,6 +34,7 @@ class User(BaseModel):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             "example": {
                 "id": "550e8400-e29b-41d4-a716-446655440000",

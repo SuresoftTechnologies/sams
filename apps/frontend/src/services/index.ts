@@ -12,8 +12,8 @@
  * ```
  */
 
-export { authService } from './auth.service';
-export { assetService } from './asset.service';
+export { authService } from './auth-service';
+export { assetService } from './asset-service';
 
 // Export common types
 export type {

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import Root from './root';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
@@ -7,22 +7,26 @@ import AssetList from './pages/AssetList';
 import AssetDetail from './pages/AssetDetail';
 import AssetForm from './pages/AssetForm';
 import Profile from './pages/Profile';
+import { ProtectedRoute, ManagerRoute } from './components/layout/ProtectedRoute';
 
 /**
  * React Router v7 Configuration
  *
  * Route Structure:
  * - / (Root layout with QueryClient and global providers)
- *   - /login - Authentication page
- *   - /dashboard - Main dashboard (redirects from /)
- *   - /assets - Asset list with search/filter
- *   - /assets/new - Create new asset form
- *   - /assets/:id - Asset detail view
- *   - /assets/:id/edit - Edit asset form (uses AssetForm component)
- *   - /profile - User profile and settings
+ *   - /login - Authentication page (public)
+ *   - / - Redirect to /dashboard
+ *   - /dashboard - Main dashboard (protected)
+ *   - /assets - Asset list (protected)
+ *   - /assets/new - Create new asset (protected - manager/admin)
+ *   - /assets/:id - Asset detail (protected)
+ *   - /assets/:id/edit - Edit asset (protected - manager/admin)
+ *   - /profile - User profile (protected)
  *   - * (404 Not Found)
  *
- * Note: Protected routes will be added in Phase 9
+ * Protected Routes:
+ * - All routes except /login require authentication
+ * - Asset creation/editing requires manager or admin role
  */
 export const router = createBrowserRouter([
   {
@@ -33,7 +37,7 @@ export const router = createBrowserRouter([
       {
         index: true,
         // Redirect to dashboard by default
-        element: <Dashboard />,
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: 'login',
@@ -41,32 +45,56 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'assets',
         children: [
           {
             index: true,
-            element: <AssetList />,
+            element: (
+              <ProtectedRoute>
+                <AssetList />
+              </ProtectedRoute>
+            ),
           },
           {
             path: 'new',
-            element: <AssetForm />,
+            element: (
+              <ManagerRoute>
+                <AssetForm />
+              </ManagerRoute>
+            ),
           },
           {
             path: ':id',
-            element: <AssetDetail />,
+            element: (
+              <ProtectedRoute>
+                <AssetDetail />
+              </ProtectedRoute>
+            ),
           },
           {
             path: ':id/edit',
-            element: <AssetForm />,
+            element: (
+              <ManagerRoute>
+                <AssetForm />
+              </ManagerRoute>
+            ),
           },
         ],
       },
       {
         path: 'profile',
-        element: <Profile />,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

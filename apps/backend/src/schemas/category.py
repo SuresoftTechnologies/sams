@@ -9,8 +9,6 @@ from pydantic import BaseModel, Field, ConfigDict
 class Category(BaseModel):
     """Category model."""
 
-    model_config = ConfigDict(from_attributes=True)
-
     id: str = Field(..., description="Unique category ID (UUID)")
     name: str = Field(..., description="Category name")
     code: str = Field(..., description="Category code")
@@ -20,6 +18,7 @@ class Category(BaseModel):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             "example": {
                 "id": "550e8400-e29b-41d4-a716-446655440000",
