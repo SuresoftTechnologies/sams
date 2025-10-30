@@ -185,26 +185,28 @@ export default function RequestsPage() {
                         {typeLabels[workflow.type]}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {(() => {
-                        const assetName = workflow.asset?.name || workflow.asset?.model || workflow.asset?.manufacturer || '-';
-                        const isLongName = assetName.length > 25;
+                    <TableCell className="font-medium max-w-[250px]">
+                      <div className="truncate">
+                        {(() => {
+                          const assetName = workflow.asset?.name || workflow.asset?.model || workflow.asset?.manufacturer || '-';
+                          const isLongName = assetName.length > 25;
 
-                        return isLongName ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="truncate block cursor-help">
-                                {assetName}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-[300px]">
-                              <p>{assetName}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="truncate block">{assetName}</span>
-                        );
-                      })()}
+                          return isLongName ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help">
+                                  {assetName}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[300px]">
+                                <p>{assetName}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <span>{assetName}</span>
+                          );
+                        })()}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {(() => {
