@@ -177,6 +177,15 @@ export const FILE_UPLOAD = {
 } as const;
 
 /**
+ * Receipt upload constraints
+ */
+export const RECEIPT_UPLOAD = {
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  ALLOWED_MIME_TYPES: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+  ALLOWED_EXTENSIONS: ['.pdf', '.jpg', '.jpeg', '.png', '.webp'],
+} as const;
+
+/**
  * API Constants
  */
 export const API = {

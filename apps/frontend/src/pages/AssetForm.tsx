@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import { AssetStatus } from '@sams/shared-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { RECEIPT_UPLOAD } from '@/lib/constants';
+import type { AnalyzeReceiptFromImageResponse } from '@/types/receipt';
+import { analyzeReceiptFromImage } from '@/services/receipt-service';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 /**
  * Asset Form Page
@@ -73,6 +79,34 @@ const calculateGrade = (purchaseDate?: string): string => {
   if (year >= 2022) return 'A';
   if (year >= 2018) return 'B';
   return 'C';
+};
+
+interface BulkEditableLineItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitPrice: string;
+  categoryId: string;
+  purchaseDate: string;
+  model: string;
+  specifications: string;
+  itemType: string;
+}
+
+const normalizeUnitPrice = (value?: string | null): string => {
+  if (!value) return '';
+  const digitsOnly = value.replace(/[^0-9]/g, '');
+  return digitsOnly;
+};
+
+const normalizeDateForInput = (value?: string | null): string => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 10);
+  }
+  const match = value.match(/\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : '';
 };
 
 export default function AssetForm() {
@@ -105,9 +139,63 @@ export default function AssetForm() {
   const [bulkFile, setBulkFile] = useState<File | null>(null);
   const [bulkFileInputKey, setBulkFileInputKey] = useState(0);
   const [bulkUrl, setBulkUrl] = useState('');
-  const [bulkMessage, setBulkMessage] = useState<{ tone: 'error' | 'info'; text: string } | null>(
-    null,
-  );
+  const [bulkMessage, setBulkMessage] = useState<
+    { tone: 'error' | 'info' | 'success'; text: string } | null
+  >(null);
+  const [bulkIsAnalyzing, setBulkIsAnalyzing] = useState(false);
+  const [bulkResult, setBulkResult] = useState<AnalyzeReceiptFromImageResponse | null>(null);
+  const [bulkEditableItems, setBulkEditableItems] = useState<BulkEditableLineItem[]>([]);
+
+  const validateBulkFile = (file: File): string | null => {
+    const extension = file.name?.split('.').pop()?.toLowerCase() ?? '';
+    const fileExtension = extension ? `.${extension}` : '';
+    const hasAllowedExtension =
+      extension.length > 0 &&
+      RECEIPT_UPLOAD.ALLOWED_EXTENSIONS.some((allowedExtension) => allowedExtension === fileExtension);
+    const hasAllowedMime =
+      !file.type ||
+      RECEIPT_UPLOAD.ALLOWED_MIME_TYPES.some((allowedMime) => allowedMime === file.type);
+
+    if (!hasAllowedExtension || !hasAllowedMime) {
+      return '지원하지 않는 파일 형식입니다. PDF, JPG, PNG, WEBP만 업로드할 수 있습니다.';
+    }
+
+    if (file.size > RECEIPT_UPLOAD.MAX_FILE_SIZE) {
+      const maxSizeMb = Math.round(RECEIPT_UPLOAD.MAX_FILE_SIZE / (1024 * 1024));
+      return `파일 용량이 너무 큽니다. 최대 ${maxSizeMb}MB까지 업로드할 수 있습니다.`;
+    }
+
+    return null;
+  };
+
+  const validateBulkUrl = (value: string): string | null => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      return '이미지 URL을 입력해 주세요.';
+    }
+
+    try {
+      const parsed = new URL(trimmedValue);
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        return '이미지 URL은 http 또는 https로 시작해야 합니다.';
+      }
+    } catch (error) {
+      return '올바른 형식의 이미지 URL을 입력해 주세요.';
+    }
+
+    return null;
+  };
+
+  const getBulkMessageClassName = (tone: 'error' | 'info' | 'success') => {
+    switch (tone) {
+      case 'error':
+        return 'text-destructive';
+      case 'success':
+        return 'text-emerald-600 dark:text-emerald-500';
+      default:
+        return 'text-muted-foreground';
+    }
+  };
 
   const form = useForm<AssetFormData>({
     resolver: zodResolver(assetSchema),
@@ -201,19 +289,158 @@ export default function AssetForm() {
       setBulkFileInputKey((prev) => prev + 1);
       setBulkUrl('');
       setBulkMessage(null);
+      setBulkResult(null);
+      setBulkEditableItems([]);
+      setBulkIsAnalyzing(false);
     }
   }, [bulkDialogOpen]);
 
-  const handleBulkAnalyze = () => {
-    if (!bulkFile && !bulkUrl.trim()) {
-      setBulkMessage({ tone: 'error', text: '파일 업로드 또는 URL 입력 중 하나를 선택해 주세요.' });
+  useEffect(() => {
+    if (!bulkResult) {
+      setBulkEditableItems([]);
       return;
     }
 
-    setBulkMessage({
-      tone: 'info',
-      text: '분석 API 연동은 후속 단계에서 구현될 예정입니다. 입력값 준비가 완료되었습니다.',
+    const defaultPurchaseDate = normalizeDateForInput(bulkResult.analysis.purchase_date);
+    const lineItems = Array.isArray(bulkResult.analysis.line_items)
+      ? bulkResult.analysis.line_items
+      : [];
+
+    setBulkEditableItems(
+      lineItems.map((item, index) => {
+        const initialQuantity = Number.isFinite(item.quantity) && item.quantity > 0
+          ? Math.floor(item.quantity)
+          : 1;
+
+        return {
+          id: `${index}-${item.name || 'line-item'}`,
+          name: item.name?.trim() || `항목 ${index + 1}`,
+          quantity: initialQuantity,
+          unitPrice: normalizeUnitPrice(item.unit_price),
+          categoryId: '',
+          purchaseDate: defaultPurchaseDate,
+          model: item.model ?? '',
+          specifications: item.specifications ?? '',
+          itemType: item.item_type ?? '',
+        } satisfies BulkEditableLineItem;
+      })
+    );
+  }, [bulkResult]);
+
+  useEffect(() => {
+    if (!bulkResult?.suggested_category_code || categories.length === 0) {
+      return;
+    }
+
+    const matchedCategory = categories.find(
+      (category) => category.code === bulkResult.suggested_category_code
+    );
+
+    if (!matchedCategory) {
+      return;
+    }
+
+    setBulkEditableItems((prev) =>
+      prev.map((item) =>
+        item.categoryId
+          ? item
+          : {
+              ...item,
+              categoryId: matchedCategory.id,
+            }
+      )
+    );
+  }, [bulkResult, categories]);
+
+  const totalBulkAssetCount = useMemo(
+    () =>
+      bulkEditableItems.reduce((sum, item) => {
+        if (!Number.isFinite(item.quantity)) {
+          return sum;
+        }
+        return sum + Math.max(0, item.quantity);
+      }, 0),
+    [bulkEditableItems]
+  );
+
+  const updateBulkItem = (
+    itemId: string,
+    updater: (item: BulkEditableLineItem) => BulkEditableLineItem,
+  ) => {
+    setBulkEditableItems((prev) =>
+      prev.map((item) => (item.id === itemId ? updater(item) : item))
+    );
+  };
+
+  const handleBulkAnalyze = async () => {
+    if (bulkIsAnalyzing) {
+      return;
+    }
+
+    const trimmedUrl = bulkUrl.trim();
+
+    if (!bulkFile && !trimmedUrl) {
+      const message = '파일 업로드 또는 URL 입력 중 하나를 선택해 주세요.';
+      setBulkMessage({ tone: 'error', text: message });
+      toast.error('입력값이 필요합니다', { description: message });
+      return;
+    }
+
+    if (bulkFile) {
+      const fileError = validateBulkFile(bulkFile);
+      if (fileError) {
+        setBulkMessage({ tone: 'error', text: fileError });
+        toast.error('파일 검증 실패', { description: fileError });
+        return;
+      }
+    }
+
+    if (!bulkFile && trimmedUrl) {
+      const urlError = validateBulkUrl(trimmedUrl);
+      if (urlError) {
+        setBulkMessage({ tone: 'error', text: urlError });
+        toast.error('URL 검증 실패', { description: urlError });
+        return;
+      }
+    }
+
+    const loadingToastId = toast.loading('영수증 분석 중입니다...', {
+      description: 'OCR 및 LLM 분석을 수행하고 있습니다.',
     });
+
+    setBulkIsAnalyzing(true);
+    setBulkMessage({ tone: 'info', text: '영수증을 분석 중입니다. 잠시만 기다려 주세요.' });
+
+    try {
+      const result = await analyzeReceiptFromImage({
+        file: bulkFile,
+        imageUrl: bulkFile ? null : trimmedUrl,
+      });
+
+      setBulkResult(result);
+      setBulkMessage({
+        tone: 'success',
+        text: '분석이 완료되었습니다. 추출된 항목을 검토해 주세요.',
+      });
+
+      toast.success('영수증 분석 완료', {
+        id: loadingToastId,
+        description: `총 ${result.analysis.line_items.length}개 항목을 추출했어요.`,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : '영수증 분석에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+      setBulkResult(null);
+      setBulkMessage({ tone: 'error', text: message });
+      toast.error('영수증 분석 실패', {
+        id: loadingToastId,
+        description: message,
+      });
+    } finally {
+      setBulkIsAnalyzing(false);
+    }
   };
 
   if (isEditMode && isLoadingAsset) {
@@ -896,7 +1123,7 @@ export default function AssetForm() {
       </Form>
 
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>세금계산서 기반 자산 일괄 등록</DialogTitle>
             <DialogDescription>
@@ -904,7 +1131,8 @@ export default function AssetForm() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-5">
+          <ScrollArea className="max-h-[65vh] pr-2">
+            <div className="space-y-5 pb-4 sm:pb-6">
             <div className="space-y-2">
               <Label htmlFor="bulk-receipt-file">세금계산서 파일 업로드</Label>
               <Input
@@ -915,10 +1143,22 @@ export default function AssetForm() {
                 disabled={Boolean(bulkUrl.trim())}
                 onChange={(event) => {
                   const file = event.target.files?.[0] ?? null;
+                  if (file) {
+                    const validationMessage = validateBulkFile(file);
+                    if (validationMessage) {
+                      setBulkMessage({ tone: 'error', text: validationMessage });
+                      setBulkFile(null);
+                      setBulkResult(null);
+                      setBulkFileInputKey((prev) => prev + 1);
+                      return;
+                    }
+                  }
+
                   setBulkFile(file);
                   if (file) {
                     setBulkUrl('');
                   }
+                  setBulkResult(null);
                   setBulkMessage(null);
                 }}
               />
@@ -960,6 +1200,7 @@ export default function AssetForm() {
                     setBulkFile(null);
                     setBulkFileInputKey((prev) => prev + 1);
                   }
+                  setBulkResult(null);
                   setBulkMessage(null);
                 }}
               />
@@ -970,22 +1211,221 @@ export default function AssetForm() {
 
             {bulkMessage && (
               <p
-                className={`text-sm ${
-                  bulkMessage.tone === 'error' ? 'text-destructive' : 'text-muted-foreground'
-                }`}
+                className={`text-sm ${getBulkMessageClassName(bulkMessage.tone)}`}
               >
                 {bulkMessage.text}
               </p>
             )}
-          </div>
 
-          <DialogFooter>
+            {bulkResult && (
+              <div className="space-y-4">
+                <div className="space-y-3 rounded-md border border-dashed border-primary/40 bg-primary/5 p-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-primary">분석 요약</p>
+                    <p className="text-sm text-muted-foreground">
+                      추천 자산명: <span className="font-medium text-foreground">{bulkResult.suggested_name}</span>
+                    </p>
+                    {bulkResult.suggested_notes && (
+                      <p className="text-xs text-muted-foreground">{bulkResult.suggested_notes}</p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                    <span>추출 항목 {bulkResult.analysis.line_items.length}개</span>
+                    <span>처리 시간 {bulkResult.processing_time.toFixed(1)}초</span>
+                    <span>신뢰도 {(bulkResult.analysis.confidence * 100).toFixed(0)}%</span>
+                  </div>
+
+                  {bulkResult.warnings.length > 0 && (
+                    <div className="rounded-md border border-dashed border-amber-400/60 bg-amber-100/60 p-3 text-xs text-amber-700 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-200">
+                      <p className="font-medium">주의가 필요한 항목</p>
+                      <ul className="mt-1 space-y-1 list-disc list-inside">
+                        {bulkResult.warnings.map((warning, index) => (
+                          <li key={`${warning}-${index}`}>{warning}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {bulkEditableItems.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium">추출된 자산 항목</p>
+                        <p className="text-xs text-muted-foreground">
+                          {bulkEditableItems.length}건 • 총 {totalBulkAssetCount}개 생성 예정
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="whitespace-nowrap">
+                        총 자산 수 {totalBulkAssetCount}개
+                      </Badge>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      각 항목의 이름, 카테고리, 수량, 단가, 구매일을 검토하고 필요 시 수정하세요.
+                    </p>
+
+                    <ScrollArea className="h-72 rounded-md border">
+                      <div className="min-w-[760px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-12 text-center">#</TableHead>
+                              <TableHead>항목명</TableHead>
+                              <TableHead className="w-48">카테고리</TableHead>
+                              <TableHead className="w-28">수량</TableHead>
+                              <TableHead className="w-32">단가(원)</TableHead>
+                              <TableHead className="w-36">구매일</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {bulkEditableItems.map((item, index) => {
+                              const formattedUnitPrice = item.unitPrice ? Number(item.unitPrice) : 0;
+
+                              return (
+                                <TableRow key={item.id}>
+                                  <TableCell className="text-center align-top">{index + 1}</TableCell>
+                                  <TableCell className="align-top">
+                                    <Input
+                                      value={item.name}
+                                      placeholder="항목명을 입력하세요"
+                                      onChange={(event) =>
+                                        updateBulkItem(item.id, (current) => ({
+                                          ...current,
+                                          name: event.target.value,
+                                        }))
+                                      }
+                                    />
+                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                      {item.itemType && (
+                                        <Badge variant="secondary" className="uppercase tracking-tight">
+                                          {item.itemType}
+                                        </Badge>
+                                      )}
+                                      {item.model && <span>모델: {item.model}</span>}
+                                      {item.specifications && <span>규격: {item.specifications}</span>}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="align-top">
+                                    <Select
+                                      value={item.categoryId}
+                                      onValueChange={(value) =>
+                                        updateBulkItem(item.id, (current) => ({
+                                          ...current,
+                                          categoryId: value,
+                                        }))
+                                      }
+                                      disabled={categoriesLoading || categories.length === 0}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={
+                                          categoriesLoading
+                                            ? '카테고리 로딩 중...'
+                                            : '카테고리를 선택하세요'
+                                        } />
+                                      </SelectTrigger>
+                                      <SelectContent className="max-h-60">
+                                        {categories.length === 0 ? (
+                                          <SelectItem value="__no-category" disabled>
+                                            등록된 카테고리가 없습니다
+                                          </SelectItem>
+                                        ) : (
+                                          categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id}>
+                                              {category.name}
+                                            </SelectItem>
+                                          ))
+                                        )}
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                  <TableCell className="align-top">
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      step={1}
+                                      value={item.quantity}
+                                      onChange={(event) => {
+                                        const value = Number(event.target.value);
+                                        const nextQuantity = Number.isNaN(value) ? 0 : Math.max(0, Math.floor(value));
+                                        updateBulkItem(item.id, (current) => ({
+                                          ...current,
+                                          quantity: nextQuantity,
+                                        }));
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="align-top">
+                                    <Input
+                                      inputMode="numeric"
+                                      value={item.unitPrice}
+                                      placeholder="0"
+                                      onChange={(event) => {
+                                        const value = normalizeUnitPrice(event.target.value);
+                                        updateBulkItem(item.id, (current) => ({
+                                          ...current,
+                                          unitPrice: value,
+                                        }));
+                                      }}
+                                    />
+                                    {item.unitPrice && (
+                                      <p className="mt-1 text-xs text-muted-foreground">
+                                        ≈ ₩{formattedUnitPrice.toLocaleString('ko-KR')}
+                                      </p>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="align-top">
+                                    <Input
+                                      type="date"
+                                      value={item.purchaseDate}
+                                      onChange={(event) =>
+                                        updateBulkItem(item.id, (current) => ({
+                                          ...current,
+                                          purchaseDate: event.target.value,
+                                        }))
+                                      }
+                                    />
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </ScrollArea>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    분석 결과에서 추출된 항목이 없습니다. 다른 영수증으로 재시도해 주세요.
+                  </p>
+                )}
+              </div>
+            )}
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="pt-2 sm:pt-4 pb-2">
             <Button variant="ghost" onClick={() => setBulkDialogOpen(false)}>
               단일 자산 등록 계속
             </Button>
-            <Button onClick={handleBulkAnalyze} disabled={!bulkFile && !bulkUrl.trim()}>
-              <Upload className="h-4 w-4" />
-              분석 준비 확인
+            <Button
+              type="button"
+              className="gap-2"
+              onClick={handleBulkAnalyze}
+              disabled={bulkIsAnalyzing || (!bulkFile && !bulkUrl.trim())}
+            >
+              {bulkIsAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  분석 중...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  영수증 분석 실행
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
