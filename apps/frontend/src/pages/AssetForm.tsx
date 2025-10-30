@@ -164,38 +164,11 @@ export default function AssetForm() {
   }, [asset, isEditMode, form]);
 
   const onSubmit = (data: AssetFormData) => {
-    // Convert form data to snake_case for API
-    const apiData = {
-      asset_tag: data.assetTag,
-      model: data.model,
-      serial_number: data.serialNumber,
-      category_id: data.categoryId,
-      location_id: data.locationId,
-      status: data.status,
-      assigned_to: data.assignedTo,
-      purchase_date: data.purchaseDate,
-      purchase_price: data.purchasePrice,
-      purchase_request: data.purchaseRequest,
-      tax_invoice_date: data.taxInvoiceDate,
-      supplier: data.supplier,
-      warranty_end: data.warrantyUntil,
-      furniture_category: data.furnitureCategory,
-      detailed_category: data.detailedCategory,
-      checkout_date: data.checkoutDate,
-      return_date: data.returnDate,
-      first_user: data.firstUser,
-      previous_user_1: data.previousUser1,
-      previous_user_2: data.previousUser2,
-      old_asset_number: data.oldAssetNumber,
-      qr_code_exists: data.qrCodeExists,
-      notes: data.notes,
-      special_notes: data.specialNotes,
-    };
-
+    // The hooks handle the conversion to DTOs internally
     if (isEditMode) {
-      updateMutation.mutate(apiData as UpdateAssetDto);
+      updateMutation.mutate(data);
     } else {
-      createMutation.mutate(apiData as CreateAssetDto);
+      createMutation.mutate(data);
     }
   };
 

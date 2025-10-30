@@ -76,11 +76,9 @@ export function useDashboardStats() {
     staleTime: 60 * 1000, // 1 minute
   });
 
-  // Fetch recent assets (only 5 items, sorted by created_at desc)
+  // Fetch recent assets (only 5 items)
   const { data: recentAssetsData, isLoading: recentAssetsLoading } = useGetAssets({
     limit: 5,
-    sort_by: 'created_at',
-    sort_order: 'desc',
   });
 
   // Combine all data

@@ -66,7 +66,7 @@ export const authService = {
     // This is handled internally by api.auth
     // but kept for compatibility
     const response = await api.auth.login({ email: '', password: '' });
-    return response;
+    return response as unknown as TokenResponse;
   },
 
   /**
@@ -74,7 +74,7 @@ export const authService = {
    */
   async getCurrentUser(): Promise<User> {
     const response = await api.auth.me();
-    return response as User;
+    return response as unknown as User;
   },
 
   /**

@@ -11,6 +11,7 @@ import { X } from 'lucide-react';
 import { ASSET_STATUSES } from '@/lib/constants';
 import { useGetCategories } from '@/hooks/useCategories';
 import { useGetLocations } from '@/hooks/useLocations';
+import { AssetStatus } from '@sams/api-client';
 
 /**
  * AssetFilters Component
@@ -30,7 +31,7 @@ import { useGetLocations } from '@/hooks/useLocations';
 
 export interface AssetFilterValues {
   search?: string; // Kept for compatibility but not used in this component
-  status?: string;
+  status?: AssetStatus;
   categoryId?: string;
   locationId?: string;
 }
@@ -54,20 +55,8 @@ export function AssetFilters({
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
   const locations = Array.isArray(locationsData) ? locationsData : [];
 
-  // Debug logging
-  console.log('AssetFilters - categoriesData:', categoriesData);
-  console.log('AssetFilters - categoriesLoading:', categoriesLoading);
-  console.log('AssetFilters - categoriesError:', categoriesError);
-  console.log('AssetFilters - categories:', categories);
-  console.log('AssetFilters - categories.length:', categories.length);
-  console.log('AssetFilters - locationsData:', locationsData);
-  console.log('AssetFilters - locationsLoading:', locationsLoading);
-  console.log('AssetFilters - locationsError:', locationsError);
-  console.log('AssetFilters - locations:', locations);
-  console.log('AssetFilters - locations.length:', locations.length);
-
   const handleStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, status: value === 'all' ? undefined : value });
+    onFiltersChange({ ...filters, status: value === 'all' ? undefined : (value as AssetStatus) });
   };
 
   const handleCategoryChange = (value: string) => {

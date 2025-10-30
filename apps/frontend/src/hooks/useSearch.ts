@@ -59,7 +59,7 @@ export function useSearch({
   onSearchChange,
 }: UseSearchOptions = {}): SearchState {
   const [searchParams, setSearchParams] = useSearchParams();
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Initialize from URL if syncing
   const getInitialQuery = (): string => {

@@ -11,7 +11,6 @@
 export interface Asset {
   id: string;
   asset_tag: string;
-  name: string;
   status?: 'issued' | 'loaned' | 'general' | 'stock' | 'server_room' | 'disposed';
   category_id: string;
   location_id?: string | null;
@@ -29,7 +28,6 @@ export interface Asset {
 
 export interface AssetCreate {
   asset_tag?: string;
-  name: string;
   category_id: string;
   location_id?: string;
   status?: string;
