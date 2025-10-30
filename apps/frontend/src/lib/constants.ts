@@ -14,20 +14,20 @@ import { AssetStatus, AssetGrade, LocationSite } from '@sams/shared-types';
  * Asset Status Options
  */
 export const ASSET_STATUSES = [
-  { value: AssetStatus.AVAILABLE, label: 'Available', color: 'green' },
-  { value: AssetStatus.ASSIGNED, label: 'Assigned', color: 'blue' },
-  { value: AssetStatus.IN_TRANSIT, label: 'In Transit', color: 'yellow' },
-  { value: AssetStatus.MAINTENANCE, label: 'Maintenance', color: 'orange' },
-  { value: AssetStatus.DISPOSED, label: 'Disposed', color: 'red' },
+  { value: AssetStatus.AVAILABLE, label: '사용 가능', color: 'green' },
+  { value: AssetStatus.ASSIGNED, label: '할당됨', color: 'blue' },
+  { value: AssetStatus.IN_TRANSIT, label: '이동 중', color: 'yellow' },
+  { value: AssetStatus.MAINTENANCE, label: '유지보수', color: 'orange' },
+  { value: AssetStatus.DISPOSED, label: '폐기됨', color: 'red' },
 ] as const;
 
 /**
  * Asset Grade Options
  */
 export const ASSET_GRADES = [
-  { value: AssetGrade.A, label: 'Grade A (2022-2025)', description: 'Latest generation' },
-  { value: AssetGrade.B, label: 'Grade B (2018-2021)', description: 'Mid-range' },
-  { value: AssetGrade.C, label: 'Grade C (~2017)', description: 'Legacy' },
+  { value: AssetGrade.A, label: '등급 A (2022-2025)', description: '최신 세대' },
+  { value: AssetGrade.B, label: '등급 B (2018-2021)', description: '중급' },
+  { value: AssetGrade.C, label: '등급 C (~2017)', description: '레거시' },
 ] as const;
 
 /**
@@ -35,14 +35,14 @@ export const ASSET_GRADES = [
  * In real app, this would be fetched from API
  */
 export const ASSET_CATEGORIES = [
-  { id: 'cat-desktop', name: 'Desktop', code: 'DESKTOP', description: 'Desktop computers' },
-  { id: 'cat-laptop', name: 'Laptop', code: 'LAPTOP', description: 'Laptop computers' },
-  { id: 'cat-tablet', name: 'Tablet', code: 'TABLET', description: 'Tablets and iPads' },
-  { id: 'cat-monitor', name: 'Monitor', code: 'MONITOR', description: 'Display monitors' },
-  { id: 'cat-peripheral', name: 'Peripheral', code: 'PERIPHERAL', description: 'Keyboards, mice, etc.' },
-  { id: 'cat-network', name: 'Network Device', code: 'NETWORK', description: 'Routers, switches, etc.' },
-  { id: 'cat-printer', name: 'Printer', code: 'PRINTER', description: 'Printers and scanners' },
-  { id: 'cat-phone', name: 'Phone', code: 'PHONE', description: 'Mobile phones' },
+  { id: 'cat-desktop', name: '데스크톱', code: 'DESKTOP', description: '데스크톱 컴퓨터' },
+  { id: 'cat-laptop', name: '노트북', code: 'LAPTOP', description: '노트북 컴퓨터' },
+  { id: 'cat-tablet', name: '태블릿', code: 'TABLET', description: '태블릿 및 iPad' },
+  { id: 'cat-monitor', name: '모니터', code: 'MONITOR', description: '디스플레이 모니터' },
+  { id: 'cat-peripheral', name: '주변기기', code: 'PERIPHERAL', description: '키보드, 마우스 등' },
+  { id: 'cat-network', name: '네트워크 장비', code: 'NETWORK', description: '라우터, 스위치 등' },
+  { id: 'cat-printer', name: '프린터', code: 'PRINTER', description: '프린터 및 스캐너' },
+  { id: 'cat-phone', name: '전화기', code: 'PHONE', description: '휴대전화' },
 ] as const;
 
 /**
@@ -52,43 +52,43 @@ export const ASSET_CATEGORIES = [
 export const ASSET_LOCATIONS = [
   {
     id: 'loc-pangyo-1f',
-    name: 'Pangyo Office 1F',
+    name: '판교 사무실 1층',
     code: 'PY-1F',
     site: LocationSite.PANGYO,
-    building: 'Main',
-    floor: '1F',
+    building: '본관',
+    floor: '1층',
   },
   {
     id: 'loc-pangyo-2f',
-    name: 'Pangyo Office 2F',
+    name: '판교 사무실 2층',
     code: 'PY-2F',
     site: LocationSite.PANGYO,
-    building: 'Main',
-    floor: '2F',
+    building: '본관',
+    floor: '2층',
   },
   {
     id: 'loc-pangyo-3f',
-    name: 'Pangyo Office 3F',
+    name: '판교 사무실 3층',
     code: 'PY-3F',
     site: LocationSite.PANGYO,
-    building: 'Main',
-    floor: '3F',
+    building: '본관',
+    floor: '3층',
   },
   {
     id: 'loc-daejeon-1f',
-    name: 'Daejeon Office 1F',
+    name: '대전 사무실 1층',
     code: 'DJ-1F',
     site: LocationSite.DAEJEON,
-    building: 'Main',
-    floor: '1F',
+    building: '본관',
+    floor: '1층',
   },
   {
     id: 'loc-daejeon-2f',
-    name: 'Daejeon Office 2F',
+    name: '대전 사무실 2층',
     code: 'DJ-2F',
     site: LocationSite.DAEJEON,
-    building: 'Main',
-    floor: '2F',
+    building: '본관',
+    floor: '2층',
   },
 ] as const;
 
@@ -96,45 +96,45 @@ export const ASSET_LOCATIONS = [
  * Departments (Mock data)
  */
 export const DEPARTMENTS = [
-  { id: 'dept-dev', name: 'Development', code: 'DEV' },
-  { id: 'dept-qa', name: 'Quality Assurance', code: 'QA' },
-  { id: 'dept-design', name: 'Design', code: 'DESIGN' },
-  { id: 'dept-pm', name: 'Product Management', code: 'PM' },
-  { id: 'dept-sales', name: 'Sales', code: 'SALES' },
-  { id: 'dept-marketing', name: 'Marketing', code: 'MKT' },
-  { id: 'dept-hr', name: 'Human Resources', code: 'HR' },
-  { id: 'dept-finance', name: 'Finance', code: 'FIN' },
-  { id: 'dept-it', name: 'IT Support', code: 'IT' },
+  { id: 'dept-dev', name: '개발팀', code: 'DEV' },
+  { id: 'dept-qa', name: '품질보증팀', code: 'QA' },
+  { id: 'dept-design', name: '디자인팀', code: 'DESIGN' },
+  { id: 'dept-pm', name: '상품기획팀', code: 'PM' },
+  { id: 'dept-sales', name: '영업팀', code: 'SALES' },
+  { id: 'dept-marketing', name: '마케팅팀', code: 'MKT' },
+  { id: 'dept-hr', name: '인사팀', code: 'HR' },
+  { id: 'dept-finance', name: '재무팀', code: 'FIN' },
+  { id: 'dept-it', name: 'IT 지원팀', code: 'IT' },
 ] as const;
 
 /**
  * User Roles
  */
 export const USER_ROLES = [
-  { value: 'admin', label: 'Administrator', description: 'Full system access' },
-  { value: 'manager', label: 'Manager', description: 'Department management' },
-  { value: 'user', label: 'User', description: 'Basic user access' },
+  { value: 'admin', label: '관리자', description: '전체 시스템 접근' },
+  { value: 'manager', label: '매니저', description: '부서 관리' },
+  { value: 'user', label: '사용자', description: '기본 사용자 접근' },
 ] as const;
 
 /**
  * Workflow Status
  */
 export const WORKFLOW_STATUSES = [
-  { value: 'pending', label: 'Pending', color: 'yellow' },
-  { value: 'approved', label: 'Approved', color: 'green' },
-  { value: 'rejected', label: 'Rejected', color: 'red' },
-  { value: 'cancelled', label: 'Cancelled', color: 'gray' },
+  { value: 'pending', label: '대기 중', color: 'yellow' },
+  { value: 'approved', label: '승인됨', color: 'green' },
+  { value: 'rejected', label: '거부됨', color: 'red' },
+  { value: 'cancelled', label: '취소됨', color: 'gray' },
 ] as const;
 
 /**
  * Workflow Types
  */
 export const WORKFLOW_TYPES = [
-  { value: 'assignment', label: 'Asset Assignment', icon: 'user-plus' },
-  { value: 'return', label: 'Asset Return', icon: 'user-minus' },
-  { value: 'transfer', label: 'Asset Transfer', icon: 'arrows-right-left' },
-  { value: 'maintenance', label: 'Maintenance Request', icon: 'wrench' },
-  { value: 'disposal', label: 'Disposal Request', icon: 'trash' },
+  { value: 'assignment', label: '자산 할당', icon: 'user-plus' },
+  { value: 'return', label: '자산 반환', icon: 'user-minus' },
+  { value: 'transfer', label: '자산 이전', icon: 'arrows-right-left' },
+  { value: 'maintenance', label: '유지보수 요청', icon: 'wrench' },
+  { value: 'disposal', label: '폐기 요청', icon: 'trash' },
 ] as const;
 
 /**

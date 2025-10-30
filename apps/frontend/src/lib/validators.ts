@@ -13,12 +13,12 @@ import { VALIDATION } from './constants';
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Invalid email address'),
+    .min(1, '이메일은 필수입니다')
+    .email('유효하지 않은 이메일 주소입니다'),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(VALIDATION.PASSWORD_MIN_LENGTH, `Password must be at least ${VALIDATION.PASSWORD_MIN_LENGTH} characters`),
+    .min(1, '비밀번호는 필수입니다')
+    .min(VALIDATION.PASSWORD_MIN_LENGTH, `비밀번호는 최소 ${VALIDATION.PASSWORD_MIN_LENGTH}자 이상이어야 합니다`),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -27,32 +27,32 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export const assetSchema = z.object({
   name: z
     .string()
-    .min(1, 'Asset name is required')
-    .min(VALIDATION.NAME_MIN_LENGTH, `Asset name must be at least ${VALIDATION.NAME_MIN_LENGTH} characters`)
-    .max(VALIDATION.NAME_MAX_LENGTH, `Asset name must be less than ${VALIDATION.NAME_MAX_LENGTH} characters`),
+    .min(1, '자산 이름은 필수입니다')
+    .min(VALIDATION.NAME_MIN_LENGTH, `자산 이름은 최소 ${VALIDATION.NAME_MIN_LENGTH}자 이상이어야 합니다`)
+    .max(VALIDATION.NAME_MAX_LENGTH, `자산 이름은 ${VALIDATION.NAME_MAX_LENGTH}자 미만이어야 합니다`),
   serialNumber: z
     .string()
-    .max(VALIDATION.SERIAL_NUMBER_MAX_LENGTH, `Serial number must be less than ${VALIDATION.SERIAL_NUMBER_MAX_LENGTH} characters`)
+    .max(VALIDATION.SERIAL_NUMBER_MAX_LENGTH, `시리얼 번호는 ${VALIDATION.SERIAL_NUMBER_MAX_LENGTH}자 미만이어야 합니다`)
     .optional()
     .or(z.literal('')),
   description: z
     .string()
-    .max(VALIDATION.DESCRIPTION_MAX_LENGTH, `Description must be less than ${VALIDATION.DESCRIPTION_MAX_LENGTH} characters`)
+    .max(VALIDATION.DESCRIPTION_MAX_LENGTH, `설명은 ${VALIDATION.DESCRIPTION_MAX_LENGTH}자 미만이어야 합니다`)
     .optional()
     .or(z.literal('')),
   categoryId: z
     .string()
-    .min(1, 'Category is required'),
+    .min(1, '카테고리는 필수입니다'),
   locationId: z
     .string()
-    .min(1, 'Location is required'),
+    .min(1, '위치는 필수입니다'),
   purchaseDate: z
     .string()
     .optional()
     .or(z.literal('')),
   purchasePrice: z
     .number()
-    .min(0, 'Price must be a positive number')
+    .min(0, '가격은 양수여야 합니다')
     .optional()
     .nullable(),
   warrantyUntil: z

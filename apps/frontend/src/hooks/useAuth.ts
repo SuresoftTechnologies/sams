@@ -39,16 +39,16 @@ export function useLogin() {
       queryClient.setQueryData(['currentUser'], data.user);
 
       // Show success message
-      toast.success('Login successful', {
-        description: `Welcome back, ${data.user.full_name}!`,
+      toast.success('로그인 성공', {
+        description: `${data.user.full_name}님, 다시 오신 것을 환영합니다!`,
       });
 
       // Navigate to dashboard
       navigate('/dashboard');
     },
     onError: (error: Error) => {
-      toast.error('Login failed', {
-        description: error.message || 'Please check your credentials and try again.',
+      toast.error('로그인 실패', {
+        description: error.message || '인증 정보를 확인하고 다시 시도해주세요.',
       });
     },
   });
@@ -73,7 +73,7 @@ export function useLogout() {
       queryClient.clear();
 
       // Show success message
-      toast.success('Logged out successfully');
+      toast.success('로그아웃 성공');
 
       // Navigate to login page
       navigate('/login');
@@ -83,7 +83,7 @@ export function useLogout() {
       logout();
       queryClient.clear();
 
-      toast.error('Logout completed with errors', {
+      toast.error('로그아웃 완료 (오류 발생)', {
         description: error.message,
       });
 

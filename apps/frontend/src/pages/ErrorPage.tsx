@@ -17,8 +17,8 @@ export default function ErrorPage() {
   const error = useRouteError();
   const navigate = useNavigate();
 
-  let title = 'Oops! Something went wrong';
-  let message = 'An unexpected error occurred. Please try again.';
+  let title = '앗! 문제가 발생했습니다';
+  let message = '예기치 않은 오류가 발생했습니다. 다시 시도해주세요.';
   let statusCode: number | undefined;
 
   if (isRouteErrorResponse(error)) {
@@ -28,14 +28,14 @@ export default function ErrorPage() {
 
     // Custom messages for common status codes
     if (error.status === 404) {
-      title = '404 - Page Not Found';
-      message = "The page you're looking for doesn't exist or has been moved.";
+      title = '404 - 페이지를 찾을 수 없습니다';
+      message = "찾으시는 페이지가 존재하지 않거나 이동되었습니다.";
     } else if (error.status === 403) {
-      title = '403 - Forbidden';
-      message = "You don't have permission to access this page.";
+      title = '403 - 접근 금지';
+      message = "이 페이지에 접근할 권한이 없습니다.";
     } else if (error.status === 500) {
-      title = '500 - Server Error';
-      message = 'Something went wrong on our end. Please try again later.';
+      title = '500 - 서버 오류';
+      message = '서버에 문제가 발생했습니다. 나중에 다시 시도해주세요.';
     }
   } else if (error instanceof Error) {
     message = error.message;
@@ -60,7 +60,7 @@ export default function ErrorPage() {
             <div>
               {statusCode && (
                 <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Error {statusCode}
+                  오류 {statusCode}
                 </p>
               )}
               <CardTitle className="text-2xl">{title}</CardTitle>
@@ -72,12 +72,12 @@ export default function ErrorPage() {
           {/* Error details in dev mode */}
           {import.meta.env.DEV && error instanceof Error && (
             <div className="mb-4 rounded-md bg-muted p-3 space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground">Error Details:</p>
+              <p className="text-xs font-semibold text-muted-foreground">오류 세부정보:</p>
               <p className="text-xs text-destructive font-mono break-all">{error.message}</p>
               {error.stack && (
                 <details className="text-xs text-muted-foreground">
                   <summary className="cursor-pointer hover:text-foreground">
-                    Stack Trace
+                    스택 추적
                   </summary>
                   <pre className="mt-2 text-xs overflow-auto max-h-40 p-2 bg-background rounded">
                     {error.stack}
@@ -91,11 +91,11 @@ export default function ErrorPage() {
           <div className="flex gap-2">
             <Button onClick={handleGoBack} variant="outline" className="flex-1 gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Go Back
+              뒤로 가기
             </Button>
             <Button onClick={handleGoHome} className="flex-1 gap-2">
               <Home className="h-4 w-4" />
-              Go Home
+              홈으로 가기
             </Button>
           </div>
         </CardContent>

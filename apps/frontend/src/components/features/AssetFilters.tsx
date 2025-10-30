@@ -81,7 +81,7 @@ export function AssetFilters({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search assets..."
+            placeholder="자산 검색..."
             value={filters.search || ''}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 pr-10"
@@ -104,7 +104,7 @@ export function AssetFilters({
           className="shrink-0"
         >
           <Filter className="h-4 w-4 mr-2" />
-          Filters
+          필터
           {hasActiveFilters && (
             <span className="ml-2 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs">
               {[filters.status, filters.categoryId, filters.locationId].filter(Boolean).length}
@@ -119,7 +119,7 @@ export function AssetFilters({
     <Card className={className}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">Filters</CardTitle>
+          <CardTitle className="text-base font-semibold">필터</CardTitle>
           {hasActiveFilters && (
             <Button
               variant="ghost"
@@ -128,7 +128,7 @@ export function AssetFilters({
               className="h-8 px-2 text-muted-foreground"
             >
               <X className="h-4 w-4 mr-1" />
-              Clear All
+              모두 지우기
             </Button>
           )}
           {compact && (
@@ -147,12 +147,12 @@ export function AssetFilters({
       <CardContent className="space-y-4">
         {/* Search */}
         <div className="space-y-2">
-          <Label htmlFor="search">Search</Label>
+          <Label htmlFor="search">검색</Label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="search"
-              placeholder="Search by name or serial number..."
+              placeholder="이름 또는 시리얼 번호로 검색..."
               value={filters.search || ''}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 pr-10"
@@ -172,16 +172,16 @@ export function AssetFilters({
 
         {/* Status Filter */}
         <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">상태</Label>
           <Select
             value={filters.status || 'all'}
             onValueChange={handleStatusChange}
           >
             <SelectTrigger id="status">
-              <SelectValue placeholder="All statuses" />
+              <SelectValue placeholder="모든 상태" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">모든 상태</SelectItem>
               {ASSET_STATUSES.map((status) => (
                 <SelectItem key={status.value} value={status.value}>
                   {status.label}
@@ -193,16 +193,16 @@ export function AssetFilters({
 
         {/* Category Filter */}
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">카테고리</Label>
           <Select
             value={filters.categoryId || 'all'}
             onValueChange={handleCategoryChange}
           >
             <SelectTrigger id="category">
-              <SelectValue placeholder="All categories" />
+              <SelectValue placeholder="모든 카테고리" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">모든 카테고리</SelectItem>
               {ASSET_CATEGORIES.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -214,16 +214,16 @@ export function AssetFilters({
 
         {/* Location Filter */}
         <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">위치</Label>
           <Select
             value={filters.locationId || 'all'}
             onValueChange={handleLocationChange}
           >
             <SelectTrigger id="location">
-              <SelectValue placeholder="All locations" />
+              <SelectValue placeholder="모든 위치" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Locations</SelectItem>
+              <SelectItem value="all">모든 위치</SelectItem>
               {ASSET_LOCATIONS.map((location) => (
                 <SelectItem key={location.id} value={location.id}>
                   {location.name}

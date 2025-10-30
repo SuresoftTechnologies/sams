@@ -55,9 +55,9 @@ export default function Login() {
               className="h-12 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">로그인</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access Asset Management System
+            자산 관리 시스템에 접근하려면 인증 정보를 입력하세요
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -68,7 +68,7 @@ export default function Login() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>이메일</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
@@ -87,11 +87,11 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>비밀번호</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="비밀번호를 입력하세요"
                         autoComplete="current-password"
                         {...field}
                       />
@@ -109,12 +109,12 @@ export default function Login() {
                 {loginMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing in...
+                    로그인 중...
                   </>
                 ) : (
                   <>
                     <LogIn className="h-4 w-4" />
-                    Sign In
+                    로그인
                   </>
                 )}
               </Button>
@@ -124,16 +124,16 @@ export default function Login() {
           {/* Demo credentials hint */}
           <div className="mt-4 p-3 bg-muted rounded-md space-y-1">
             <p className="text-xs font-semibold text-muted-foreground text-center mb-1">
-              Demo Accounts:
+              데모 계정:
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              👤 Admin: admin@suresoft.com / admin123!
+              👤 관리자: admin@suresoft.com / admin123!
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              👤 Manager: manager@suresoft.com / manager123!
+              👤 매니저: manager@suresoft.com / manager123!
             </p>
             <p className="text-xs text-muted-foreground text-center">
-              👤 Employee: employee@suresoft.com / employee123!
+              👤 직원: employee@suresoft.com / employee123!
             </p>
           </div>
         </CardContent>

@@ -137,16 +137,16 @@ export default function AssetList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Assets</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">자산</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Manage and track all your company assets
+            회사의 모든 자산을 관리하고 추적합니다
           </p>
         </div>
         {/* Only managers and admins can create assets */}
         <ManagerOrAbove>
           <Button onClick={() => navigate('/assets/new')} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
-            New Asset
+            새 자산
           </Button>
         </ManagerOrAbove>
       </div>
@@ -156,17 +156,17 @@ export default function AssetList() {
         <SearchInput
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search by asset tag, name, model, or serial number..."
+          placeholder="자산 태그, 이름, 모델 또는 시리얼 번호로 검색..."
           isLoading={isDebouncing || isLoading}
           enableShortcut={true}
-          aria-label="Search assets"
+          aria-label="자산 검색"
         />
         <div className="mt-2 text-xs text-muted-foreground">
           <span className="inline-block mr-4">
-            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted border border-border rounded">/</kbd> to focus search
+            <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted border border-border rounded">/</kbd> 키를 눌러 검색 포커스
           </span>
           <span className="inline-block">
-            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted border border-border rounded">Esc</kbd> to clear
+            <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted border border-border rounded">Esc</kbd> 키를 눌러 초기화
           </span>
         </div>
       </div>
@@ -182,12 +182,11 @@ export default function AssetList() {
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
               {isLoading ? (
-                <span>Loading assets...</span>
+                <span>자산 로딩 중...</span>
               ) : (
                 <>
-                  <span className="font-medium">{totalItems}</span>{' '}
-                  {totalItems === 1 ? 'asset' : 'assets'}
-                  {hasActiveFilters && ' found'}
+                  <span className="font-medium">{totalItems}</span>개 {totalItems === 1 ? '자산' : '자산'}
+                  {hasActiveFilters && ' 발견됨'}
                 </>
               )}
             </div>
@@ -196,19 +195,19 @@ export default function AssetList() {
                 variant={viewMode === 'table' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('table')}
-                aria-label="Table view"
+                aria-label="테이블 뷰"
               >
                 <LayoutList className="h-4 w-4" />
-                <span className="hidden sm:inline ml-2">Table</span>
+                <span className="hidden sm:inline ml-2">테이블</span>
               </Button>
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
-                aria-label="Card view"
+                aria-label="카드 뷰"
               >
                 <LayoutGrid className="h-4 w-4" />
-                <span className="hidden sm:inline ml-2">Cards</span>
+                <span className="hidden sm:inline ml-2">카드</span>
               </Button>
             </div>
           </div>
@@ -232,13 +231,13 @@ export default function AssetList() {
               ) : assets.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <div className="text-muted-foreground space-y-2">
-                    <p className="text-lg font-medium">No assets found</p>
+                    <p className="text-lg font-medium">자산을 찾을 수 없습니다</p>
                     {hasActiveFilters ? (
                       <p className="text-sm">
-                        Try adjusting your filters or search query
+                        필터나 검색어를 조정해 보세요
                       </p>
                     ) : (
-                      <p className="text-sm">Create your first asset to get started</p>
+                      <p className="text-sm">첫 번째 자산을 생성하여 시작하세요</p>
                     )}
                   </div>
                   {hasActiveFilters && (
@@ -250,7 +249,7 @@ export default function AssetList() {
                         setSearchQuery('');
                       }}
                     >
-                      Clear all filters
+                      모든 필터 지우기
                     </Button>
                   )}
                 </div>
@@ -289,7 +288,7 @@ export default function AssetList() {
       <Dialog open={!!qrAsset} onOpenChange={(open) => !open && setQrAsset(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Asset QR Code</DialogTitle>
+            <DialogTitle>자산 QR 코드</DialogTitle>
           </DialogHeader>
           {qrAsset && <AssetQRCode asset={qrAsset} size={256} />}
         </DialogContent>

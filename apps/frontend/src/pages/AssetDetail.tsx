@@ -106,13 +106,13 @@ export default function AssetDetail() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Asset Not Found</h1>
+            <h1 className="text-3xl font-bold tracking-tight">자산을 찾을 수 없습니다</h1>
           </div>
         </div>
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <p className="text-destructive text-center">
-              The requested asset could not be found. It may have been deleted.
+              요청한 자산을 찾을 수 없습니다. 삭제되었을 수 있습니다.
             </p>
           </CardContent>
         </Card>
@@ -122,10 +122,10 @@ export default function AssetDetail() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      available: { variant: 'default' as const, label: 'Available' },
-      in_use: { variant: 'secondary' as const, label: 'In Use' },
-      maintenance: { variant: 'destructive' as const, label: 'Maintenance' },
-      retired: { variant: 'outline' as const, label: 'Retired' },
+      available: { variant: 'default' as const, label: '사용 가능' },
+      in_use: { variant: 'secondary' as const, label: '사용 중' },
+      maintenance: { variant: 'destructive' as const, label: '유지보수' },
+      retired: { variant: 'outline' as const, label: '폐기됨' },
     };
     const config = variants[status as keyof typeof variants] || variants.available;
     return <Badge variant={config.variant}>{config.label}</Badge>;
@@ -140,7 +140,7 @@ export default function AssetDetail() {
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{asset.name}</h1>
-            <p className="text-sm text-muted-foreground">Asset ID: {asset.id}</p>
+            <p className="text-sm text-muted-foreground">자산 ID: {asset.id}</p>
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button
@@ -149,7 +149,7 @@ export default function AssetDetail() {
               onClick={() => navigate(`/assets/${id}/edit`)}
             >
               <Edit className="h-4 w-4" />
-              <span className="hidden sm:inline">Edit</span>
+              <span className="hidden sm:inline">편집</span>
             </Button>
             <Button
               variant="destructive"
@@ -158,7 +158,7 @@ export default function AssetDetail() {
               disabled={deleteMutation.isPending}
             >
               <Trash2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Delete</span>
+              <span className="hidden sm:inline">삭제</span>
             </Button>
           </div>
         </div>
@@ -167,44 +167,44 @@ export default function AssetDetail() {
           {/* Main Info */}
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Asset Information</CardTitle>
-              <CardDescription>Detailed information about this asset</CardDescription>
+              <CardTitle>자산 정보</CardTitle>
+              <CardDescription>이 자산에 대한 상세 정보</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <p className="text-sm font-medium text-muted-foreground">상태</p>
                   <div className="mt-1">{getStatusBadge(asset.status)}</div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Serial Number</p>
+                  <p className="text-sm font-medium text-muted-foreground">시리얼 번호</p>
                   <p className="text-base mt-1">{asset.serialNumber || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Category</p>
+                  <p className="text-sm font-medium text-muted-foreground">카테고리</p>
                   <p className="text-base mt-1">{asset.category_name || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Location</p>
+                  <p className="text-sm font-medium text-muted-foreground">위치</p>
                   <p className="text-base mt-1">{asset.location_name || '-'}</p>
                 </div>
               </div>
 
               {asset.description && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Description</p>
+                  <p className="text-sm font-medium text-muted-foreground">설명</p>
                   <p className="text-base mt-1">{asset.description}</p>
                 </div>
               )}
 
               <div className="pt-4 border-t space-y-3">
-                <h4 className="font-medium text-sm">Purchase Information</h4>
+                <h4 className="font-medium text-sm">구매 정보</h4>
                 <div className="grid grid-cols-2 gap-4">
                   {asset.purchaseDate && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Purchase Date</p>
+                        <p className="text-xs text-muted-foreground">구매일</p>
                         <p className="text-sm">
                           {format(new Date(asset.purchaseDate), 'MMM d, yyyy')}
                         </p>
@@ -215,7 +215,7 @@ export default function AssetDetail() {
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Purchase Price</p>
+                        <p className="text-xs text-muted-foreground">구매 가격</p>
                         <p className="text-sm">
                           {new Intl.NumberFormat('ko-KR', {
                             style: 'currency',
@@ -229,7 +229,7 @@ export default function AssetDetail() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Warranty Until</p>
+                        <p className="text-xs text-muted-foreground">보증 기간</p>
                         <p className="text-sm">
                           {format(new Date(asset.warrantyUntil), 'MMM d, yyyy')}
                         </p>
@@ -246,15 +246,15 @@ export default function AssetDetail() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <QrCode className="h-5 w-5" />
-                QR Code
+                QR 코드
               </CardTitle>
-              <CardDescription>Scan to view asset</CardDescription>
+              <CardDescription>스캔하여 자산 보기</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/50">
                 <div className="text-center">
                   <QrCode className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">QR code coming soon</p>
+                  <p className="text-sm text-muted-foreground">QR 코드 곧 제공 예정</p>
                 </div>
               </div>
             </CardContent>
@@ -264,12 +264,12 @@ export default function AssetDetail() {
         {/* History */}
         <Card>
           <CardHeader>
-            <CardTitle>Activity History</CardTitle>
-            <CardDescription>Check-in and check-out records</CardDescription>
+            <CardTitle>활동 이력</CardTitle>
+            <CardDescription>반입 및 반출 기록</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground text-center py-8">
-              No activity history available yet. Check-in/out feature coming in Phase 8.
+              활동 이력이 아직 없습니다. 반입/반출 기능은 Phase 8에 추가 예정입니다.
             </p>
           </CardContent>
         </Card>
@@ -279,14 +279,14 @@ export default function AssetDetail() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Asset</DialogTitle>
+            <DialogTitle>자산 삭제</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{asset.name}"? This action cannot be undone.
+              "{asset.name}"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-              Cancel
+              취소
             </Button>
             <Button
               variant="destructive"
@@ -296,10 +296,10 @@ export default function AssetDetail() {
               {deleteMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Deleting...
+                  삭제 중...
                 </>
               ) : (
-                'Delete'
+                '삭제'
               )}
             </Button>
           </DialogFooter>

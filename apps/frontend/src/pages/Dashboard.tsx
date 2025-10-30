@@ -34,42 +34,42 @@ export default function Dashboard() {
   const statsCards = stats
     ? [
         {
-          label: 'Total Assets',
+          label: '전체 자산',
           value: stats.totalAssets.toLocaleString(),
           icon: Package,
           color: 'text-blue-500',
           bgColor: 'bg-blue-50 dark:bg-blue-950',
-          description: `${stats.totalCategories} categories, ${stats.totalLocations} locations`,
+          description: `${stats.totalCategories}개 카테고리, ${stats.totalLocations}개 위치`,
         },
         {
-          label: 'Available',
+          label: '사용 가능',
           value: stats.statusDistribution.available.toLocaleString(),
           icon: CheckCircle,
           color: 'text-green-500',
           bgColor: 'bg-green-50 dark:bg-green-950',
-          description: 'Ready for deployment',
+          description: '배포 준비 완료',
           percentage: stats.totalAssets > 0
             ? Math.round((stats.statusDistribution.available / stats.totalAssets) * 100)
             : 0,
         },
         {
-          label: 'In Use',
+          label: '사용 중',
           value: stats.statusDistribution.in_use.toLocaleString(),
           icon: Clock,
           color: 'text-amber-500',
           bgColor: 'bg-amber-50 dark:bg-amber-950',
-          description: 'Currently deployed',
+          description: '현재 배포됨',
           percentage: stats.totalAssets > 0
             ? Math.round((stats.statusDistribution.in_use / stats.totalAssets) * 100)
             : 0,
         },
         {
-          label: 'Maintenance',
+          label: '유지보수',
           value: stats.statusDistribution.maintenance.toLocaleString(),
           icon: AlertCircle,
           color: 'text-red-500',
           bgColor: 'bg-red-50 dark:bg-red-950',
-          description: 'Under maintenance',
+          description: '유지보수 중',
           percentage: stats.totalAssets > 0
             ? Math.round((stats.statusDistribution.maintenance / stats.totalAssets) * 100)
             : 0,
@@ -100,21 +100,21 @@ export default function Dashboard() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to SureSoft Asset Management System</p>
+          <h1 className="text-3xl font-bold tracking-tight">대시보드</h1>
+          <p className="text-muted-foreground">SureSoft 자산 관리 시스템에 오신 것을 환영합니다</p>
         </div>
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
               <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
               <div>
-                <p className="text-destructive font-semibold">Failed to load dashboard data</p>
+                <p className="text-destructive font-semibold">대시보드 데이터 로딩 실패</p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {error instanceof Error ? error.message : 'Please try again later.'}
+                  {error instanceof Error ? error.message : '나중에 다시 시도해주세요.'}
                 </p>
               </div>
               <Button variant="outline" onClick={() => window.location.reload()}>
-                Retry
+                다시 시도
               </Button>
             </div>
           </CardContent>
@@ -124,18 +124,18 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 px-4">
+    <div className="space-y-4 md:space-y-6 px-4 py-4 md:py-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">대시보드</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Welcome to SureSoft Asset Management System
+            SureSoft 자산 관리 시스템에 오신 것을 환영합니다
           </p>
         </div>
         <Badge variant="secondary" className="gap-2 w-fit">
           <TrendingUp className="h-3 w-3" />
-          Phase 15 Complete
+          Phase 15 완료
         </Badge>
       </div>
 
@@ -189,9 +189,9 @@ export default function Dashboard() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <LayoutGrid className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Category Distribution</CardTitle>
+              <CardTitle>카테고리 분포</CardTitle>
             </div>
-            <CardDescription>Asset breakdown by category</CardDescription>
+            <CardDescription>카테고리별 자산 분류</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -223,13 +223,13 @@ export default function Dashboard() {
                 ))}
                 {stats.categoryDistribution.length > 8 && (
                   <p className="text-xs text-muted-foreground text-center pt-2">
-                    +{stats.categoryDistribution.length - 8} more categories
+                    +{stats.categoryDistribution.length - 8}개 추가 카테고리
                   </p>
                 )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
-                No category data available
+                카테고리 데이터가 없습니다
               </p>
             )}
           </CardContent>
@@ -240,9 +240,9 @@ export default function Dashboard() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Top Locations</CardTitle>
+              <CardTitle>주요 위치</CardTitle>
             </div>
-            <CardDescription>Assets by location</CardDescription>
+            <CardDescription>위치별 자산 현황</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -275,7 +275,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">
-                No location data available
+                위치 데이터가 없습니다
               </p>
             )}
           </CardContent>
@@ -289,12 +289,12 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Recent Assets</CardTitle>
+                <CardTitle>최근 자산</CardTitle>
               </div>
-              <CardDescription>Latest assets added to the system</CardDescription>
+              <CardDescription>시스템에 추가된 최신 자산</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/assets">View All</Link>
+              <Link to="/assets">전체 보기</Link>
             </Button>
           </div>
         </CardHeader>
@@ -348,10 +348,10 @@ export default function Dashboard() {
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-sm text-muted-foreground">
-                No assets found. Create your first asset to get started.
+                자산을 찾을 수 없습니다. 첫 번째 자산을 생성하세요.
               </p>
               <Button variant="outline" size="sm" className="mt-4" asChild>
-                <Link to="/assets/new">Create Asset</Link>
+                <Link to="/assets/new">자산 생성</Link>
               </Button>
             </div>
           )}

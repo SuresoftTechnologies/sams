@@ -112,13 +112,13 @@ export function AssetTable({
   const getStatusLabel = (status: Asset['status']) => {
     switch (status) {
       case 'available':
-        return 'Available';
+        return '사용 가능';
       case 'in_use':
-        return 'In Use';
+        return '사용 중';
       case 'maintenance':
-        return 'Maintenance';
+        return '유지보수';
       case 'retired':
-        return 'Retired';
+        return '폐기됨';
       default:
         return status;
     }
@@ -130,14 +130,14 @@ export function AssetTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Asset Name</TableHead>
-              <TableHead>Serial Number</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Purchase Date</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>자산 이름</TableHead>
+              <TableHead>시리얼 번호</TableHead>
+              <TableHead>카테고리</TableHead>
+              <TableHead>위치</TableHead>
+              <TableHead>상태</TableHead>
+              <TableHead>구매일</TableHead>
+              <TableHead>가격</TableHead>
+              <TableHead className="text-right">작업</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -165,20 +165,20 @@ export function AssetTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Asset Name</TableHead>
-              <TableHead>Serial Number</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Purchase Date</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>자산 이름</TableHead>
+              <TableHead>시리얼 번호</TableHead>
+              <TableHead>카테고리</TableHead>
+              <TableHead>위치</TableHead>
+              <TableHead>상태</TableHead>
+              <TableHead>구매일</TableHead>
+              <TableHead>가격</TableHead>
+              <TableHead className="text-right">작업</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                No assets found. Create your first asset to get started.
+                자산을 찾을 수 없습니다. 첫 번째 자산을 생성하여 시작하세요.
               </TableCell>
             </TableRow>
           </TableBody>
@@ -196,32 +196,32 @@ export function AssetTable({
               className="cursor-pointer select-none"
               onClick={() => handleSort('name')}
             >
-              Asset Name {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+              자산 이름 {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead
               className="cursor-pointer select-none"
               onClick={() => handleSort('serialNumber')}
             >
-              Serial Number{' '}
+              시리얼 번호{' '}
               {sortField === 'serialNumber' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Location</TableHead>
+            <TableHead>카테고리</TableHead>
+            <TableHead>위치</TableHead>
             <TableHead
               className="cursor-pointer select-none"
               onClick={() => handleSort('status')}
             >
-              Status {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
+              상태 {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead
               className="cursor-pointer select-none"
               onClick={() => handleSort('purchaseDate')}
             >
-              Purchase Date{' '}
+              구매일{' '}
               {sortField === 'purchaseDate' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>가격</TableHead>
+            <TableHead className="text-right">작업</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -261,7 +261,7 @@ export function AssetTable({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>작업</DropdownMenuLabel>
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
@@ -269,7 +269,7 @@ export function AssetTable({
                       }}
                     >
                       <Eye className="mr-2 h-4 w-4" />
-                      View Details
+                      상세 보기
                     </DropdownMenuItem>
                     {onViewQR && (
                       <DropdownMenuItem
@@ -279,7 +279,7 @@ export function AssetTable({
                         }}
                       >
                         <QrCode className="mr-2 h-4 w-4" />
-                        View QR Code
+                        QR 코드 보기
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
@@ -291,7 +291,7 @@ export function AssetTable({
                         }}
                       >
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit
+                        편집
                       </DropdownMenuItem>
                     )}
                     {onDelete && (
@@ -303,7 +303,7 @@ export function AssetTable({
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        삭제
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

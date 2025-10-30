@@ -58,13 +58,13 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
   const getStatusLabel = (status: Asset['status']) => {
     switch (status) {
       case 'available':
-        return 'Available';
+        return '사용 가능';
       case 'in_use':
-        return 'In Use';
+        return '사용 중';
       case 'maintenance':
-        return 'Maintenance';
+        return '유지보수';
       case 'retired':
-        return 'Retired';
+        return '폐기됨';
       default:
         return status;
     }
@@ -95,7 +95,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>작업</DropdownMenuLabel>
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -103,7 +103,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
                   }}
                 >
                   <Eye className="mr-2 h-4 w-4" />
-                  View Details
+                  상세 보기
                 </DropdownMenuItem>
                 {onViewQR && (
                   <DropdownMenuItem
@@ -113,7 +113,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
                     }}
                   >
                     <QrCode className="mr-2 h-4 w-4" />
-                    View QR Code
+                    QR 코드 보기
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -125,7 +125,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
                     }}
                   >
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit
+                    편집
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
@@ -137,7 +137,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    삭제
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -150,7 +150,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
         <div className="space-y-2 text-sm">
           {asset.category_name && (
             <div className="flex items-center text-muted-foreground">
-              <span className="font-medium min-w-20">Category:</span>
+              <span className="font-medium min-w-20">카테고리:</span>
               <span>{asset.category_name}</span>
             </div>
           )}
@@ -158,7 +158,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
           {asset.location_name && (
             <div className="flex items-center text-muted-foreground">
               <MapPin className="mr-1.5 h-3.5 w-3.5" />
-              <span className="font-medium min-w-20">Location:</span>
+              <span className="font-medium min-w-20">위치:</span>
               <span>{asset.location_name}</span>
             </div>
           )}
@@ -166,7 +166,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
           {asset.purchaseDate && (
             <div className="flex items-center text-muted-foreground">
               <Calendar className="mr-1.5 h-3.5 w-3.5" />
-              <span className="font-medium min-w-20">Purchased:</span>
+              <span className="font-medium min-w-20">구매일:</span>
               <span>{formatDate(asset.purchaseDate)}</span>
             </div>
           )}
@@ -182,7 +182,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
       {asset.purchasePrice && (
         <CardFooter className="pt-3 border-t">
           <div className="flex items-center justify-between w-full">
-            <span className="text-sm text-muted-foreground">Purchase Price</span>
+            <span className="text-sm text-muted-foreground">구매 가격</span>
             <span className="text-base font-semibold">
               {formatCurrency(asset.purchasePrice)}
             </span>

@@ -19,15 +19,15 @@ export default function NotFound() {
           <div className="flex justify-center mb-4">
             <div className="text-6xl font-bold text-muted-foreground">404</div>
           </div>
-          <CardTitle className="text-2xl">Page Not Found</CardTitle>
+          <CardTitle className="text-2xl">페이지를 찾을 수 없습니다</CardTitle>
           <CardDescription>
-            The page you are looking for does not exist or has been moved.
+            찾으시는 페이지가 존재하지 않거나 이동되었습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={() => navigate('/')} className="gap-2">
             <Home className="h-4 w-4" />
-            Go to Dashboard
+            대시보드로 이동
           </Button>
         </CardContent>
       </Card>

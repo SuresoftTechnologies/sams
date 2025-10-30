@@ -132,9 +132,8 @@ export function Pagination({
     >
       {/* Results info */}
       <div className="text-sm text-muted-foreground">
-        Showing <span className="font-medium">{startItem}</span> to{' '}
-        <span className="font-medium">{endItem}</span> of{' '}
-        <span className="font-medium">{totalItems}</span> {totalItems === 1 ? 'result' : 'results'}
+        전체 <span className="font-medium">{totalItems}</span>개 중{' '}
+        <span className="font-medium">{startItem}</span>~<span className="font-medium">{endItem}</span>개 표시
       </div>
 
       {/* Page controls */}
@@ -159,11 +158,11 @@ export function Pagination({
             size="sm"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            aria-label="Go to previous page"
+            aria-label="이전 페이지로 이동"
             className="h-9 w-9 p-0 sm:w-auto sm:px-4"
           >
             <ChevronLeft className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">Previous</span>
+            <span className="hidden sm:inline ml-2">이전</span>
           </Button>
 
           {/* Page numbers */}
@@ -206,10 +205,10 @@ export function Pagination({
             size="sm"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            aria-label="Go to next page"
+            aria-label="다음 페이지로 이동"
             className="h-9 w-9 p-0 sm:w-auto sm:px-4"
           >
-            <span className="hidden sm:inline mr-2">Next</span>
+            <span className="hidden sm:inline mr-2">다음</span>
             <ChevronRight className="h-4 w-4" />
           </Button>
 
@@ -229,12 +228,12 @@ export function Pagination({
         {/* Page size selector */}
         {showPageSize && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">Items per page:</span>
+            <span className="text-sm text-muted-foreground whitespace-nowrap">페이지당 항목:</span>
             <Select
               value={pageSize.toString()}
               onValueChange={(value) => onPageSizeChange(Number(value))}
             >
-              <SelectTrigger className="w-[80px] h-9" aria-label="Select page size">
+              <SelectTrigger className="w-[80px] h-9" aria-label="페이지 크기 선택">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -275,19 +274,19 @@ export function SimplePagination({
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        aria-label="Previous page"
+        aria-label="이전 페이지"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <span className="text-sm text-muted-foreground">
-        Page {currentPage} of {totalPages}
+        페이지 {currentPage} / {totalPages}
       </span>
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        aria-label="Next page"
+        aria-label="다음 페이지"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

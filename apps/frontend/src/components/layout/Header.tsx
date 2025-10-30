@@ -52,12 +52,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    title: 'Dashboard',
+    title: '대시보드',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    title: 'Assets',
+    title: '자산',
     href: '/assets',
     icon: Package,
   },
@@ -168,7 +168,7 @@ export default function Header() {
                   )}
                 >
                   <User className="h-5 w-5" />
-                  <span>Profile</span>
+                  <span>프로필</span>
                 </Link>
 
                 <Link
@@ -181,7 +181,7 @@ export default function Header() {
                   aria-disabled="true"
                 >
                   <Settings className="h-5 w-5" />
-                  <span>Settings</span>
+                  <span>설정</span>
                 </Link>
 
                 <Button
@@ -194,13 +194,13 @@ export default function Header() {
                   className="w-full justify-start gap-3 px-3 mt-2 text-red-600 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
                 >
                   <LogOut className="h-5 w-5" />
-                  <span>{logoutMutation.isPending ? 'Logging out...' : 'Log out'}</span>
+                  <span>{logoutMutation.isPending ? '로그아웃 중...' : '로그아웃'}</span>
                 </Button>
               </div>
 
               {/* Mobile Footer Info */}
               <div className="border-t pt-4 mt-4">
-                <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+                <p className="text-xs text-muted-foreground">버전 1.0.0</p>
                 <p className="text-xs text-muted-foreground">SureSoft SAMS</p>
               </div>
             </nav>
@@ -281,12 +281,12 @@ export default function Header() {
               <DropdownMenuItem asChild>
                 <Link to="/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>프로필</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>설정</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -295,7 +295,7 @@ export default function Header() {
                 disabled={logoutMutation.isPending}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{logoutMutation.isPending ? 'Logging out...' : 'Log out'}</span>
+                <span>{logoutMutation.isPending ? '로그아웃 중...' : '로그아웃'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

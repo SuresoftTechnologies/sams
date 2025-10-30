@@ -193,7 +193,7 @@ export function SearchInput({
 
       {/* Screen reader live region for search results */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {isLoading ? 'Searching...' : localValue ? `Search results for ${localValue}` : ''}
+        {isLoading ? '검색 중...' : localValue ? `${localValue}에 대한 검색 결과` : ''}
       </div>
     </div>
   );
@@ -217,7 +217,7 @@ export function CompactSearchInput({
         <SearchInput {...props} className="flex-1" enableShortcut={false} />
         <Button type="submit" size="sm">
           <Search className="h-4 w-4" />
-          <span className="sr-only">Search</span>
+          <span className="sr-only">검색</span>
         </Button>
       </div>
     );
