@@ -121,14 +121,15 @@ class AssetService:
         asset = Asset(
             id=str(uuid4()),
             asset_tag=asset_data.asset_tag,
-            name=asset_data.name,
+            model=asset_data.model,
+            serial_number=asset_data.serial_number,
             category_id=asset_data.category_id,
             location_id=asset_data.location_id,
             status=asset_data.status,
             grade=grade,
             purchase_date=asset_data.purchase_date,
             purchase_price=asset_data.purchase_price,
-            warranty_end=asset_data.warranty_end,
+            supplier=asset_data.supplier,
             notes=asset_data.notes,
         )
 
