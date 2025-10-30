@@ -221,7 +221,7 @@ apps/frontend/src/
 
 ## 주의사항
 
-1. **빌드 에러**: 현재 백엔드 패키지(@ams/api-client, @ams/shared-types)가 없어서 빌드 에러 발생
+1. **빌드 에러**: 현재 백엔드 패키지(@sams/api-client, @sams/shared-types)가 없어서 빌드 에러 발생
    - 개발 서버는 정상 작동
    - 백엔드 통합 시 해결 예정
 

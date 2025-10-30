@@ -66,7 +66,7 @@
 - [x] package.json 생성 (Turborepo 통합)
   ```json
   {
-    "name": "@ams/backend",
+    "name": "@sams/backend",
     "version": "1.0.0",
     "private": true,
     "scripts": {

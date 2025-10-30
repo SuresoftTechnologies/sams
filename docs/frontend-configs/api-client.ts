@@ -1,5 +1,5 @@
 // src/lib/api-client.ts
-import type { components, paths } from '@ams/api-client';
+import type { components, paths } from '@sams/api-client';
 
 // Type helpers
 type Asset = components['schemas']['Asset'];

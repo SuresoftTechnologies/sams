@@ -144,7 +144,7 @@ suresoft-ams/
 
 ### Applications (`apps/`)
 
-#### 1. Frontend (@ams/frontend)
+#### 1. Frontend (@sams/frontend)
 - **Framework**: React 18 + TypeScript + Vite
 - **State Management**: Zustand
 - **UI Library**: Material-UI (MUI)
@@ -160,13 +160,13 @@ suresoft-ams/
 **Dependencies**:
 ```json
 {
-  "@ams/shared-types": "workspace:*",
-  "@ams/ui": "workspace:*",
-  "@ams/utils": "workspace:*"
+  "@sams/shared-types": "workspace:*",
+  "@sams/ui": "workspace:*",
+  "@sams/utils": "workspace:*"
 }
 ```
 
-#### 2. Backend (@ams/backend)
+#### 2. Backend (@sams/backend)
 - **Framework**: NestJS + TypeScript
 - **ORM**: Prisma
 - **Validation**: class-validator
@@ -180,15 +180,15 @@ suresoft-ams/
 **Dependencies**:
 ```json
 {
-  "@ams/shared-types": "workspace:*",
-  "@ams/utils": "workspace:*",
-  "@ams/database": "workspace:*"
+  "@sams/shared-types": "workspace:*",
+  "@sams/utils": "workspace:*",
+  "@sams/database": "workspace:*"
 }
 ```
 
 ### Shared Packages (`packages/`)
 
-#### 1. @ams/shared-types
+#### 1. @sams/shared-types
 **Purpose**: 공유 TypeScript 타입 정의
 
 **Exports**:
@@ -200,10 +200,10 @@ suresoft-ams/
 **Usage**:
 ```typescript
 // Frontend
-import { Asset, AssetStatus } from '@ams/shared-types';
+import { Asset, AssetStatus } from '@sams/shared-types';
 
 // Backend
-import { CreateAssetDto } from '@ams/shared-types';
+import { CreateAssetDto } from '@sams/shared-types';
 ```
 
 **Benefits**:
@@ -211,7 +211,7 @@ import { CreateAssetDto } from '@ams/shared-types';
 - ✅ API 계약 보장
 - ✅ 중복 제거
 
-#### 2. @ams/ui
+#### 2. @sams/ui
 **Purpose**: 공유 UI 컴포넌트 라이브러리
 
 **Components**:
@@ -227,7 +227,7 @@ import { CreateAssetDto } from '@ams/shared-types';
 - 접근성 (a11y) 준수
 - 다크모드 지원
 
-#### 3. @ams/utils
+#### 3. @sams/utils
 **Purpose**: 공유 유틸리티 함수
 
 **Modules**:
@@ -238,13 +238,13 @@ import { CreateAssetDto } from '@ams/shared-types';
 
 **Example**:
 ```typescript
-import { formatAssetTag, calculateGrade } from '@ams/utils';
+import { formatAssetTag, calculateGrade } from '@sams/utils';
 
 const tag = formatAssetTag('11', '2024', 1); // "SRS-11-2024-0001"
 const grade = calculateGrade(new Date('2023-01-01')); // "A"
 ```
 
-#### 4. @ams/config
+#### 4. @sams/config
 **Purpose**: 공유 설정 파일
 
 **Configurations**:
@@ -256,11 +256,11 @@ const grade = calculateGrade(new Date('2023-01-01')); // "A"
 ```json
 // apps/frontend/tsconfig.json
 {
-  "extends": "@ams/config/typescript/react.json"
+  "extends": "@sams/config/typescript/react.json"
 }
 ```
 
-#### 5. @ams/database
+#### 5. @sams/database
 **Purpose**: Prisma Client 및 스키마
 
 **Structure**:
@@ -276,7 +276,7 @@ packages/database/
 **Usage**:
 ```typescript
 // Backend only
-import { prisma } from '@ams/database';
+import { prisma } from '@sams/database';
 
 const assets = await prisma.asset.findMany();
 ```
@@ -329,8 +329,8 @@ pnpm install
 pnpm dev
 
 # Start specific app
-pnpm dev --filter=@ams/frontend
-pnpm dev --filter=@ams/backend
+pnpm dev --filter=@sams/frontend
+pnpm dev --filter=@sams/backend
 ```
 
 ### Building
@@ -340,10 +340,10 @@ pnpm dev --filter=@ams/backend
 pnpm build
 
 # Build specific package
-pnpm build --filter=@ams/shared-types
+pnpm build --filter=@sams/shared-types
 
 # Build with dependencies
-pnpm build --filter=@ams/frontend...
+pnpm build --filter=@sams/frontend...
 ```
 
 ### Testing
@@ -356,7 +356,7 @@ pnpm test
 pnpm test --filter=[HEAD^1]
 
 # Run tests in watch mode
-pnpm test:watch --filter=@ams/backend
+pnpm test:watch --filter=@sams/backend
 ```
 
 ### Linting
@@ -380,7 +380,7 @@ mkdir -p packages/new-package/src
 # 2. Create package.json
 cat > packages/new-package/package.json <<EOF
 {
-  "name": "@ams/new-package",
+  "name": "@sams/new-package",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -390,7 +390,7 @@ cat > packages/new-package/package.json <<EOF
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "@ams/config": "workspace:*",
+    "@sams/config": "workspace:*",
     "typescript": "^5.3.0"
   }
 }
@@ -399,7 +399,7 @@ EOF
 # 3. Create tsconfig.json
 cat > packages/new-package/tsconfig.json <<EOF
 {
-  "extends": "@ams/config/typescript/base.json",
+  "extends": "@sams/config/typescript/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -413,7 +413,7 @@ EOF
 echo "export const hello = 'world';" > packages/new-package/src/index.ts
 
 # 6. Build
-pnpm build --filter=@ams/new-package
+pnpm build --filter=@sams/new-package
 ```
 
 ### Use in Apps
@@ -422,27 +422,27 @@ pnpm build --filter=@ams/new-package
 // apps/frontend/package.json
 {
   "dependencies": {
-    "@ams/new-package": "workspace:*"
+    "@sams/new-package": "workspace:*"
   }
 }
 ```
 
 ```typescript
 // apps/frontend/src/App.tsx
-import { hello } from '@ams/new-package';
+import { hello } from '@sams/new-package';
 ```
 
 ## 🎯 Best Practices
 
 ### 1. Package Naming Convention
-- Use `@ams/` scope for all packages
-- Use kebab-case: `@ams/shared-types`
+- Use `@sams/` scope for all packages
+- Use kebab-case: `@sams/shared-types`
 - Descriptive names: `ui`, `utils`, `database`
 
 ### 2. Import Paths
 ```typescript
 // ✅ Good - Use package name
-import { Asset } from '@ams/shared-types';
+import { Asset } from '@sams/shared-types';
 
 // ❌ Bad - Relative path across packages
 import { Asset } from '../../packages/shared-types/src';

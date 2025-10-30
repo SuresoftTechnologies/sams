@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-Welcome to the SureSoft Asset Management System (AMS) architecture documentation.
+Welcome to the SAMS (Suresoft Asset Management System) architecture documentation.
 
 ## 📚 Documentation Index
 

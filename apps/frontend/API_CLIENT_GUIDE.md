@@ -17,7 +17,7 @@
 
 ## 개요
 
-프론트엔드는 `@ams/api-client` 패키지를 사용하여 백엔드 API와 통신합니다.
+프론트엔드는 `@sams/api-client` 패키지를 사용하여 백엔드 API와 통신합니다.
 
 **주요 기능:**
 - Type-safe API 호출 (OpenAPI 기반 타입 생성)
@@ -311,7 +311,7 @@ const asset: Asset = await assetService.createAsset(createData);
 ### OpenAPI 타입 직접 사용
 
 ```typescript
-import type { components, operations } from '@ams/api-client';
+import type { components, operations } from '@sams/api-client';
 
 // 컴포넌트 스키마
 type Asset = components['schemas']['Asset'];
@@ -465,7 +465,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 런타임에 API URL을 변경할 수 있습니다:
 
 ```typescript
-import { setApiConfig } from '@ams/api-client';
+import { setApiConfig } from '@sams/api-client';
 
 setApiConfig({
   baseUrl: 'https://new-api-url.com',
@@ -494,7 +494,7 @@ setApiConfig({
 
 ### 타입 에러
 
-- `@ams/api-client` 패키지 재빌드: `pnpm --filter @ams/api-client build`
+- `@sams/api-client` 패키지 재빌드: `pnpm --filter @sams/api-client build`
 - OpenAPI 스펙이 최신인지 확인
 
 ---

@@ -1,7 +1,7 @@
 {
-  "name": "@ams/backend",
+  "name": "@sams/backend",
   "version": "1.0.0",
-  "description": "SureSoft AMS Backend API (FastAPI)",
+  "description": "SAMS (Suresoft Asset Management System) Backend API (FastAPI)",
   "private": true,
   "scripts": {
     "setup": "uv sync",
@@ -13,10 +13,18 @@
     "lint": "uv run ruff check src tests",
     "format": "uv run ruff format src tests",
     "typecheck": "uv run mypy src",
+    "db:up": "cd ../.. && docker compose up -d",
+    "db:down": "cd ../.. && docker compose down",
+    "db:logs": "cd ../.. && docker compose logs -f",
+    "db:clean": "cd ../.. && docker compose down -v",
     "db:migrate": "uv run alembic upgrade head",
     "db:migrate:create": "uv run alembic revision --autogenerate -m",
     "db:reset": "uv run alembic downgrade base && uv run alembic upgrade head",
     "db:seed": "uv run python scripts/seed.py",
+    "db:setup": "pnpm db:up && sleep 3 && pnpm db:migrate && pnpm db:seed",
+    "migrate:excel": "uv run python scripts/migrate_excel.py",
+    "migrate:excel:check": "uv run python scripts/migrate_excel.py --dry-run",
+    "migrate:excel:force": "uv run python scripts/migrate_excel.py --clear",
     "clean": "rm -rf dist .venv .pytest_cache .coverage htmlcov .mypy_cache .ruff_cache uv.lock"
   }
 }

@@ -1,8 +1,8 @@
-# SureSoft 자산관리 시스템 (AMS) - 문서 인덱스
+# SAMS (Suresoft Asset Management System) - 문서 인덱스
 
 ## 프론트엔드 기술 스택 검토 결과
 
-해커톤용 자산관리 시스템의 프론트엔드 기술 스택을 종합적으로 검토하고, 최적화된 권장안을 제공합니다.
+SAMS의 프론트엔드 기술 스택을 종합적으로 검토하고, 최적화된 권장안을 제공합니다.
 
 ---
 
@@ -243,12 +243,12 @@ pnpm dev
 
 ### 2. OpenAPI spec 자동 생성
 ```bash
-pnpm --filter @ams/backend generate:openapi
+pnpm --filter @sams/backend generate:openapi
 ```
 
 ### 3. TypeScript 타입 자동 생성
 ```bash
-pnpm --filter @ams/api-client generate
+pnpm --filter @sams/api-client generate
 ```
 
 ### 4. 프론트엔드에서 타입 안전하게 API 호출
@@ -380,5 +380,5 @@ const { data } = useQuery({
 ---
 
 **작성일**: 2025-01-29
-**프로젝트**: SureSoft 자산관리 시스템 (슈커톤 해커톤)
+**프로젝트**: SAMS (Suresoft Asset Management System)
 **상태**: ✅ 검토 완료, 바로 사용 가능

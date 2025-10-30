@@ -13,7 +13,7 @@ import type { AssetFormData } from '@/lib/validators';
  * - useUpdateAsset: Update existing asset
  * - useDeleteAsset: Delete asset
  *
- * TODO Phase 12: Connect to actual API endpoints using @ams/api-client
+ * TODO Phase 12: Connect to actual API endpoints using @sams/api-client
  */
 
 export interface Asset {

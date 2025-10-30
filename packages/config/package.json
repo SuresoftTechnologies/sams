@@ -1,7 +1,7 @@
 {
-  "name": "@ams/config",
+  "name": "@sams/config",
   "version": "1.0.0",
-  "description": "Shared configuration for AMS",
+  "description": "Shared configuration for SAMS",
   "private": true,
   "exports": {
     "./typescript/base.json": "./typescript/base.json",

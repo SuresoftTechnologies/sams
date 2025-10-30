@@ -165,10 +165,10 @@ From project root:
 
 ```bash
 # 1. Backend generates OpenAPI spec
-pnpm --filter=@ams/backend generate:openapi
+pnpm --filter=@sams/backend generate:openapi
 
 # 2. API client generates TypeScript types
-pnpm --filter=@ams/api-client generate
+pnpm --filter=@sams/api-client generate
 
 # 3. Build everything (automatic dependency order)
 pnpm build
@@ -353,7 +353,7 @@ pnpm generate:openapi
 5. **Generate TypeScript types**:
 
 ```bash
-pnpm --filter=@ams/api-client generate
+pnpm --filter=@sams/api-client generate
 ```
 
 ### Test Endpoint

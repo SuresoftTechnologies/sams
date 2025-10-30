@@ -1,5 +1,5 @@
 {
-  "extends": "@ams/config/typescript/base.json",
+  "extends": "@sams/config/typescript/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",

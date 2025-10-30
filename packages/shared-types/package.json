@@ -1,7 +1,7 @@
 {
-  "name": "@ams/shared-types",
+  "name": "@sams/shared-types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for AMS",
+  "description": "Shared TypeScript types for SAMS",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,7 +30,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@ams/config": "workspace:*",
+    "@sams/config": "workspace:*",
     "typescript": "^5.3.0"
   }
 }

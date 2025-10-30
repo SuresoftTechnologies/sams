@@ -71,10 +71,10 @@ export interface Asset {
 }
 
 // apps/frontend/src/services/api.ts
-import { Asset } from '@ams/shared-types';
+import { Asset } from '@sams/shared-types';
 
 // apps/backend/src/modules/assets/entities/asset.entity.ts
-import { Asset } from '@ams/shared-types';
+import { Asset } from '@sams/shared-types';
 ```
 
 #### ✅ 빌드 캐싱 및 병렬 처리
@@ -231,7 +231,7 @@ const asset = await api.createAsset({
 
 ```json
 {
-  "name": "@ams/root",
+  "name": "@sams/root",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@8.15.0",
@@ -288,20 +288,20 @@ packages:
 
 ### Package Naming Convention
 
-- `@ams/frontend` - Frontend app
-- `@ams/backend` - Backend app
-- `@ams/shared-types` - Shared types
-- `@ams/ui` - UI components
-- `@ams/utils` - Utilities
-- `@ams/config` - Configurations
-- `@ams/database` - Prisma client
+- `@sams/frontend` - Frontend app
+- `@sams/backend` - Backend app
+- `@sams/shared-types` - Shared types
+- `@sams/ui` - UI components
+- `@sams/utils` - Utilities
+- `@sams/config` - Configurations
+- `@sams/database` - Prisma client
 
 ### Shared Types Package Example
 
 ```json
 // packages/shared-types/package.json
 {
-  "name": "@ams/shared-types",
+  "name": "@sams/shared-types",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -310,7 +310,7 @@ packages:
     "dev": "tsc --watch"
   },
   "devDependencies": {
-    "@ams/config": "workspace:*",
+    "@sams/config": "workspace:*",
     "typescript": "^5.3.0"
   }
 }
@@ -321,11 +321,11 @@ packages:
 ```json
 // apps/frontend/package.json
 {
-  "name": "@ams/frontend",
+  "name": "@sams/frontend",
   "dependencies": {
-    "@ams/shared-types": "workspace:*",
-    "@ams/ui": "workspace:*",
-    "@ams/utils": "workspace:*",
+    "@sams/shared-types": "workspace:*",
+    "@sams/ui": "workspace:*",
+    "@sams/utils": "workspace:*",
     "react": "^18.2.0"
   }
 }
@@ -334,11 +334,11 @@ packages:
 ```json
 // apps/backend/package.json
 {
-  "name": "@ams/backend",
+  "name": "@sams/backend",
   "dependencies": {
-    "@ams/shared-types": "workspace:*",
-    "@ams/utils": "workspace:*",
-    "@ams/database": "workspace:*",
+    "@sams/shared-types": "workspace:*",
+    "@sams/utils": "workspace:*",
+    "@sams/database": "workspace:*",
     "@nestjs/core": "^10.0.0"
   }
 }

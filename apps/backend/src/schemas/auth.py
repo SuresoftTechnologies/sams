@@ -9,7 +9,7 @@ from src.schemas.user import User, UserRole
 
 
 class LoginRequest(BaseModel):
-    """Login request DTO - matches @ams/shared-types LoginDto."""
+    """Login request DTO - matches @sams/shared-types LoginDto."""
 
     email: EmailStr = Field(..., description="Email address")
     password: str = Field(..., min_length=1, description="Password")
@@ -56,7 +56,7 @@ class TokenPair(BaseModel):
 
 class LoginResponse(BaseModel):
     """
-    Login response DTO - matches @ams/shared-types LoginResponse.
+    Login response DTO - matches @sams/shared-types LoginResponse.
     """
 
     user: User = Field(..., description="Authenticated user")

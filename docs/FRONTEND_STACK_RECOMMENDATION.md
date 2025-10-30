@@ -217,8 +217,8 @@ function AssetForm() {
 ### API Integration
 ```json
 {
-  "@ams/api-client": "workspace:*",
-  "@ams/shared-types": "workspace:*"
+  "@sams/api-client": "workspace:*",
+  "@sams/shared-types": "workspace:*"
 }
 ```
 
@@ -226,7 +226,7 @@ function AssetForm() {
 ```
 FastAPI (OpenAPI spec)
   ↓ (자동 생성)
-@ams/api-client (TypeScript types)
+@sams/api-client (TypeScript types)
   ↓
 TanStack Query (캐싱, 재검증)
   ↓
@@ -480,7 +480,7 @@ apps/frontend/
 
 ```json
 {
-  "name": "@ams/frontend",
+  "name": "@sams/frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -526,8 +526,8 @@ apps/frontend/
     "sonner": "^1.3.0",
     "zustand": "^4.4.7",
 
-    "@ams/api-client": "workspace:*",
-    "@ams/shared-types": "workspace:*"
+    "@sams/api-client": "workspace:*",
+    "@sams/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
@@ -549,7 +549,7 @@ apps/frontend/
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
 
-    "@ams/config": "workspace:*"
+    "@sams/config": "workspace:*"
   }
 }
 ```
@@ -624,7 +624,7 @@ export const queryClient = new QueryClient({
 ### 5. API Client 통합
 ```typescript
 // src/lib/api-client.ts
-import type { paths } from '@ams/api-client';
+import type { paths } from '@sams/api-client';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -644,17 +644,17 @@ export const apiClient = {
 ### 1. 백엔드 OpenAPI 생성
 ```bash
 cd /Users/chsong/Documents/my-projects/suresoft-ams
-pnpm --filter @ams/backend generate:openapi
+pnpm --filter @sams/backend generate:openapi
 ```
 
 ### 2. TypeScript 타입 자동 생성
 ```bash
-pnpm --filter @ams/api-client generate
+pnpm --filter @sams/api-client generate
 ```
 
 ### 3. 프론트엔드 개발 시작
 ```bash
-pnpm --filter @ams/frontend dev
+pnpm --filter @sams/frontend dev
 ```
 
 ### 4. 모든 앱 동시 실행

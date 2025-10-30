@@ -1,10 +1,10 @@
-# @ams/backend
+# @sams/backend
 
-SureSoft Asset Management System - Backend API (FastAPI + Python)
+SAMS (Suresoft Asset Management System) - Backend API (FastAPI + Python)
 
 ## 📦 Overview
 
-High-performance async REST API built with FastAPI, providing backend services for the SureSoft AMS.
+High-performance async REST API built with FastAPI, providing backend services for SAMS.
 
 **Tech Stack**:
 - **Framework**: FastAPI 0.109+
@@ -221,8 +221,8 @@ Backend Pydantic models → OpenAPI spec → TypeScript types
 1. Define Pydantic schemas in `src/schemas/`
 2. FastAPI auto-generates OpenAPI spec
 3. Run `pnpm generate:openapi` to export `openapi.json`
-4. `@ams/api-client` generates TypeScript types
-5. Frontend imports types from `@ams/api-client`
+4. `@sams/api-client` generates TypeScript types
+5. Frontend imports types from `@sams/api-client`
 
 ### Example
 

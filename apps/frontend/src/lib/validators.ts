@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AssetStatus } from '@ams/shared-types';
+import { AssetStatus } from '@sams/shared-types';
 import { VALIDATION } from './constants';
 
 /**

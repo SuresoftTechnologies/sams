@@ -42,7 +42,7 @@ cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json p
 
 ```json
 {
-  "name": "@ams/frontend",
+  "name": "@sams/frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -81,8 +81,8 @@ cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json p
     "react-day-picker": "^8.10.0",
     "sonner": "^1.3.0",
     "zustand": "^4.4.7",
-    "@ams/api-client": "workspace:*",
-    "@ams/shared-types": "workspace:*"
+    "@sams/api-client": "workspace:*",
+    "@sams/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
@@ -100,7 +100,7 @@ cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json p
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "@ams/config": "workspace:*"
+    "@sams/config": "workspace:*"
   }
 }
 ```
@@ -465,7 +465,7 @@ RUN pnpm install --frozen-lockfile
 COPY apps/frontend ./apps/frontend
 
 # Build
-RUN pnpm --filter @ams/frontend build
+RUN pnpm --filter @sams/frontend build
 
 # Production
 FROM nginx:alpine
@@ -509,7 +509,7 @@ curl http://localhost:8000/api/v1/health
 pnpm typecheck
 
 # api-client 재생성
-pnpm --filter @ams/api-client generate
+pnpm --filter @sams/api-client generate
 ```
 
 ---

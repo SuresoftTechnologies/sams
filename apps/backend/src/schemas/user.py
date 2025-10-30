@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class UserRole(str, Enum):
-    """User role enum - matches @ams/shared-types."""
+    """User role enum - matches @sams/shared-types."""
 
     ADMIN = "admin"
     MANAGER = "manager"
@@ -18,7 +18,7 @@ class UserRole(str, Enum):
 
 class User(BaseModel):
     """
-    User model - matches @ams/shared-types User interface.
+    User model - matches @sams/shared-types User interface.
     """
 
     id: str = Field(..., description="Unique user ID (UUID)")

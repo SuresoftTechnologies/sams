@@ -1,15 +1,16 @@
 {
-  "name": "@ams/root",
+  "name": "@sams/root",
   "version": "1.0.0",
   "private": true,
-  "description": "SureSoft Asset Management System - Monorepo",
+  "description": "SAMS (Suresoft Asset Management System) - Monorepo",
   "packageManager": "pnpm@8.15.0",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=8.0.0"
   },
   "scripts": {
-    "dev": "turbo run dev",
+    "generate:types": "pnpm --filter @sams/backend generate:openapi && pnpm --filter @sams/api-client generate",
+    "dev": "pnpm generate:types && turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",

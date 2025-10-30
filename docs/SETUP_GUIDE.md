@@ -36,7 +36,7 @@ npx @turbo/codemod migrate
 
 ```json
 {
-  "name": "@ams/root",
+  "name": "@sams/root",
   "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@8.15.0",
@@ -109,13 +109,13 @@ mkdir -p packages/database/prisma
 
 ### 5. 공유 패키지 설정
 
-#### @ams/shared-types
+#### @sams/shared-types
 
 **packages/shared-types/package.json:**
 
 ```json
 {
-  "name": "@ams/shared-types",
+  "name": "@sams/shared-types",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -125,7 +125,7 @@ mkdir -p packages/database/prisma
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "@ams/config": "workspace:*",
+    "@sams/config": "workspace:*",
     "typescript": "^5.3.0"
   }
 }
@@ -135,7 +135,7 @@ mkdir -p packages/database/prisma
 
 ```json
 {
-  "extends": "@ams/config/typescript/base.json",
+  "extends": "@sams/config/typescript/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -145,13 +145,13 @@ mkdir -p packages/database/prisma
 }
 ```
 
-#### @ams/config
+#### @sams/config
 
 **packages/config/package.json:**
 
 ```json
 {
-  "name": "@ams/config",
+  "name": "@sams/config",
   "version": "1.0.0",
   "private": true,
   "exports": {
@@ -188,7 +188,7 @@ mkdir -p packages/database/prisma
 
 ```json
 {
-  "name": "@ams/frontend",
+  "name": "@sams/frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -200,14 +200,14 @@ mkdir -p packages/database/prisma
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ams/shared-types": "workspace:*",
-    "@ams/ui": "workspace:*",
-    "@ams/utils": "workspace:*",
+    "@sams/shared-types": "workspace:*",
+    "@sams/ui": "workspace:*",
+    "@sams/utils": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@ams/config": "workspace:*",
+    "@sams/config": "workspace:*",
     "@vitejs/plugin-react": "^4.2.0",
     "typescript": "^5.3.0",
     "vite": "^5.0.0"
@@ -219,7 +219,7 @@ mkdir -p packages/database/prisma
 
 ```json
 {
-  "extends": "@ams/config/typescript/react.json",
+  "extends": "@sams/config/typescript/react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -290,7 +290,7 @@ pnpm install
 pnpm build
 
 # 특정 패키지만 빌드
-pnpm build --filter=@ams/shared-types
+pnpm build --filter=@sams/shared-types
 ```
 
 ### 3. 개발 서버 시작
@@ -300,8 +300,8 @@ pnpm build --filter=@ams/shared-types
 pnpm dev
 
 # 특정 앱만 실행
-pnpm dev --filter=@ams/frontend
-pnpm dev --filter=@ams/backend
+pnpm dev --filter=@sams/frontend
+pnpm dev --filter=@sams/backend
 ```
 
 ## 🔧 Common Commands
@@ -310,16 +310,16 @@ pnpm dev --filter=@ams/backend
 
 ```bash
 # 특정 앱에 의존성 추가
-pnpm add axios --filter=@ams/frontend
+pnpm add axios --filter=@sams/frontend
 
 # 공유 패키지 추가
-pnpm add @ams/shared-types --filter=@ams/backend
+pnpm add @sams/shared-types --filter=@sams/backend
 
 # 전역 devDependencies 추가
 pnpm add -D -w eslint
 
 # 의존성 업데이트
-pnpm update --filter=@ams/frontend
+pnpm update --filter=@sams/frontend
 ```
 
 ### 빌드 & 테스트
@@ -332,7 +332,7 @@ pnpm build
 pnpm build --filter=[HEAD^1]
 
 # 특정 패키지와 의존성 빌드
-pnpm build --filter=@ams/frontend...
+pnpm build --filter=@sams/frontend...
 
 # 테스트 실행
 pnpm test
@@ -358,11 +358,11 @@ turbo prune
 
 ### 1. 패키지 네이밍
 
-모든 내부 패키지는 `@ams/` 스코프 사용:
+모든 내부 패키지는 `@sams/` 스코프 사용:
 
 ```json
 {
-  "name": "@ams/package-name"
+  "name": "@sams/package-name"
 }
 ```
 
@@ -373,7 +373,7 @@ pnpm을 사용하므로 `workspace:*` 사용:
 ```json
 {
   "dependencies": {
-    "@ams/shared-types": "workspace:*"
+    "@sams/shared-types": "workspace:*"
   }
 }
 ```
@@ -417,7 +417,7 @@ pnpm install
 
 ```bash
 # TypeScript 캐시 정리
-pnpm build --filter=@ams/shared-types
+pnpm build --filter=@sams/shared-types
 pnpm typecheck
 ```
 

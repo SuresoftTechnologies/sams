@@ -1,7 +1,7 @@
-# Asset Management System (AMS) - Architecture Overview
+# SAMS - Architecture Overview
 
 ## 문서 정보
-- **프로젝트명**: SureSoft Asset Management System (AMS)
+- **프로젝트명**: SAMS (Suresoft Asset Management System)
 - **버전**: 1.0.0
 - **작성일**: 2025-10-29
 - **작성자**: Architecture Team
@@ -9,7 +9,7 @@
 
 ## 📋 Executive Summary
 
-슈어소프트 자산관리 시스템(AMS)은 기존 Excel 기반의 수작업 자산관리를 현대적인 웹/모바일 기반 시스템으로 전환하는 디지털 전환 프로젝트입니다.
+SAMS (Suresoft Asset Management System)는 기존 Excel 기반의 수작업 자산관리를 현대적인 웹/모바일 기반 시스템으로 전환하는 디지털 전환 프로젝트입니다.
 
 ### 비즈니스 목표
 - 1,182개 IT 자산(데스크탑 198개, 노트북 396개, 모니터 588개)의 효율적 관리

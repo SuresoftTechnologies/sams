@@ -1,7 +1,7 @@
 /**
  * API Client Configuration
  *
- * Centralized API client using @ams/api-client package.
+ * Centralized API client using @sams/api-client package.
  * Handles authentication, error handling, and request/response interceptors.
  * Supports automatic token refresh on 401 errors.
  *
@@ -19,7 +19,7 @@ import {
   setApiConfig,
   setAuthToken as setApiAuthToken,
   getApiConfig,
-} from '@ams/api-client';
+} from '@sams/api-client';
 import { authStorage, type TokenResponse } from './auth-storage';
 import { toast } from 'sonner';
 

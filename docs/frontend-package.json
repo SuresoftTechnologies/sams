@@ -1,5 +1,5 @@
 {
-  "name": "@ams/frontend",
+  "name": "@sams/frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -46,8 +46,8 @@
     "sonner": "^1.3.0",
     "zustand": "^4.4.7",
 
-    "@ams/api-client": "workspace:*",
-    "@ams/shared-types": "workspace:*"
+    "@sams/api-client": "workspace:*",
+    "@sams/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
@@ -69,6 +69,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
 
-    "@ams/config": "workspace:*"
+    "@sams/config": "workspace:*"
   }
 }

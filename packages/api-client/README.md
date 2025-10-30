@@ -1,10 +1,10 @@
-# @ams/api-client
+# @sams/api-client
 
 Auto-generated TypeScript API client from FastAPI OpenAPI specification.
 
 ## 📦 Overview
 
-This package provides type-safe access to the SureSoft AMS backend API. Types are automatically generated from the FastAPI OpenAPI spec, ensuring frontend and backend stay in sync.
+This package provides type-safe access to the SAMS backend API. Types are automatically generated from the FastAPI OpenAPI spec, ensuring frontend and backend stay in sync.
 
 ## 🔄 Type Generation Flow
 
@@ -23,7 +23,7 @@ Frontend App
 ### Import Types
 
 ```typescript
-import { components, operations, paths } from '@ams/api-client';
+import { components, operations, paths } from '@sams/api-client';
 
 // Component schemas (DTOs, models)
 type Asset = components['schemas']['Asset'];
@@ -40,8 +40,8 @@ type AssetPaths = paths['/api/assets'];
 ### API Calls
 
 ```typescript
-import { apiFetch, setAuthToken } from '@ams/api-client';
-import type { components } from '@ams/api-client';
+import { apiFetch, setAuthToken } from '@sams/api-client';
+import type { components } from '@sams/api-client';
 
 type Asset = components['schemas']['Asset'];
 type CreateAssetDto = components['schemas']['CreateAssetDto'];
@@ -99,7 +99,7 @@ VITE_API_URL=http://localhost:8000
 Or programmatically:
 
 ```typescript
-import { setApiConfig } from '@ams/api-client';
+import { setApiConfig } from '@sams/api-client';
 
 setApiConfig({
   baseUrl: 'https://api.production.com',
@@ -109,7 +109,7 @@ setApiConfig({
 ### Custom Headers
 
 ```typescript
-import { setApiConfig } from '@ams/api-client';
+import { setApiConfig } from '@sams/api-client';
 
 setApiConfig({
   headers: {
@@ -123,7 +123,7 @@ setApiConfig({
 ### Asset Types
 
 ```typescript
-import type { components } from '@ams/api-client';
+import type { components } from '@sams/api-client';
 
 type Asset = components['schemas']['Asset'];
 // {
@@ -159,7 +159,7 @@ type CreateAssetDto = components['schemas']['CreateAssetDto'];
 ### User Types
 
 ```typescript
-import type { components } from '@ams/api-client';
+import type { components } from '@sams/api-client';
 
 type User = components['schemas']['User'];
 type LoginDto = components['schemas']['LoginDto'];
@@ -168,7 +168,7 @@ type LoginResponse = components['schemas']['LoginResponse'];
 
 ## 🔗 Dependencies
 
-- `@ams/shared-types`: Manual shared types (enums, constants)
+- `@sams/shared-types`: Manual shared types (enums, constants)
 - `openapi-typescript`: OpenAPI → TypeScript converter
 
 ## 📚 Related

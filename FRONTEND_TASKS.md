@@ -14,7 +14,7 @@
 - [x] 디렉토리 이동 및 기본 파일 확인
 
 ### 1.2 Package.json 설정
-- [x] package.json 수정 (name: `@ams/frontend`)
+- [x] package.json 수정 (name: `@sams/frontend`)
 - [x] 핵심 의존성 설치
   - [x] react-router (v7)
   - [x] @react-router/dev
@@ -36,8 +36,8 @@
   - [x] date-fns
   - [x] @types/node
 - [x] Workspace 패키지 연결
-  - [x] @ams/shared-types
-  - [x] @ams/api-client
+  - [x] @sams/shared-types
+  - [x] @sams/api-client
 
 ### 1.3 개발 도구 설치
 - [x] ESLint 설정
@@ -72,7 +72,7 @@
 ### 2.2 TypeScript 설정 (tsconfig.json)
 - [x] baseUrl 및 paths 설정
 - [x] 컴파일러 옵션 확인
-- [x] @ams/* 패키지 타입 인식 확인
+- [x] @sams/* 패키지 타입 인식 확인
 
 ### 2.3 Tailwind CSS 설정
 - [x] src/index.css 수정
@@ -185,7 +185,7 @@ src/
 - [x] React Query Devtools 추가 (개발 모드)
 
 ### 6.3 API Client 통합
-- [x] @ams/api-client import
+- [x] @sams/api-client import
 - [x] lib/api.ts 생성 (API 설정)
 - [x] Base URL 설정 (환경변수)
 
@@ -356,7 +356,7 @@ src/
 
 ### 12.1 백엔드 연동
 - [ ] OpenAPI 스펙 가져오기
-- [ ] @ams/api-client 타입 생성
+- [ ] @sams/api-client 타입 생성
 - [ ] API 엔드포인트 연결 확인
 
 ### 12.2 환경 변수 설정

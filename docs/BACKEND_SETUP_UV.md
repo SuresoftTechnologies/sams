@@ -212,7 +212,7 @@ From project root:
 
 ```bash
 # API client generates TypeScript types
-pnpm --filter=@ams/api-client generate
+pnpm --filter=@sams/api-client generate
 
 # Full workflow (automatic with Turborepo)
 pnpm dev

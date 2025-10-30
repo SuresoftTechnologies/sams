@@ -3,7 +3,7 @@
 Export OpenAPI specification from FastAPI application.
 
 This script generates the openapi.json file that will be consumed by
-the @ams/api-client package for TypeScript type generation.
+the @sams/api-client package for TypeScript type generation.
 """
 
 import json

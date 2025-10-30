@@ -8,7 +8,7 @@
  * - Configuration values
  */
 
-import { AssetStatus, AssetGrade, LocationSite } from '@ams/shared-types';
+import { AssetStatus, AssetGrade, LocationSite } from '@sams/shared-types';
 
 /**
  * Asset Status Options

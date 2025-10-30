@@ -17,7 +17,7 @@ console.log('🔄 Generating TypeScript types from OpenAPI spec...');
 // Check if openapi.json exists
 if (!existsSync(openApiPath)) {
   console.warn('⚠️  openapi.json not found. Backend needs to generate it first.');
-  console.warn('   Run: pnpm --filter=@ams/backend generate:openapi');
+  console.warn('   Run: pnpm --filter=@sams/backend generate:openapi');
   process.exit(1);
 }
 

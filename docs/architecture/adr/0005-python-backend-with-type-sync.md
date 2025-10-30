@@ -59,13 +59,13 @@ Frontend (React/TypeScript)
 
 We will use a **hybrid type architecture**:
 
-#### 1. Manual Shared Types (`@ams/shared-types`)
+#### 1. Manual Shared Types (`@sams/shared-types`)
 - Business enums (AssetStatus, UserRole, etc.)
 - Domain-specific constants
 - Common utility types
 - These are manually maintained and shared
 
-#### 2. Auto-Generated API Types (`@ams/api-client`)
+#### 2. Auto-Generated API Types (`@sams/api-client`)
 - Generated from FastAPI's OpenAPI spec
 - Request/Response DTOs
 - API client functions
@@ -165,8 +165,8 @@ async def export_openapi():
 
 ```typescript
 // apps/frontend/src/services/assets.ts
-import { components, operations } from '@ams/api-client';
-import { AssetStatus } from '@ams/shared-types';
+import { components, operations } from '@sams/api-client';
+import { AssetStatus } from '@sams/shared-types';
 
 type Asset = components['schemas']['Asset'];
 type CreateAssetDto = components['schemas']['CreateAssetDto'];
@@ -196,8 +196,8 @@ async function createAsset(data: CreateAssetDto): Promise<Asset> {
     },
     "dev": {
       "dependsOn": [
-        "@ams/backend#generate:openapi",
-        "@ams/api-client#generate:types"
+        "@sams/backend#generate:openapi",
+        "@sams/api-client#generate:types"
       ],
       "persistent": true
     }

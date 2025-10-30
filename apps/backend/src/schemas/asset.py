@@ -12,7 +12,7 @@ from src.schemas.common import PaginatedResponse
 
 
 class AssetStatus(str, Enum):
-    """Asset status enum - matches @ams/shared-types."""
+    """Asset status enum - matches @sams/shared-types."""
 
     AVAILABLE = "available"
     ASSIGNED = "assigned"
@@ -22,7 +22,7 @@ class AssetStatus(str, Enum):
 
 
 class AssetGrade(str, Enum):
-    """Asset grade based on age - matches @ams/shared-types."""
+    """Asset grade based on age - matches @sams/shared-types."""
 
     A = "A"  # 0-2 years
     B = "B"  # 2-4 years
@@ -31,7 +31,7 @@ class AssetGrade(str, Enum):
 
 class Asset(BaseModel):
     """
-    Asset model - matches @ams/shared-types Asset interface.
+    Asset model - matches @sams/shared-types Asset interface.
     """
 
     model_config = ConfigDict(from_attributes=True)

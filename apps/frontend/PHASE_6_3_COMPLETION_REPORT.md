@@ -13,7 +13,7 @@ Phase 6.3 (API Client 통합) 작업을 성공적으로 완료했습니다.
 ### 완료된 작업
 
 ✅ **1. lib/api.ts 생성**
-- @ams/api-client 패키지 통합
+- @sams/api-client 패키지 통합
 - Fetch 기반 API client 설정
 - Base URL 환경변수 설정
 - Request/Response 인터셉터 구현:
@@ -31,7 +31,7 @@ Phase 6.3 (API Client 통합) 작업을 성공적으로 완료했습니다.
 
 ✅ **3. API Client 타입 정의**
 - `types/api.ts` 생성
-- @ams/api-client의 OpenAPI 타입 활용
+- @sams/api-client의 OpenAPI 타입 활용
 - Asset, User, Login, Register 등 주요 타입 export
 - API 응답/에러 타입 정의
 - Query 파라미터 타입 정의
@@ -131,7 +131,7 @@ VITE_API_URL=http://localhost:8000
 
 런타임 설정:
 ```typescript
-import { setApiConfig } from '@ams/api-client';
+import { setApiConfig } from '@sams/api-client';
 
 setApiConfig({
   baseUrl: 'http://localhost:8000',
@@ -177,7 +177,7 @@ export class ApiError extends Error {
 ### 5. Type Safety
 
 OpenAPI 스펙 기반 타입 자동 생성:
-- @ams/api-client의 타입 활용
+- @sams/api-client의 타입 활용
 - 컴파일 타임 타입 체크
 - IDE 자동완성 지원
 
@@ -315,7 +315,7 @@ function AssetList() {
 
 ```bash
 ✓ TypeScript 타입 체크 통과 (0 errors)
-✓ @ams/api-client 타입 연동 성공
+✓ @sams/api-client 타입 연동 성공
 ✓ OpenAPI 스키마 기반 타입 생성 완료
 ```
 
@@ -431,7 +431,7 @@ $ pnpm typecheck
 ## 완료 체크리스트
 
 - [x] lib/api.ts 생성
-- [x] @ams/api-client 패키지 import
+- [x] @sams/api-client 패키지 import
 - [x] Base URL 설정 (환경변수)
 - [x] Request/Response 인터셉터 추가
 - [x] Authorization 헤더 자동 추가

@@ -1,5 +1,5 @@
 /**
- * @ams/api-client
+ * @sams/api-client
  *
  * Auto-generated TypeScript API client from FastAPI OpenAPI specification.
  *
@@ -9,7 +9,7 @@
  *
  * @example
  * ```typescript
- * import { components } from '@ams/api-client';
+ * import { components } from '@sams/api-client';
  *
  * type Asset = components['schemas']['Asset'];
  * type CreateAssetDto = components['schemas']['CreateAssetDto'];
