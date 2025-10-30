@@ -13,6 +13,7 @@ from src.api.v1.endpoints import (
     workflows,
     qrcode,
     statistics,
+    email,
     receipts,
 )
 
@@ -72,4 +73,10 @@ api_router.include_router(
     receipts.router,
     prefix="/receipts",
     tags=["Receipts"],
+)
+
+api_router.include_router(
+    email.router,
+    prefix="/email",
+    tags=["Email"],
 )

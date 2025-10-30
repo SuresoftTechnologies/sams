@@ -357,10 +357,6 @@ async def migrate_sheet(
                 current_user = await get_user_by_name(db, current_user_name)
 
             # 자산 생성
-            # 필드 길이 제한 (DB 스키마에 맞춤)
-            asset_name = f"{category_name} {model or asset_tag}"
-            asset_name = truncate_string(asset_name, 200)
-
             # 긴 model 정보는 description에 저장
             description = None
             if model and len(model) > 100:
@@ -372,7 +368,6 @@ async def migrate_sheet(
             asset = Asset(
                 id=str(uuid.uuid4()),
                 asset_tag=asset_tag,
-                name=asset_name,
                 category_id=category.id if category else None,
                 model=model_short,
                 serial_number=truncate_string(serial_number, 100),

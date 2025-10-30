@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreHorizontal, Edit, Trash2, Eye, QrCode } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/format';
 import type { Asset } from '@/hooks/useAssets';
 
 /**
@@ -48,7 +47,7 @@ interface AssetTableProps {
   onViewQR?: (id: string) => void;
 }
 
-type SortField = 'name' | 'serialNumber' | 'status' | 'purchaseDate';
+type SortField = 'name' | 'asset_tag' | 'model' | 'serial_number' | 'status' | 'purchase_date' | 'grade' | 'supplier';
 type SortOrder = 'asc' | 'desc';
 
 export function AssetTable({
@@ -64,12 +63,12 @@ export function AssetTable({
 
   // Sort assets
   const sortedAssets = [...assets].sort((a, b) => {
-    let aValue: string | number | null | undefined = a[sortField];
-    let bValue: string | number | null | undefined = b[sortField];
+    let aValue: string | number | null | undefined = a[sortField as keyof Asset];
+    let bValue: string | number | null | undefined = b[sortField as keyof Asset];
 
-    if (sortField === 'purchaseDate') {
-      aValue = a.purchaseDate ? new Date(a.purchaseDate).getTime() : 0;
-      bValue = b.purchaseDate ? new Date(b.purchaseDate).getTime() : 0;
+    if (sortField === 'purchase_date') {
+      aValue = a.purchase_date ? new Date(a.purchase_date).getTime() : 0;
+      bValue = b.purchase_date ? new Date(b.purchase_date).getTime() : 0;
     }
 
     if (aValue === undefined || aValue === null) return 1;
@@ -132,32 +131,51 @@ export function AssetTable({
     }
   };
 
+  const getGradeBadgeVariant = (grade?: Asset['grade']) => {
+    switch (grade) {
+      case 'A':
+        return 'default'; // blue
+      case 'B':
+        return 'secondary'; // gray
+      case 'C':
+        return 'outline'; // outline
+      default:
+        return 'outline';
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>자산 이름</TableHead>
-              <TableHead>시리얼 번호</TableHead>
-              <TableHead>카테고리</TableHead>
-              <TableHead>위치</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>구매일</TableHead>
-              <TableHead>가격</TableHead>
-              <TableHead className="text-right">작업</TableHead>
+              <TableHead className="min-w-[120px]">자산번호</TableHead>
+              <TableHead className="min-w-[150px]">자산명</TableHead>
+              <TableHead className="min-w-[120px]">모델</TableHead>
+              <TableHead className="min-w-[120px]">시리얼번호</TableHead>
+              <TableHead className="min-w-[60px]">등급</TableHead>
+              <TableHead className="min-w-[100px]">카테고리</TableHead>
+              <TableHead className="min-w-[80px]">상태</TableHead>
+              <TableHead className="min-w-[100px]">사용자</TableHead>
+              <TableHead className="min-w-[100px]">위치</TableHead>
+              <TableHead className="min-w-[120px]">공급업체</TableHead>
+              <TableHead className="text-right min-w-[80px]">작업</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={i}>
+                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-8" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                 <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
               </TableRow>
             ))}
@@ -169,23 +187,26 @@ export function AssetTable({
 
   if (assets.length === 0) {
     return (
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>자산 이름</TableHead>
-              <TableHead>시리얼 번호</TableHead>
-              <TableHead>카테고리</TableHead>
-              <TableHead>위치</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>구매일</TableHead>
-              <TableHead>가격</TableHead>
-              <TableHead className="text-right">작업</TableHead>
+              <TableHead className="min-w-[120px]">자산번호</TableHead>
+              <TableHead className="min-w-[150px]">자산명</TableHead>
+              <TableHead className="min-w-[120px]">모델</TableHead>
+              <TableHead className="min-w-[120px]">시리얼번호</TableHead>
+              <TableHead className="min-w-[60px]">등급</TableHead>
+              <TableHead className="min-w-[100px]">카테고리</TableHead>
+              <TableHead className="min-w-[80px]">상태</TableHead>
+              <TableHead className="min-w-[100px]">사용자</TableHead>
+              <TableHead className="min-w-[100px]">위치</TableHead>
+              <TableHead className="min-w-[120px]">공급업체</TableHead>
+              <TableHead className="text-right min-w-[80px]">작업</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                 자산을 찾을 수 없습니다. 첫 번째 자산을 생성하여 시작하세요.
               </TableCell>
             </TableRow>
@@ -196,40 +217,57 @@ export function AssetTable({
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none min-w-[120px]"
+              onClick={() => handleSort('asset_tag')}
+            >
+              자산번호 {sortField === 'asset_tag' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer select-none min-w-[150px]"
               onClick={() => handleSort('name')}
             >
-              자산 이름 {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+              자산명 {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead
-              className="cursor-pointer select-none"
-              onClick={() => handleSort('serialNumber')}
+              className="cursor-pointer select-none min-w-[120px]"
+              onClick={() => handleSort('model')}
             >
-              시리얼 번호{' '}
-              {sortField === 'serialNumber' && (sortOrder === 'asc' ? '↑' : '↓')}
+              모델 {sortField === 'model' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>카테고리</TableHead>
-            <TableHead>위치</TableHead>
             <TableHead
-              className="cursor-pointer select-none"
+              className="cursor-pointer select-none min-w-[120px]"
+              onClick={() => handleSort('serial_number')}
+            >
+              시리얼번호{' '}
+              {sortField === 'serial_number' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer select-none min-w-[60px]"
+              onClick={() => handleSort('grade')}
+            >
+              등급 {sortField === 'grade' && (sortOrder === 'asc' ? '↑' : '↓')}
+            </TableHead>
+            <TableHead className="min-w-[100px]">카테고리</TableHead>
+            <TableHead
+              className="cursor-pointer select-none min-w-[80px]"
               onClick={() => handleSort('status')}
             >
               상태 {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
+            <TableHead className="min-w-[100px]">사용자</TableHead>
+            <TableHead className="min-w-[100px]">위치</TableHead>
             <TableHead
-              className="cursor-pointer select-none"
-              onClick={() => handleSort('purchaseDate')}
+              className="cursor-pointer select-none min-w-[120px]"
+              onClick={() => handleSort('supplier')}
             >
-              구매일{' '}
-              {sortField === 'purchaseDate' && (sortOrder === 'asc' ? '↑' : '↓')}
+              공급업체 {sortField === 'supplier' && (sortOrder === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>가격</TableHead>
-            <TableHead className="text-right">작업</TableHead>
+            <TableHead className="text-right min-w-[80px]">작업</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -239,7 +277,17 @@ export function AssetTable({
               className="cursor-pointer hover:bg-muted/50"
               onClick={() => navigate(`/assets/${asset.id}`)}
             >
+              <TableCell>
+                <code className="text-sm font-medium">{asset.asset_tag}</code>
+              </TableCell>
               <TableCell className="font-medium">{asset.name}</TableCell>
+              <TableCell>
+                {asset.model ? (
+                  <span className="text-sm">{asset.model}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
               <TableCell>
                 {asset.serial_number ? (
                   <code className="text-sm">{asset.serial_number}</code>
@@ -247,18 +295,35 @@ export function AssetTable({
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
+              <TableCell>
+                {asset.grade ? (
+                  <Badge variant={getGradeBadgeVariant(asset.grade)}>
+                    {asset.grade}급
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
               <TableCell>{asset.category_name || '-'}</TableCell>
-              <TableCell>{asset.location_name || '-'}</TableCell>
               <TableCell>
                 <Badge variant={getStatusBadgeVariant(asset.status)}>
                   {getStatusLabel(asset.status)}
                 </Badge>
               </TableCell>
               <TableCell>
-                {asset.purchaseDate ? formatDate(asset.purchaseDate) : '-'}
+                {asset.assigned_to ? (
+                  <span className="text-sm">{asset.assigned_to}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
+              <TableCell>{asset.location_name || '-'}</TableCell>
               <TableCell>
-                {asset.purchasePrice ? formatCurrency(asset.purchasePrice) : '-'}
+                {asset.supplier ? (
+                  <span className="text-sm">{asset.supplier}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>

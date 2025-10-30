@@ -23,40 +23,54 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
-// Asset Form Schema
+// Asset Form Schema with all 23+ fields
 export const assetSchema = z.object({
-  name: z
-    .string()
-    .min(1, '자산 이름은 필수입니다')
-    .min(VALIDATION.NAME_MIN_LENGTH, `자산 이름은 최소 ${VALIDATION.NAME_MIN_LENGTH}자 이상이어야 합니다`)
-    .max(VALIDATION.NAME_MAX_LENGTH, `자산 이름은 ${VALIDATION.NAME_MAX_LENGTH}자 미만이어야 합니다`),
+  // Basic Info
+  assetTag: z.string().optional().or(z.literal('')), // Auto-generated, readonly in edit mode
+  model: z.string().optional().or(z.literal('')),
   serialNumber: z
     .string()
-    .max(VALIDATION.SERIAL_NUMBER_MAX_LENGTH, `시리얼 번호는 ${VALIDATION.SERIAL_NUMBER_MAX_LENGTH}자 미만이어야 합니다`)
+    .max(VALIDATION.SERIAL_NUMBER_MAX_LENGTH, `시리얼번호는 ${VALIDATION.SERIAL_NUMBER_MAX_LENGTH}자 미만이어야 합니다`)
     .optional()
     .or(z.literal('')),
-  description: z
+  categoryId: z.string().min(1, '카테고리는 필수입니다'),
+  locationId: z.string().min(1, '위치는 필수입니다'),
+  status: z.nativeEnum(AssetStatus).optional(),
+  grade: z.string().optional().or(z.literal('')), // Auto-calculated, readonly
+  assignedTo: z.string().optional().or(z.literal('')),
+
+  // Purchase Info
+  purchaseDate: z.string().optional().or(z.literal('')),
+  purchasePrice: z.number().min(0, '가격은 양수여야 합니다').optional().nullable(),
+  purchaseRequest: z.string().optional().or(z.literal('')),
+  taxInvoiceDate: z.string().optional().or(z.literal('')),
+  supplier: z.string().optional().or(z.literal('')),
+  warrantyUntil: z.string().optional().or(z.literal('')),
+
+  // Category Details
+  furnitureCategory: z.string().optional().or(z.literal('')),
+  detailedCategory: z.string().optional().or(z.literal('')),
+
+  // Checkout/Return Info
+  checkoutDate: z.string().optional().or(z.literal('')),
+  returnDate: z.string().optional().or(z.literal('')),
+
+  // User History
+  firstUser: z.string().optional().or(z.literal('')),
+  previousUser1: z.string().optional().or(z.literal('')),
+  previousUser2: z.string().optional().or(z.literal('')),
+
+  // Other Info
+  oldAssetNumber: z.string().optional().or(z.literal('')),
+  qrCodeExists: z.string().optional().or(z.literal('')),
+  notes: z
     .string()
-    .max(VALIDATION.DESCRIPTION_MAX_LENGTH, `설명은 ${VALIDATION.DESCRIPTION_MAX_LENGTH}자 미만이어야 합니다`)
+    .max(VALIDATION.DESCRIPTION_MAX_LENGTH, `비고는 ${VALIDATION.DESCRIPTION_MAX_LENGTH}자 미만이어야 합니다`)
     .optional()
     .or(z.literal('')),
-  categoryId: z
+  specialNotes: z
     .string()
-    .min(1, '카테고리는 필수입니다'),
-  locationId: z
-    .string()
-    .min(1, '위치는 필수입니다'),
-  purchaseDate: z
-    .string()
-    .optional()
-    .or(z.literal('')),
-  purchasePrice: z
-    .number()
-    .min(0, '가격은 양수여야 합니다')
-    .optional()
-    .nullable(),
-  warrantyUntil: z
-    .string()
+    .max(VALIDATION.DESCRIPTION_MAX_LENGTH, `특이사항은 ${VALIDATION.DESCRIPTION_MAX_LENGTH}자 미만이어야 합니다`)
     .optional()
     .or(z.literal('')),
 });

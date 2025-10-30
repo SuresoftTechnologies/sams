@@ -27,11 +27,12 @@ if (!existsSync(outputDir)) {
 }
 
 try {
-  // Run openapi-typescript
-  execSync(
-    `npx openapi-typescript ${openApiPath} -o ${outputPath} --empty-objects-unknown`,
-    { stdio: 'inherit', cwd: rootDir }
-  );
+  // Run openapi-typescript with proper path handling for Windows
+  const command = process.platform === 'win32'
+    ? `npx openapi-typescript "${openApiPath}" -o "${outputPath}" --empty-objects-unknown`
+    : `npx openapi-typescript ${openApiPath} -o ${outputPath} --empty-objects-unknown`;
+  
+  execSync(command, { stdio: 'inherit', cwd: rootDir });
 
   console.log('✅ TypeScript types generated successfully!');
   console.log(`   Output: ${outputPath}`);

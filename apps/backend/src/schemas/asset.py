@@ -41,13 +41,11 @@ class Asset(BaseModel):
             "example": {
                 "id": "550e8400-e29b-41d4-a716-446655440000",
                 "asset_tag": "SRS-11-2024-0001",
-                "name": "Dell Latitude 5420",
                 "status": "stock",
                 "category_id": "550e8400-e29b-41d4-a716-446655440001",
                 "location_id": "550e8400-e29b-41d4-a716-446655440002",
                 "purchase_date": "2024-01-15T00:00:00Z",
                 "purchase_price": "1200000",
-                "warranty_end": "2027-01-15T00:00:00Z",
                 "grade": "A",
                 "created_at": "2024-01-15T09:00:00Z",
                 "updated_at": "2024-01-15T09:00:00Z",
@@ -57,10 +55,8 @@ class Asset(BaseModel):
 
     id: str = Field(..., description="Unique asset ID (UUID)")
     asset_tag: str = Field(..., description="Asset tag (e.g., SRS-11-2024-0001)")
-    name: str = Field(..., description="Asset name")
-    model: str | None = Field(None, description="Asset model")
+    model: str | None = Field(None, description="Asset model (규격/모델명)")
     serial_number: str | None = Field(None, description="Serial number")
-    manufacturer: str | None = Field(None, description="Manufacturer")
     status: AssetStatus = Field(default=AssetStatus.STOCK, description="Current status")
 
     # Relations
@@ -73,10 +69,9 @@ class Asset(BaseModel):
     location_name: str | None = Field(None, description="Location name (from join)")
 
     # Purchase info
-    purchase_date: datetime | None = Field(None, description="Purchase date")
-    purchase_price: Decimal | None = Field(None, description="Purchase price")
-    supplier: str | None = Field(None, description="Supplier")
-    warranty_end: datetime | None = Field(None, description="Warranty end date")
+    purchase_date: datetime | None = Field(None, description="Purchase date (구매연일)")
+    purchase_price: Decimal | None = Field(None, description="Purchase price (구매가)")
+    supplier: str | None = Field(None, description="Supplier (구매처)")
 
     # QR Code
     qr_code: str | None = Field(None, description="QR code URL or Base64")
@@ -96,14 +91,12 @@ class CreateAssetRequest(BaseModel):
     """Create asset request DTO."""
 
     asset_tag: str = Field(..., min_length=1, max_length=50, description="Asset tag")
-    name: str = Field(..., min_length=1, max_length=200, description="Asset name")
     category_id: str = Field(..., description="Category ID")
     status: AssetStatus = Field(default=AssetStatus.STOCK, description="Initial status")
 
     location_id: str | None = Field(None, description="Location ID")
     purchase_date: datetime | None = None
     purchase_price: Decimal | None = Field(None, ge=0)
-    warranty_end: datetime | None = None
     notes: str | None = Field(None, max_length=1000)
 
     model_config = ConfigDict(
@@ -116,7 +109,6 @@ class CreateAssetRequest(BaseModel):
                 "location_id": "550e8400-e29b-41d4-a716-446655440002",
                 "purchase_date": "2024-01-15T00:00:00Z",
                 "purchase_price": "1200000",
-                "warranty_end": "2027-01-15T00:00:00Z",
             }
         }
     )
@@ -125,14 +117,12 @@ class CreateAssetRequest(BaseModel):
 class UpdateAssetRequest(BaseModel):
     """Update asset request DTO - all fields optional."""
 
-    name: str | None = Field(None, min_length=1, max_length=200)
     status: AssetStatus | None = None
     category_id: str | None = None
     location_id: str | None = None
     assigned_to: str | None = None
     purchase_date: datetime | None = None
     purchase_price: Decimal | None = Field(None, ge=0)
-    warranty_end: datetime | None = None
     notes: str | None = Field(None, max_length=1000)
     grade: AssetGrade | None = None
 
@@ -140,7 +130,7 @@ class UpdateAssetRequest(BaseModel):
 class AssetFilterParams(BaseModel):
     """Asset filter and search parameters."""
 
-    search: str | None = Field(None, description="Search term (name, asset_tag)")
+    search: str | None = Field(None, description="Search term (asset_tag, model, serial_number)")
     status: AssetStatus | None = Field(None, description="Filter by status")
     category_id: str | None = Field(None, description="Filter by category")
     location_id: str | None = Field(None, description="Filter by location")
@@ -172,8 +162,7 @@ class AssetListResponse(PaginatedResponse[Asset]):
                     {
                         "id": "550e8400-e29b-41d4-a716-446655440000",
                         "asset_tag": "SRS-11-2024-0001",
-                        "name": "Dell Latitude 5420",
-                        "status": "stock",
+                "status": "stock",
                         "category_id": "550e8400-e29b-41d4-a716-446655440001",
                         "grade": "A",
                         "created_at": "2024-01-15T09:00:00Z",

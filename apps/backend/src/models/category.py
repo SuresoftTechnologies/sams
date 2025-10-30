@@ -4,7 +4,7 @@ Category model for asset classification.
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -22,6 +22,14 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text)
+
+    # Hierarchical structure
+    parent_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("categories.id"), index=True
+    )
+
+    # Display order
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Icon/Color for UI (optional)
     icon: Mapped[str | None] = mapped_column(String(50))

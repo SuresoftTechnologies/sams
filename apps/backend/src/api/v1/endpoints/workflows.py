@@ -168,7 +168,7 @@ async def create_checkout_request(
             detail="Asset not found",
         )
 
-    if asset.status != AssetStatus.AVAILABLE:
+    if asset.status not in [AssetStatus.LOANED, AssetStatus.STOCK]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Asset is not available (current status: {asset.status})",
@@ -306,7 +306,7 @@ async def approve_workflow(
     if asset:
         # Update asset based on workflow type
         if workflow.type == WorkflowType.CHECKOUT:
-            asset.status = AssetStatus.ASSIGNED
+            asset.status = AssetStatus.ISSUED
             asset.assigned_to = workflow.assignee_id
 
             # Create history entry
@@ -322,7 +322,7 @@ async def approve_workflow(
             db.add(history)
 
         elif workflow.type == WorkflowType.CHECKIN:
-            asset.status = AssetStatus.AVAILABLE
+            asset.status = AssetStatus.LOANED
             asset.assigned_to = None
 
             # Create history entry

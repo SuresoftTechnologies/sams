@@ -40,7 +40,6 @@ export interface UserWithRelations extends User {
   assignedAssets?: Array<{
     id: string;
     assetTag: string;
-    name: string;
     status: string;
   }>;
 }

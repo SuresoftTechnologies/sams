@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import type { AssetFormData } from '@/lib/validators';
-import type { CreateAssetDto, UpdateAssetDto, AssetStatus } from '@sams/api-client';
+import type { CreateAssetDto, UpdateAssetDto } from '@sams/api-client';
+import { AssetStatus } from '@sams/api-client';
 
 /**
  * Asset Management Hooks
@@ -23,26 +24,24 @@ export type { Asset } from '@sams/api-client';
 const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
   return {
     asset_tag: data.serialNumber || `ASSET-${Date.now()}`,
-    name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
-    status: AssetStatus.AVAILABLE,
+    status: AssetStatus.STOCK,
     purchase_date: data.purchaseDate,
     purchase_price: data.purchasePrice ?? undefined,
     warranty_end: data.warrantyUntil,
-    notes: data.description,
+    notes: data.notes,
   };
 };
 
 const mapFormToUpdateDto = (data: AssetFormData): UpdateAssetDto => {
   return {
-    name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
     purchase_date: data.purchaseDate,
     purchase_price: data.purchasePrice ?? undefined,
     warranty_end: data.warrantyUntil,
-    notes: data.description,
+    notes: data.notes,
   };
 };
 
@@ -94,7 +93,7 @@ export function useCreateAsset() {
       queryClient.invalidateQueries({ queryKey: ['assets'] });
 
       toast.success('Asset created successfully', {
-        description: `${data.name} has been added to the system.`,
+        description: `Asset ${data.asset_tag} has been added to the system.`,
       });
 
       // Navigate to asset detail page
@@ -126,7 +125,7 @@ export function useUpdateAsset(id: string) {
       queryClient.invalidateQueries({ queryKey: ['asset', id] });
 
       toast.success('Asset updated successfully', {
-        description: `${data.name} has been updated.`,
+        description: `Asset ${data.asset_tag} has been updated.`,
       });
 
       // Navigate to asset detail page

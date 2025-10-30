@@ -5,7 +5,7 @@ User model for authentication and authorization.
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -33,9 +33,12 @@ class User(Base):
 
     # Profile
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    role: Mapped[UserRole] = mapped_column(String(20), default=UserRole.EMPLOYEE, nullable=False)
-    department: Mapped[str | None] = mapped_column(String(100))
+    role: Mapped[UserRole] = mapped_column(String(20), default=UserRole.EMPLOYEE, nullable=False, index=True)
+    department_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("departments.id"), index=True
+    )
     phone: Mapped[str | None] = mapped_column(String(20))
+    avatar_url: Mapped[str | None] = mapped_column(String(500))
 
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -51,6 +54,12 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Relationships
+    department: Mapped["Department | None"] = relationship(
+        "Department", foreign_keys=[department_id], back_populates="members", lazy="select"
+    )
+    managed_department: Mapped["Department | None"] = relationship(
+        "Department", foreign_keys="Department.manager_id", back_populates="manager", lazy="select"
+    )
     # assets: Mapped[list["Asset"]] = relationship("Asset", back_populates="assigned_user")
     # workflows_requested: Mapped[list["Workflow"]] = relationship(
     #     "Workflow", foreign_keys="Workflow.requester_id", back_populates="requester"

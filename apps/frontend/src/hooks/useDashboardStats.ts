@@ -1,12 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@sams/api-client';
 import { useGetAssets } from './useAssets';
-import { useGetCategories } from './useCategories';
-import { useGetLocations } from './useLocations';
-import { useMemo } from 'react';
 
 /**
  * Dashboard Statistics Hook
  *
- * Aggregates data from multiple sources to provide dashboard statistics
+ * Uses backend statistics API for efficient server-side aggregation
  */
 
 export interface DashboardStats {
@@ -43,8 +42,8 @@ export interface DashboardStats {
   // Recent assets
   recentAssets: Array<{
     id: string;
-    name: string;
     asset_tag: string;
+    model?: string;
     status: string;
     category_name?: string;
     created_at: string;
@@ -53,127 +52,91 @@ export interface DashboardStats {
 
 /**
  * Hook to fetch and calculate dashboard statistics
+ * Now uses backend statistics API for better performance
  */
 export function useDashboardStats() {
-  // Fetch all data (we need full data for aggregation)
-  // Backend allows up to 5000 items per page
-  const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useGetAssets({ limit: 3000 });
-  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategories();
-  const { data: locationsData, isLoading: locationsLoading } = useGetLocations();
+  // Fetch overview statistics from backend
+  const { data: overview, isLoading: overviewLoading, error: overviewError } = useQuery({
+    queryKey: ['statistics', 'overview'],
+    queryFn: () => apiClient.statistics.overview(),
+    staleTime: 60 * 1000, // 1 minute
+  });
 
-  // Check if using statistics API endpoint
-  // Disabled for now, using client-side aggregation
-  // const { data: statsApiData } = useQuery({
-  //   queryKey: ['dashboard-stats'],
-  //   queryFn: () => api.statistics.dashboard(),
-  //   staleTime: 60 * 1000, // 1 minute
-  //   retry: false, // Don't retry if endpoint doesn't exist
-  //   enabled: false,
-  // });
+  // Fetch category distribution from backend
+  const { data: categoryStats, isLoading: categoryLoading } = useQuery({
+    queryKey: ['statistics', 'categories'],
+    queryFn: () => apiClient.statistics.assetsByCategory(),
+    staleTime: 60 * 1000, // 1 minute
+  });
 
-  // Calculate statistics from assets data
-  const stats = useMemo<DashboardStats | null>(() => {
-    if (!assetsData || !categoriesData || !locationsData) {
-      return null;
-    }
+  // Fetch location distribution from backend
+  const { data: locationStats, isLoading: locationLoading } = useQuery({
+    queryKey: ['statistics', 'locations'],
+    queryFn: () => apiClient.statistics.assetsByLocation(),
+    staleTime: 60 * 1000, // 1 minute
+  });
 
-    // Ensure data is in correct format
-    const categories = Array.isArray(categoriesData) ? categoriesData : [];
-    const locations = Array.isArray(locationsData) ? locationsData : [];
+  // Fetch recent assets (only 5 items, sorted by created_at desc)
+  const { data: recentAssetsData, isLoading: recentAssetsLoading } = useGetAssets({
+    limit: 5,
+    sort_by: 'created_at',
+    sort_order: 'desc',
+  });
 
-    if (categories.length === 0 || locations.length === 0) {
-      console.warn('Categories or locations data is empty or invalid format');
-      return null;
-    }
+  // Combine all data
+  const stats: DashboardStats | null =
+    overview && categoryStats && locationStats && recentAssetsData
+      ? {
+          // Total counts from overview API
+          totalAssets: overview.total_assets,
+          totalCategories: overview.total_categories,
+          totalLocations: overview.total_locations,
 
-    const assets = assetsData.items;
+          // Status distribution from overview API
+          statusDistribution: {
+            issued: overview.assets_by_status.issued || 0,
+            loaned: overview.assets_by_status.loaned || 0,
+            general: overview.assets_by_status.general || 0,
+            stock: overview.assets_by_status.stock || 0,
+            server_room: overview.assets_by_status.server_room || 0,
+            disposed: overview.assets_by_status.disposed || 0,
+          },
 
-    // Status distribution
-    const statusDistribution = {
-      issued: assets.filter(a => a.status === 'issued').length,
-      loaned: assets.filter(a => a.status === 'loaned').length,
-      general: assets.filter(a => a.status === 'general').length,
-      stock: assets.filter(a => a.status === 'stock').length,
-      server_room: assets.filter(a => a.status === 'server_room').length,
-      disposed: assets.filter(a => a.status === 'disposed').length,
-    };
+          // Category distribution from category stats API
+          categoryDistribution: categoryStats.map(cat => ({
+            id: cat.category_id,
+            name: cat.category_name,
+            count: cat.asset_count,
+            percentage: overview.total_assets > 0
+              ? Math.round((cat.asset_count / overview.total_assets) * 100)
+              : 0,
+          })).sort((a, b) => b.count - a.count), // Sort by count descending
 
-    // Category distribution
-    const categoryMap = new Map<string, { name: string; count: number }>();
-    assets.forEach(asset => {
-      const category = categories.find(c => c.id === asset.category_id);
-      if (category) {
-        const existing = categoryMap.get(category.id);
-        if (existing) {
-          existing.count++;
-        } else {
-          categoryMap.set(category.id, { name: category.name, count: 1 });
+          // Location distribution from location stats API (top 10)
+          locationDistribution: locationStats
+            .map(loc => ({
+              id: loc.location_id,
+              name: loc.location_name,
+              count: loc.asset_count,
+            }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10), // Top 10
+
+          // Recent assets
+          recentAssets: recentAssetsData.items.map(asset => ({
+            id: asset.id,
+            asset_tag: asset.asset_tag,
+            model: asset.model,
+            status: asset.status,
+            category_name: asset.category_name,
+            created_at: asset.created_at,
+          })),
         }
-      }
-    });
-
-    const categoryDistribution = Array.from(categoryMap.entries())
-      .map(([id, data]) => ({
-        id,
-        name: data.name,
-        count: data.count,
-        percentage: Math.round((data.count / assets.length) * 100),
-      }))
-      .sort((a, b) => b.count - a.count); // Sort by count descending
-
-    // Location distribution (top 10)
-    const locationMap = new Map<string, { name: string; count: number }>();
-    assets.forEach(asset => {
-      const location = locations.find(l => l.id === asset.location_id);
-      if (location) {
-        const existing = locationMap.get(location.id);
-        if (existing) {
-          existing.count++;
-        } else {
-          locationMap.set(location.id, { name: location.name, count: 1 });
-        }
-      }
-    });
-
-    const locationDistribution = Array.from(locationMap.entries())
-      .map(([id, data]) => ({
-        id,
-        name: data.name,
-        count: data.count,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10); // Top 10
-
-    // Recent assets (latest 5 by created_at)
-    const recentAssets = [...assets]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 5)
-      .map(asset => {
-        const category = categories.find(c => c.id === asset.category_id);
-        return {
-          id: asset.id,
-          name: asset.name,
-          asset_tag: asset.asset_tag,
-          status: asset.status,
-          category_name: category?.name,
-          created_at: asset.created_at,
-        };
-      });
-
-    return {
-      totalAssets: assetsData.total,
-      totalCategories: categories.length,
-      totalLocations: locations.length,
-      statusDistribution,
-      categoryDistribution,
-      locationDistribution,
-      recentAssets,
-    };
-  }, [assetsData, categoriesData, locationsData]);
+      : null;
 
   return {
     data: stats,
-    isLoading: assetsLoading || categoriesLoading || locationsLoading,
-    error: assetsError,
+    isLoading: overviewLoading || categoryLoading || locationLoading || recentAssetsLoading,
+    error: overviewError,
   };
 }

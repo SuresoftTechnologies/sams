@@ -86,7 +86,7 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
-            <CardTitle className="text-lg">{asset.name}</CardTitle>
+            <CardTitle className="text-lg">{asset.model || asset.asset_tag}</CardTitle>
             {asset.serial_number && (
               <code className="text-xs text-muted-foreground">{asset.serial_number}</code>
             )}
@@ -171,11 +171,11 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
             </div>
           )}
 
-          {asset.purchaseDate && (
+          {asset.purchase_date && (
             <div className="flex items-center text-muted-foreground">
               <Calendar className="mr-1.5 h-3.5 w-3.5" />
               <span className="font-medium min-w-20">구매일:</span>
-              <span>{formatDate(asset.purchaseDate)}</span>
+              <span>{formatDate(asset.purchase_date)}</span>
             </div>
           )}
 
@@ -187,12 +187,12 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
         </div>
       </CardContent>
 
-      {asset.purchasePrice && (
+      {asset.purchase_price && (
         <CardFooter className="pt-3 border-t">
           <div className="flex items-center justify-between w-full">
             <span className="text-sm text-muted-foreground">구매 가격</span>
             <span className="text-base font-semibold">
-              {formatCurrency(asset.purchasePrice)}
+              {formatCurrency(asset.purchase_price)}
             </span>
           </div>
         </CardFooter>

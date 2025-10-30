@@ -435,10 +435,62 @@ export class ApiClient {
    */
   statistics = {
     /**
-     * Get dashboard statistics
+     * Get dashboard overview statistics
      */
-    dashboard: (): Promise<any> => {
-      return this.request<any>('/api/v1/statistics/dashboard');
+    overview: (): Promise<{
+      total_assets: number;
+      assets_by_status: Record<string, number>;
+      pending_workflows: number;
+      total_users: number;
+      total_categories: number;
+      total_locations: number;
+    }> => {
+      return this.request('/api/v1/statistics/overview');
+    },
+
+    /**
+     * Get assets by category
+     */
+    assetsByCategory: (): Promise<Array<{
+      category_id: string;
+      category_name: string;
+      category_code: string;
+      asset_count: number;
+    }>> => {
+      return this.request('/api/v1/statistics/assets-by-category');
+    },
+
+    /**
+     * Get assets by location
+     */
+    assetsByLocation: (): Promise<Array<{
+      location_id: string;
+      location_name: string;
+      location_code: string;
+      site: string;
+      asset_count: number;
+    }>> => {
+      return this.request('/api/v1/statistics/assets-by-location');
+    },
+
+    /**
+     * Get assets by status
+     */
+    assetsByStatus: (): Promise<Array<{
+      status: string;
+      asset_count: number;
+    }>> => {
+      return this.request('/api/v1/statistics/assets-by-status');
+    },
+
+    /**
+     * Get assets by grade
+     */
+    assetsByGrade: (): Promise<Array<{
+      grade: string;
+      asset_count: number;
+    }>> => {
+      return this.request('/api/v1/statistics/assets-by-grade');
     },
   };
 

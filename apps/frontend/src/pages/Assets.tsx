@@ -35,7 +35,7 @@ export default function Assets() {
   const filteredAssets = data?.items.filter((asset) => {
     const query = searchQuery.toLowerCase();
     return (
-      asset.name.toLowerCase().includes(query) ||
+      (asset.model?.toLowerCase().includes(query) || asset.asset_tag?.toLowerCase().includes(query)) ||
       asset.serial_number?.toLowerCase().includes(query) ||
       asset.category_name?.toLowerCase().includes(query) ||
       asset.location_name?.toLowerCase().includes(query)
@@ -142,7 +142,7 @@ export default function Assets() {
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => navigate(`/assets/${asset.id}`)}
                     >
-                      <TableCell className="font-medium">{asset.name}</TableCell>
+                      <TableCell className="font-medium">{asset.model || asset.asset_tag}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {asset.serial_number || '-'}
                       </TableCell>

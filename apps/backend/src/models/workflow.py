@@ -82,7 +82,7 @@ class Workflow(Base):
     )
 
     # Relationships
-    asset: Mapped["Asset"] = relationship("Asset", lazy="joined")
+    asset: Mapped["Asset"] = relationship("Asset", back_populates="workflows", lazy="joined")
     requester: Mapped["User"] = relationship(
         "User", foreign_keys=[requester_id], lazy="joined"
     )
@@ -92,6 +92,7 @@ class Workflow(Base):
     approver: Mapped["User"] = relationship(
         "User", foreign_keys=[approver_id], lazy="joined"
     )
+    approvals: Mapped[list["Approval"]] = relationship("Approval", back_populates="workflow", lazy="select")
 
     def __repr__(self) -> str:
         return f"<Workflow(id={self.id}, type={self.type}, status={self.status}, asset_id={self.asset_id})>"

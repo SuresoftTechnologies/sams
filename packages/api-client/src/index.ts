@@ -24,7 +24,13 @@ export type {
   LoginResponse,
   Category,
   Location,
+} from '@sams/shared-types';
+
+// Re-export enums (both type and value)
+export {
   AssetStatus,
   AssetGrade,
+  AssetCategory,
+  AssetHistoryAction,
   UserRole,
 } from '@sams/shared-types';

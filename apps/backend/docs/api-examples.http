@@ -164,3 +164,65 @@ Authorization: Bearer {{managerToken}}
 ### Test employee access
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{employeeToken}}
+
+###############################################################################
+# 9. Email API Examples
+###############################################################################
+
+### Send basic text email
+POST {{baseUrl}}/email/send
+Content-Type: application/json
+
+{
+  "to": ["recipient@example.com"],
+  "subject": "테스트 이메일",
+  "body": "안녕하세요. 이것은 테스트 이메일입니다."
+}
+
+### Send HTML email
+POST {{baseUrl}}/email/send
+Content-Type: application/json
+
+{
+  "to": ["recipient@example.com"],
+  "subject": "HTML 이메일 테스트",
+  "body": "텍스트 버전의 내용입니다.",
+  "html_body": "<h1>환영합니다!</h1><p>이것은 <strong>HTML</strong> 형식의 이메일입니다.</p><p>자산 관리 시스템에서 보낸 이메일입니다.</p>"
+}
+
+### Send email with CC and BCC
+POST {{baseUrl}}/email/send
+Content-Type: application/json
+
+{
+  "to": ["recipient@example.com"],
+  "subject": "팀 공지사항",
+  "body": "중요한 공지사항입니다.\n\n팀 전체에 전달되는 메시지입니다.",
+  "cc": ["manager@example.com"],
+  "bcc": ["archive@example.com"]
+}
+
+### Send email to multiple recipients
+POST {{baseUrl}}/email/send
+Content-Type: application/json
+
+{
+  "to": [
+    "user1@example.com",
+    "user2@example.com",
+    "user3@example.com"
+  ],
+  "subject": "다중 수신자 테스트",
+  "body": "여러 명에게 동시에 전송되는 이메일입니다."
+}
+
+### Send formatted notification email
+POST {{baseUrl}}/email/send
+Content-Type: application/json
+
+{
+  "to": ["admin@suresoft.com"],
+  "subject": "[자산관리] 새로운 자산이 등록되었습니다",
+  "body": "새로운 자산이 등록되었습니다.\n\n자산명: 노트북\n자산코드: ASSET-2024-001\n담당자: 홍길동",
+  "html_body": "<h2>새로운 자산 등록 알림</h2><table border='1' cellpadding='10'><tr><th>항목</th><th>내용</th></tr><tr><td>자산명</td><td>노트북</td></tr><tr><td>자산코드</td><td>ASSET-2024-001</td></tr><tr><td>담당자</td><td>홍길동</td></tr></table>"
+}

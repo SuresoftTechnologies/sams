@@ -141,9 +141,8 @@ class AssetService:
             asset_id=asset.id,
             action=HistoryAction.CREATED,
             performed_by=created_by,
-            description=f"Asset created: {asset.name}",
+            description=f"Asset created: {asset.model or asset.asset_tag}",
             new_values={
-                "name": asset.name,
                 "category_id": asset.category_id,
                 "status": asset.status.value,
                 "grade": asset.grade.value,
@@ -211,7 +210,7 @@ class AssetService:
                 asset_id=asset.id,
                 action=HistoryAction.UPDATED,
                 performed_by=updated_by,
-                description=f"Asset updated: {asset.name}",
+                description=f"Asset updated: {asset.model or asset.asset_tag}",
                 old_values=old_values,
                 new_values=new_values,
             )
@@ -255,7 +254,7 @@ class AssetService:
             asset_id=asset.id,
             action=HistoryAction.DELETED,
             performed_by=deleted_by,
-            description=f"Asset deleted: {asset.name}",
+            description=f"Asset deleted: {asset.model or asset.asset_tag}",
             old_values={"deleted_at": None},
             new_values={"deleted_at": asset.deleted_at.isoformat()},
         )
@@ -290,7 +289,7 @@ class AssetService:
         if not asset:
             raise ValueError(f"Asset not found: {asset_id}")
 
-        if asset.status not in [AssetStatus.AVAILABLE, AssetStatus.IN_TRANSIT]:
+        if asset.status not in [AssetStatus.LOANED, AssetStatus.STOCK]:
             raise ValueError(f"Asset not available for assignment: {asset.status}")
 
         # Track old values
@@ -299,7 +298,7 @@ class AssetService:
 
         # Update assignment
         asset.assigned_to = user_id
-        asset.status = AssetStatus.ASSIGNED
+        asset.status = AssetStatus.ISSUED
 
         # Create history record
         await AssetService.create_history(
@@ -316,7 +315,7 @@ class AssetService:
             },
             new_values={
                 "assigned_to": user_id,
-                "status": AssetStatus.ASSIGNED.value,
+                "status": AssetStatus.ISSUED.value,
             },
         )
 
@@ -349,7 +348,7 @@ class AssetService:
         if not asset:
             raise ValueError(f"Asset not found: {asset_id}")
 
-        if asset.status != AssetStatus.ASSIGNED:
+        if asset.status != AssetStatus.ISSUED:
             raise ValueError(f"Asset is not assigned: {asset.status}")
 
         # Track old values
@@ -357,7 +356,7 @@ class AssetService:
 
         # Update assignment
         asset.assigned_to = None
-        asset.status = AssetStatus.AVAILABLE
+        asset.status = AssetStatus.LOANED
 
         # Create history record
         await AssetService.create_history(
@@ -369,11 +368,11 @@ class AssetService:
             from_user_id=old_assigned_to,
             old_values={
                 "assigned_to": old_assigned_to,
-                "status": AssetStatus.ASSIGNED.value,
+                "status": AssetStatus.ISSUED.value,
             },
             new_values={
                 "assigned_to": None,
-                "status": AssetStatus.AVAILABLE.value,
+                "status": AssetStatus.LOANED.value,
             },
         )
 

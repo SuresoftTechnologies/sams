@@ -48,7 +48,6 @@ export interface WorkflowWithRelations extends Workflow {
   asset: {
     id: string;
     assetTag: string;
-    name: string;
     model?: string;
   };
   requester: {

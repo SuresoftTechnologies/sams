@@ -3,11 +3,19 @@ Location model for asset tracking.
 """
 
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import Boolean, DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
+
+
+class LocationSite(str, Enum):
+    """Location site enum."""
+
+    PANGYO = "pangyo"  # 판교
+    DAEJEON = "daejeon"  # 대전
 
 
 class Location(Base):
@@ -23,7 +31,7 @@ class Location(Base):
     code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
 
     # Detailed location info
-    site: Mapped[str | None] = mapped_column(String(50))  # e.g., "판교", "대전"
+    site: Mapped[LocationSite | None] = mapped_column(String(50), index=True)  # e.g., "판교", "대전"
     building: Mapped[str | None] = mapped_column(String(50))  # e.g., "본관", "연구동"
     floor: Mapped[str | None] = mapped_column(String(10))  # e.g., "3F", "B1"
     room: Mapped[str | None] = mapped_column(String(20))  # e.g., "301호", "회의실A"

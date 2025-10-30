@@ -4,6 +4,7 @@ Application configuration using Pydantic Settings.
 
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,10 +38,15 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
 
     # CORS
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ]
+    CORS_ORIGINS: str | list[str] = "http://localhost:5173,http://localhost:3000"
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS_ORIGINS from comma-separated string or list."""
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",")]
+        return v
 
     # Storage
     UPLOAD_DIR: str = "./uploads"
@@ -49,6 +55,15 @@ class Settings(BaseSettings):
     # QR Code
     QR_CODE_BASE_URL: str = "http://localhost:5173/assets"
     APP_FRONTEND_URL: str = "http://localhost:5173"
+
+    # Email (SMTP)
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_FROM_NAME: str = "SureSoft AMS"
+    SMTP_USE_TLS: bool = True
 
 
     # DeepSeek OCR API (Vision 모델)

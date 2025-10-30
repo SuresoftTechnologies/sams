@@ -58,14 +58,17 @@ apps/backend/
 │   │       ├── endpoints/      # API endpoints
 │   │       │   ├── auth.py
 │   │       │   ├── users.py
-│   │       │   └── assets.py
+│   │       │   ├── assets.py
+│   │       │   └── email.py
 │   │       └── router.py       # Main router
 │   ├── schemas/                # Pydantic models
 │   │   ├── asset.py
 │   │   ├── user.py
-│   │   └── auth.py
+│   │   ├── auth.py
+│   │   └── email.py
 │   ├── models/                 # SQLAlchemy models (TODO)
-│   ├── services/               # Business logic (TODO)
+│   ├── services/               # Business logic
+│   │   └── email_service.py
 │   ├── config.py               # Configuration
 │   └── main.py                 # FastAPI app
 ├── scripts/
@@ -156,6 +159,50 @@ FastAPI provides auto-generated interactive API documentation:
 ### OpenAPI Schema
 
 - **JSON**: http://localhost:8000/openapi.json
+
+## 📧 Email API
+
+SMTP 기반 이메일 전송 기능을 제공합니다.
+
+### 설정 방법
+
+`.env` 파일에 SMTP 설정 추가:
+
+```bash
+# Gmail 사용 시 (앱 비밀번호 필요)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM_EMAIL=your-email@gmail.com
+SMTP_FROM_NAME=SureSoft AMS
+SMTP_USE_TLS=true
+```
+
+### 이메일 전송 예제
+
+```bash
+# 기본 텍스트 이메일
+POST /api/v1/email/send
+{
+  "to": ["recipient@example.com"],
+  "subject": "테스트 이메일",
+  "body": "안녕하세요."
+}
+
+# HTML 이메일 (CC, BCC 포함)
+POST /api/v1/email/send
+{
+  "to": ["recipient@example.com"],
+  "subject": "HTML 이메일",
+  "body": "텍스트 버전",
+  "html_body": "<h1>환영합니다!</h1>",
+  "cc": ["manager@example.com"],
+  "bcc": ["archive@example.com"]
+}
+```
+
+상세한 내용은 [EMAIL_API.md](./docs/EMAIL_API.md)를 참조하세요.
 
 ## 🔐 Authentication
 
@@ -261,6 +308,15 @@ REDIS_URL=redis://localhost:6379/0
 # JWT
 JWT_ACCESS_SECRET=your-secret-key
 JWT_REFRESH_SECRET=your-refresh-secret
+
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM_EMAIL=your-email@gmail.com
+SMTP_FROM_NAME=SureSoft AMS
+SMTP_USE_TLS=true
 ```
 
 See `.env.example` for all options.
