@@ -131,20 +131,20 @@ src/
 └── App.tsx
 ```
 
-- [ ] components/layout 폴더 생성
-- [ ] components/features 폴더 생성
-- [ ] pages 폴더 생성
-- [ ] hooks 폴더 생성
-- [ ] lib 폴더 생성 (utils.ts 포함)
-- [ ] services 폴더 생성
-- [ ] stores 폴더 생성 (선택적)
-- [ ] types 폴더 생성
+- [x] components/layout 폴더 생성
+- [x] components/features 폴더 생성
+- [x] pages 폴더 생성
+- [x] hooks 폴더 생성
+- [x] lib 폴더 생성 (utils.ts 포함)
+- [x] services 폴더 생성
+- [x] stores 폴더 생성 (선택적)
+- [x] types 폴더 생성
 
 ### 4.2 .gitignore 업데이트
-- [ ] node_modules
-- [ ] dist
-- [ ] .env.local
-- [ ] 기타 빌드 아티팩트
+- [x] node_modules
+- [x] dist
+- [x] .env.local
+- [x] 기타 빌드 아티팩트
 
 ---
 
