@@ -31,7 +31,7 @@ export default function RootLayout() {
 
       {/* Main content area - Full width, no sidebar */}
       <main className="pt-16">
-        <div className="container mx-auto py-4 md:py-6 px-4 max-w-screen-2xl">
+        <div className="container mx-auto py-2 md:py-4 px-4 max-w-screen-2xl">
           <Outlet />
         </div>
       </main>
