@@ -176,18 +176,18 @@ src/
 ## 🌐 Phase 6: TanStack Query 설정
 
 ### 6.1 QueryClient 설정
-- [ ] lib/query-client.ts 생성
-- [ ] QueryClient 인스턴스 생성
-- [ ] 기본 옵션 설정 (staleTime, cacheTime 등)
+- [x] lib/query-client.ts 생성
+- [x] QueryClient 인스턴스 생성
+- [x] 기본 옵션 설정 (staleTime, cacheTime 등)
 
 ### 6.2 QueryClientProvider 통합
-- [ ] App.tsx에 QueryClientProvider 추가
-- [ ] React Query Devtools 추가 (개발 모드)
+- [x] App.tsx에 QueryClientProvider 추가
+- [x] React Query Devtools 추가 (개발 모드)
 
 ### 6.3 API Client 통합
-- [ ] @ams/api-client import
-- [ ] lib/api.ts 생성 (API 설정)
-- [ ] Base URL 설정 (환경변수)
+- [x] @ams/api-client import
+- [x] lib/api.ts 생성 (API 설정)
+- [x] Base URL 설정 (환경변수)
 
 ---
 

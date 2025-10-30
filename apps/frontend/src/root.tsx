@@ -2,6 +2,8 @@ import { Outlet } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { queryClient } from '@/lib/query-client';
+import { useEffect } from 'react';
+import { initializeApiClient } from '@/lib/api';
 
 /**
  * Root Layout Component
@@ -9,9 +11,15 @@ import { queryClient } from '@/lib/query-client';
  * Provides global context providers and layout structure:
  * - QueryClientProvider for TanStack Query
  * - Toaster for notifications (sonner)
+ * - API Client initialization
  * - Basic layout structure (will add Header/Sidebar later)
  */
 export default function Root() {
+  // Initialize API client on mount
+  useEffect(() => {
+    initializeApiClient();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background">
