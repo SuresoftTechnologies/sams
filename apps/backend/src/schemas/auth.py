@@ -2,9 +2,10 @@
 Authentication schemas matching TypeScript shared-types.
 """
 
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
-from src.schemas.user import User
+from src.schemas.user import User, UserRole
 
 
 class LoginRequest(BaseModel):
@@ -80,6 +81,40 @@ class LoginResponse(BaseModel):
                 "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "token_type": "bearer",
+            }
+        }
+    )
+
+
+class TokenPayload(BaseModel):
+    """JWT token payload."""
+
+    sub: str = Field(..., description="Subject (user ID)")
+    exp: datetime = Field(..., description="Expiration time")
+    role: UserRole = Field(..., description="User role")
+    email: str | None = Field(None, description="User email")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "sub": "550e8400-e29b-41d4-a716-446655440000",
+                "exp": "2024-01-15T10:00:00Z",
+                "role": "employee",
+                "email": "john.doe@suresoft.com",
+            }
+        }
+    )
+
+
+class RefreshTokenRequest(BaseModel):
+    """Refresh token request."""
+
+    refresh_token: str = Field(..., description="Refresh token")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             }
         }
     )

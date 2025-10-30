@@ -399,40 +399,49 @@ apps/backend/
 
 ---
 
-## 📝 Phase 5: Pydantic 스키마 생성
+## 📝 Phase 5: Pydantic 스키마 생성 ✅
 
 ### 5.1 공통 스키마 (src/schemas/common.py)
-- [ ] PaginationParams (skip, limit)
-- [ ] PaginatedResponse (items, total, page, pages)
-- [ ] MessageResponse (message)
-- [ ] ErrorResponse (detail, code)
+- [x] PaginationParams (skip, limit)
+- [x] PaginatedResponse (items, total, page, pages)
+- [x] MessageResponse (message)
+- [x] ErrorResponse (detail, code)
 
 ### 5.2 사용자 스키마 (src/schemas/user.py)
-- [ ] UserBase (email, name, role)
-- [ ] UserCreate (+ password)
-- [ ] UserUpdate (선택적 필드)
-- [ ] UserResponse (비밀번호 제외)
-- [ ] UserInDB (password_hash 포함)
+- [x] User (email, name, role)
+- [x] CreateUserRequest (+ password)
+- [x] UpdateUserRequest (선택적 필드)
+- [x] UserResponse (비밀번호 제외)
 
 ### 5.3 자산 스키마 (src/schemas/asset.py)
-- [ ] AssetBase (name, category_id, model 등)
-- [ ] AssetCreate
-- [ ] AssetUpdate
-- [ ] AssetResponse
-- [ ] AssetListResponse (페이지네이션 포함)
-- [ ] AssetFilterParams (검색, 필터링)
+- [x] Asset (name, category_id, model 등)
+- [x] CreateAssetRequest
+- [x] UpdateAssetRequest
+- [x] AssetListResponse (페이지네이션 포함)
+- [x] AssetFilterParams (검색, 필터링)
 
 ### 5.4 인증 스키마 (src/schemas/auth.py)
-- [ ] LoginRequest (email, password)
-- [ ] TokenResponse (access_token, refresh_token, token_type)
-- [ ] TokenPayload (sub, exp, role)
-- [ ] RefreshTokenRequest (refresh_token)
+- [x] LoginRequest (email, password)
+- [x] LoginResponse (access_token, refresh_token, token_type)
+- [x] TokenPayload (sub, exp, role)
+- [x] RefreshTokenRequest (refresh_token)
+- [x] RegisterRequest
 
-### 5.5 워크플로우 스키마
-- [ ] WorkflowCreate (asset_id, reason, expected_return_date)
-- [ ] WorkflowUpdate (status, reject_reason)
-- [ ] WorkflowResponse
-- [ ] ApprovalRequest (comment)
+### 5.5 워크플로우 스키마 (src/schemas/workflow.py)
+- [x] Workflow
+- [x] CreateWorkflowRequest (asset_id, reason, expected_return_date)
+- [x] UpdateWorkflowRequest (status, reject_reason)
+- [x] ApprovalRequest (comment)
+
+### 5.6 카테고리 스키마 (src/schemas/category.py)
+- [x] Category
+- [x] CreateCategoryRequest
+- [x] UpdateCategoryRequest
+
+### 5.7 위치 스키마 (src/schemas/location.py)
+- [x] Location
+- [x] CreateLocationRequest
+- [x] UpdateLocationRequest
 
 ---
 

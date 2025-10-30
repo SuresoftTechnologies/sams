@@ -8,6 +8,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, ConfigDict
 
+from src.schemas.common import PaginatedResponse
+
 
 class AssetStatus(str, Enum):
     """Asset status enum - matches @ams/shared-types."""
@@ -121,3 +123,54 @@ class UpdateAssetRequest(BaseModel):
     warranty_end: datetime | None = None
     notes: str | None = Field(None, max_length=1000)
     grade: AssetGrade | None = None
+
+
+class AssetFilterParams(BaseModel):
+    """Asset filter and search parameters."""
+
+    search: str | None = Field(None, description="Search term (name, asset_tag)")
+    status: AssetStatus | None = Field(None, description="Filter by status")
+    category_id: str | None = Field(None, description="Filter by category")
+    location_id: str | None = Field(None, description="Filter by location")
+    assigned_to: str | None = Field(None, description="Filter by assignee")
+    grade: AssetGrade | None = Field(None, description="Filter by grade")
+    sort_by: str | None = Field(None, description="Sort field")
+    sort_order: str | None = Field(None, description="Sort order (asc/desc)")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "search": "Dell",
+                "status": "available",
+                "category_id": "550e8400-e29b-41d4-a716-446655440001",
+                "sort_by": "created_at",
+                "sort_order": "desc",
+            }
+        }
+    )
+
+
+class AssetListResponse(PaginatedResponse[Asset]):
+    """Paginated asset list response."""
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "items": [
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "asset_tag": "SRS-11-2024-0001",
+                        "name": "Dell Latitude 5420",
+                        "status": "available",
+                        "category_id": "550e8400-e29b-41d4-a716-446655440001",
+                        "grade": "A",
+                        "created_at": "2024-01-15T09:00:00Z",
+                        "updated_at": "2024-01-15T09:00:00Z",
+                    }
+                ],
+                "total": 100,
+                "skip": 0,
+                "limit": 20,
+            }
+        }
+    )
