@@ -17,3 +17,10 @@ export function useGetLocations() {
     staleTime: 5 * 60 * 1000, // 5 minutes - locations don't change often
   });
 }
+
+/**
+ * Alias for useGetLocations (for consistency)
+ */
+export function useLocations() {
+  return useGetLocations();
+}

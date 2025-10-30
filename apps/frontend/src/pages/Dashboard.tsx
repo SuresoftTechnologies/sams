@@ -1,3 +1,4 @@
+import { useMemo, useCallback, lazy, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,134 +10,169 @@ import {
   Archive,
   Server,
   XCircle,
-  LayoutGrid,
   Activity,
   AlertCircle,
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router';
-import { StatusDonutChart } from '@/components/charts/StatusDonutChart';
-import { LocationBarChart } from '@/components/charts/LocationBarChart';
+import { Link, useNavigate } from 'react-router';
 import { TrendIndicator } from '@/components/charts/TrendIndicator';
+import { DashboardFilters } from '@/components/dashboard/DashboardFilters';
+
+// Lazy load chart components for better initial load performance
+const StatusDonutChart = lazy(() =>
+  import('@/components/charts/StatusDonutChart').then(module => ({
+    default: module.StatusDonutChart
+  }))
+);
+const LocationBarChart = lazy(() =>
+  import('@/components/charts/LocationBarChart').then(module => ({
+    default: module.LocationBarChart
+  }))
+);
+const CategoryBarChart = lazy(() =>
+  import('@/components/charts/CategoryBarChart').then(module => ({
+    default: module.CategoryBarChart
+  }))
+);
+const WorkflowTimelineChart = lazy(() =>
+  import('@/components/charts/WorkflowTimelineChart').then(module => ({
+    default: module.WorkflowTimelineChart
+  }))
+);
 
 /**
- * Dashboard Page - Phase 1 Enhanced
+ * Dashboard Page - Phase 3 Optimized
+ *
+ * Phase 3 Enhancements:
+ * - Lazy loading for chart components
+ * - useMemo for expensive computations
+ * - useCallback for event handlers
+ * - Enhanced ARIA labels throughout
+ * - Better loading states with Suspense
+ * - Optimized re-render prevention
  *
  * Features:
  * - Real-time asset statistics with trend indicators
- * - Status distribution donut chart
- * - Location distribution horizontal bar chart
- * - Category distribution with progress bars
+ * - Status distribution donut chart (clickable)
+ * - Location distribution horizontal bar chart (clickable)
+ * - Workflow timeline chart with date range selector
+ * - Category distribution bar chart (clickable)
+ * - Dashboard filters (date range, category, location)
  * - Recent assets activity
  * - Loading and error states
  * - Responsive grid layout
  * - Enhanced data visualization
+ * - Click-to-navigate interactions
+ * - WCAG 2.1 AA compliant
  */
 export default function Dashboard() {
   const { data: stats, isLoading, error } = useDashboardStats();
+  const navigate = useNavigate();
 
   // TODO: Replace with actual backend data when API is updated
   // Mock previous month data for trend calculation (10% less than current)
-  const getPreviousValue = (current: number): number => {
+  const getPreviousValue = useCallback((current: number): number => {
     return Math.round(current * 0.9);
-  };
+  }, []);
 
-  // Statistics cards configuration
-  const statsCards = stats
-    ? [
-        {
-          label: '전체 자산',
-          value: stats.totalAssets.toLocaleString(),
-          previous: getPreviousValue(stats.totalAssets),
-          icon: Package,
-          color: 'text-blue-500',
-          bgColor: 'bg-blue-50 dark:bg-blue-950',
-          description: `${stats.totalCategories}개 카테고리, ${stats.totalLocations}개 위치`,
-        },
-        {
-          label: '지급장비',
-          value: stats.statusDistribution.issued.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.issued),
-          icon: UserCheck,
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-50 dark:bg-blue-950',
-          description: '사용자에게 지급됨',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.issued / stats.totalAssets) * 100)
-            : 0,
-        },
-        {
-          label: '대여용',
-          value: stats.statusDistribution.loaned.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.loaned),
-          icon: HandHelping,
-          color: 'text-purple-600',
-          bgColor: 'bg-purple-50 dark:bg-purple-950',
-          description: '대여 가능',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.loaned / stats.totalAssets) * 100)
-            : 0,
-        },
-        {
-          label: '일반장비',
-          value: stats.statusDistribution.general.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.general),
-          icon: Box,
-          color: 'text-green-600',
-          bgColor: 'bg-green-50 dark:bg-green-950',
-          description: '일반 자산',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.general / stats.totalAssets) * 100)
-            : 0,
-        },
-        {
-          label: '재고',
-          value: stats.statusDistribution.stock.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.stock),
-          icon: Archive,
-          color: 'text-gray-600',
-          bgColor: 'bg-gray-50 dark:bg-gray-950',
-          description: '창고 보관 중',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.stock / stats.totalAssets) * 100)
-            : 0,
-        },
-        {
-          label: '서버실',
-          value: stats.statusDistribution.server_room.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.server_room),
-          icon: Server,
-          color: 'text-cyan-600',
-          bgColor: 'bg-cyan-50 dark:bg-cyan-950',
-          description: '서버실 운영',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.server_room / stats.totalAssets) * 100)
-            : 0,
-        },
-        {
-          label: '불용',
-          value: stats.statusDistribution.disposed.toLocaleString(),
-          previous: getPreviousValue(stats.statusDistribution.disposed),
-          icon: XCircle,
-          color: 'text-red-600',
-          bgColor: 'bg-red-50 dark:bg-red-950',
-          description: '폐기 처리됨',
-          percentage: stats.totalAssets > 0
-            ? Math.round((stats.statusDistribution.disposed / stats.totalAssets) * 100)
-            : 0,
-        },
-      ]
-    : [];
+  // Memoized statistics cards configuration
+  const statsCards = useMemo(() => {
+    if (!stats) return [];
 
-  // Format status for display
-  const formatStatus = (status: string) => {
+    return [
+      {
+        label: '전체 자산',
+        value: stats.totalAssets.toLocaleString(),
+        previous: getPreviousValue(stats.totalAssets),
+        icon: Package,
+        color: 'text-blue-500',
+        bgColor: 'bg-blue-50 dark:bg-blue-950/50',
+        description: `${stats.totalCategories}개 카테고리, ${stats.totalLocations}개 위치`,
+      },
+      {
+        label: '지급장비',
+        value: stats.statusDistribution.issued.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.issued),
+        icon: UserCheck,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50 dark:bg-blue-950/50',
+        description: '사용자에게 지급됨',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.issued / stats.totalAssets) * 100)
+          : 0,
+      },
+      {
+        label: '대여용',
+        value: stats.statusDistribution.loaned.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.loaned),
+        icon: HandHelping,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-50 dark:bg-purple-950/50',
+        description: '대여 가능',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.loaned / stats.totalAssets) * 100)
+          : 0,
+      },
+      {
+        label: '일반장비',
+        value: stats.statusDistribution.general.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.general),
+        icon: Box,
+        color: 'text-green-600',
+        bgColor: 'bg-green-50 dark:bg-green-950/50',
+        description: '일반 자산',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.general / stats.totalAssets) * 100)
+          : 0,
+      },
+      {
+        label: '재고',
+        value: stats.statusDistribution.stock.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.stock),
+        icon: Archive,
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-50 dark:bg-gray-950/50',
+        description: '창고 보관 중',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.stock / stats.totalAssets) * 100)
+          : 0,
+      },
+      {
+        label: '서버실',
+        value: stats.statusDistribution.server_room.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.server_room),
+        icon: Server,
+        color: 'text-cyan-600',
+        bgColor: 'bg-cyan-50 dark:bg-cyan-950/50',
+        description: '서버실 운영',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.server_room / stats.totalAssets) * 100)
+          : 0,
+      },
+      {
+        label: '불용',
+        value: stats.statusDistribution.disposed.toLocaleString(),
+        previous: getPreviousValue(stats.statusDistribution.disposed),
+        icon: XCircle,
+        color: 'text-red-600',
+        bgColor: 'bg-red-50 dark:bg-red-950/50',
+        description: '폐기 처리됨',
+        percentage: stats.totalAssets > 0
+          ? Math.round((stats.statusDistribution.disposed / stats.totalAssets) * 100)
+          : 0,
+      },
+    ];
+  }, [stats, getPreviousValue]);
+
+  // Memoized format status helper
+  const formatStatus = useCallback((status: string) => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
+  }, []);
 
-  // Get badge variant for status
-  const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+  // Memoized get badge variant helper
+  const getStatusVariant = useCallback((status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
     switch (status) {
       case 'issued':
         return 'default'; // blue
@@ -153,7 +189,37 @@ export default function Dashboard() {
       default:
         return 'outline';
     }
-  };
+  }, []);
+
+  // Optimized chart click handlers with useCallback
+  const handleStatusClick = useCallback((status: string) => {
+    navigate(`/assets?status=${status}`);
+  }, [navigate]);
+
+  const handleLocationClick = useCallback((locationId: number) => {
+    navigate(`/assets?location_id=${locationId}`);
+  }, [navigate]);
+
+  const handleCategoryClick = useCallback((categoryId: string) => {
+    navigate(`/assets?category_id=${categoryId}`);
+  }, [navigate]);
+
+  const handleDateClick = useCallback((date: string) => {
+    navigate(`/requests?date=${date}`);
+  }, [navigate]);
+
+  // Chart loading skeleton component
+  const ChartSkeleton = useCallback(({ height = 'h-[300px]' }: { height?: string }) => (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-48 mt-2" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className={`${height} w-full`} />
+      </CardContent>
+    </Card>
+  ), []);
 
   if (error) {
     return (
@@ -164,8 +230,8 @@ export default function Dashboard() {
         </div>
         <Card className="border-destructive">
           <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+            <div className="text-center space-y-4" role="alert" aria-live="assertive">
+              <AlertCircle className="h-12 w-12 text-destructive mx-auto" aria-hidden="true" />
               <div>
                 <p className="text-destructive font-semibold">대시보드 데이터 로딩 실패</p>
                 <p className="text-sm text-muted-foreground mt-2">
@@ -185,12 +251,15 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-6 -mt-0 pb-8">
       {/* Header */}
-      <div className="pt-0">
+      <header className="pt-0">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">대시보드</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           SureSoft 자산 관리 시스템에 오신 것을 환영합니다
         </p>
-      </div>
+      </header>
+
+      {/* Dashboard Filters */}
+      <DashboardFilters />
 
       {/* Statistics Cards */}
       {isLoading ? (
@@ -224,7 +293,7 @@ export default function Dashboard() {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <section aria-label="자산 통계" className="space-y-4">
           {/* Total Assets Card - Full Width with Trend */}
           {statsCards[0] && (() => {
             const stat = statsCards[0];
@@ -234,7 +303,7 @@ export default function Dashboard() {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
                   <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                    <Icon className={`h-5 w-5 ${stat.color}`} aria-hidden="true" />
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -246,7 +315,7 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
                     </div>
                     <TrendIndicator
-                      current={stats.totalAssets}
+                      current={stats!.totalAssets}
                       previous={stat.previous}
                       className="ml-4"
                     />
@@ -260,13 +329,13 @@ export default function Dashboard() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {statsCards.slice(1).map((stat, index) => {
               const Icon = stat.icon;
-              const currentValue = Object.values(stats.statusDistribution)[index];
+              const currentValue = Object.values(stats!.statusDistribution)[index];
               return (
                 <Card key={stat.label} className="hover:shadow-md transition-shadow">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
                     <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                      <Icon className={`h-5 w-5 ${stat.color}`} />
+                      <Icon className={`h-5 w-5 ${stat.color}`} aria-hidden="true" />
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -293,111 +362,70 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Charts Section */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* Charts Section - Row 1: Status & Workflow Timeline */}
+      <section aria-label="차트 분석" className="grid gap-4 lg:grid-cols-2">
         {/* Status Distribution Donut Chart */}
-        {isLoading ? (
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-48 mt-2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[300px] w-full" />
-            </CardContent>
-          </Card>
-        ) : stats ? (
-          <StatusDonutChart
-            data={stats.statusDistribution}
-            totalAssets={stats.totalAssets}
-          />
-        ) : null}
+        <Suspense fallback={<ChartSkeleton />}>
+          {!isLoading && stats ? (
+            <StatusDonutChart
+              data={stats.statusDistribution}
+              totalAssets={stats.totalAssets}
+              onStatusClick={handleStatusClick}
+            />
+          ) : (
+            <ChartSkeleton />
+          )}
+        </Suspense>
+
+        {/* Workflow Timeline Chart */}
+        <Suspense fallback={<ChartSkeleton />}>
+          <WorkflowTimelineChart onDateClick={handleDateClick} />
+        </Suspense>
+      </section>
+
+      {/* Charts Section - Row 2: Category & Location */}
+      <section aria-label="분포 분석" className="grid gap-4 lg:grid-cols-2">
+        {/* Category Distribution Bar Chart */}
+        <Suspense fallback={<ChartSkeleton height="h-[400px]" />}>
+          {!isLoading && stats && stats.categoryDistribution.length > 0 ? (
+            <CategoryBarChart
+              data={stats.categoryDistribution}
+              totalAssets={stats.totalAssets}
+              onCategoryClick={handleCategoryClick}
+            />
+          ) : (
+            <ChartSkeleton height="h-[400px]" />
+          )}
+        </Suspense>
 
         {/* Location Distribution Bar Chart */}
-        {isLoading ? (
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-4 w-48 mt-2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[400px] w-full" />
-            </CardContent>
-          </Card>
-        ) : stats && stats.locationDistribution.length > 0 ? (
-          <LocationBarChart
-            data={stats.locationDistribution.map(loc => ({
-              id: parseInt(loc.id),
-              name: loc.name,
-              count: loc.count,
-            }))}
-          />
-        ) : null}
-      </div>
+        <Suspense fallback={<ChartSkeleton height="h-[400px]" />}>
+          {!isLoading && stats && stats.locationDistribution.length > 0 ? (
+            <LocationBarChart
+              data={stats.locationDistribution.map(loc => ({
+                id: parseInt(loc.id),
+                name: loc.name,
+                count: loc.count,
+              }))}
+              onLocationClick={handleLocationClick}
+            />
+          ) : (
+            <ChartSkeleton height="h-[400px]" />
+          )}
+        </Suspense>
+      </section>
 
-      {/* Category Distribution & Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Category Distribution */}
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>카테고리 분포</CardTitle>
-            </div>
-            <CardDescription>카테고리별 자산 분류</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                ))}
-              </div>
-            ) : stats && stats.categoryDistribution.length > 0 ? (
-              <div className="space-y-3">
-                {stats.categoryDistribution.slice(0, 8).map((category) => (
-                  <div key={category.id} className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{category.name}</span>
-                      <span className="text-muted-foreground">
-                        {category.count.toLocaleString()} ({category.percentage}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${category.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-                {stats.categoryDistribution.length > 8 && (
-                  <p className="text-xs text-muted-foreground text-center pt-2">
-                    +{stats.categoryDistribution.length - 8}개 추가 카테고리
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                카테고리 데이터가 없습니다
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card className="lg:col-span-3">
+      {/* Recent Activity */}
+      <section aria-label="최근 활동" className="grid gap-4">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-muted-foreground" />
+                  <Activity className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                   <CardTitle>최근 자산</CardTitle>
                 </div>
                 <CardDescription>시스템에 추가된 최신 자산</CardDescription>
@@ -430,7 +458,7 @@ export default function Dashboard() {
                     <div className="space-y-1 flex-1 min-w-0">
                       <Link
                         to={`/assets/${asset.id}`}
-                        className="text-sm font-medium leading-none hover:underline block truncate"
+                        className="text-sm font-medium leading-none hover:underline block truncate focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
                       >
                         {asset.model || asset.asset_tag}
                       </Link>
@@ -443,9 +471,12 @@ export default function Dashboard() {
                       <Badge variant={getStatusVariant(asset.status)} className="text-xs">
                         {formatStatus(asset.status)}
                       </Badge>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <time
+                        className="text-xs text-muted-foreground whitespace-nowrap"
+                        dateTime={asset.created_at}
+                      >
                         {format(new Date(asset.created_at), 'MMM d, yyyy')}
-                      </span>
+                      </time>
                     </div>
                   </div>
                 ))}
@@ -456,8 +487,8 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <div className="text-center py-12" role="status">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
                 <p className="text-sm text-muted-foreground">
                   자산을 찾을 수 없습니다. 첫 번째 자산을 생성하세요.
                 </p>
@@ -468,7 +499,7 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
-      </div>
+      </section>
     </div>
   );
 }

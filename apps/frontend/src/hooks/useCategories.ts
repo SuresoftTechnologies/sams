@@ -17,3 +17,10 @@ export function useGetCategories() {
     staleTime: 5 * 60 * 1000, // 5 minutes - categories don't change often
   });
 }
+
+/**
+ * Alias for useGetCategories (for consistency)
+ */
+export function useCategories() {
+  return useGetCategories();
+}
