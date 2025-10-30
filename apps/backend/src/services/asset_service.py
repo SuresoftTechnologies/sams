@@ -145,8 +145,8 @@ class AssetService:
             description=f"Asset created: {asset.model or asset.asset_tag}",
             new_values={
                 "category_id": asset.category_id,
-                "status": asset.status.value,
-                "grade": asset.grade.value,
+                "status": asset.status if isinstance(asset.status, str) else asset.status.value,
+                "grade": asset.grade if isinstance(asset.grade, str) else asset.grade.value,
             },
         )
 
@@ -200,7 +200,7 @@ class AssetService:
         if "purchase_date" in update_data and asset.purchase_date:
             new_grade = AssetService.calculate_grade(asset.purchase_date)
             if asset.grade != new_grade:
-                old_values["grade"] = asset.grade.value
+                old_values["grade"] = asset.grade if isinstance(asset.grade, str) else asset.grade.value
                 new_values["grade"] = new_grade.value
                 asset.grade = new_grade
 
@@ -312,7 +312,7 @@ class AssetService:
             from_user_id=old_assigned_to,
             old_values={
                 "assigned_to": old_assigned_to,
-                "status": old_status.value,
+                "status": old_status if isinstance(old_status, str) else old_status.value,
             },
             new_values={
                 "assigned_to": user_id,

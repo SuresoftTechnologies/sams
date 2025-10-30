@@ -145,7 +145,7 @@ async def refresh_access_token(
     token_data = {
         "sub": user.id,
         "email": user.email,
-        "role": user.role.value,
+        "role": user.role if isinstance(user.role, str) else user.role.value,
     }
 
     access_token = create_access_token(token_data)
@@ -264,7 +264,7 @@ async def register_user(
     token_data = {
         "sub": new_user.id,
         "email": new_user.email,
-        "role": new_user.role.value,
+        "role": new_user.role if isinstance(new_user.role, str) else new_user.role.value,
     }
 
     # Generate tokens
