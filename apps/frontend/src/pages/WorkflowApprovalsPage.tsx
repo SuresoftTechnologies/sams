@@ -301,11 +301,10 @@ export default function WorkflowApprovalsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">ID</TableHead>
                   <TableHead className="w-[100px]">유형</TableHead>
-                  <TableHead>자산명</TableHead>
-                  <TableHead className="w-[100px]">자산코드</TableHead>
-                  <TableHead>요청자</TableHead>
+                  <TableHead className="min-w-[200px]">모델</TableHead>
+                  <TableHead className="w-[140px]">자산번호</TableHead>
+                  <TableHead className="w-[120px]">요청자</TableHead>
                   <TableHead className="w-[100px]">상태</TableHead>
                   <TableHead className="w-[150px]">신청일시</TableHead>
                   <TableHead className="w-[200px] text-center">액션</TableHead>
@@ -317,55 +316,47 @@ export default function WorkflowApprovalsPage() {
                     key={workflow.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell
-                      onClick={() => handleRowClick(workflow.id)}
-                      className="font-mono text-xs"
-                    >
-                      {formatShortId(workflow.id)}
-                    </TableCell>
-                    <TableCell onClick={() => handleRowClick(workflow.id)}>
+                    <TableCell onClick={() => handleRowClick(workflow.id)} className="whitespace-nowrap">
                       <Badge variant="outline">
                         {WorkflowTypeLabels[workflow.type as keyof typeof WorkflowTypeLabels] || workflow.type}
                       </Badge>
                     </TableCell>
                     <TableCell
                       onClick={() => handleRowClick(workflow.id)}
-                      className="font-medium"
+                      className="font-medium truncate max-w-[250px]"
+                      title={workflow.asset?.model || '-'}
                     >
-                      {workflow.asset?.name || '-'}
+                      {workflow.asset?.model || '-'}
                     </TableCell>
                     <TableCell
                       onClick={() => handleRowClick(workflow.id)}
-                      className="text-muted-foreground"
+                      className="text-muted-foreground font-mono text-xs whitespace-nowrap"
                     >
-                      {workflow.asset?.asset_code || '-'}
+                      {workflow.asset?.asset_tag || '-'}
                     </TableCell>
-                    <TableCell onClick={() => handleRowClick(workflow.id)}>
+                    <TableCell onClick={() => handleRowClick(workflow.id)} className="whitespace-nowrap">
                       <div className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
+                        <User className="h-3 w-3 flex-shrink-0" />
                         <span className="text-sm">
                           {workflow.requester?.name || '-'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell onClick={() => handleRowClick(workflow.id)}>
-                      <div className="flex items-center gap-1">
-                        {statusIcons[workflow.status]}
-                        <Badge
-                          variant="secondary"
-                          className={statusColors[workflow.status]}
-                        >
-                          {WorkflowStatusLabels[workflow.status] || workflow.status}
-                        </Badge>
-                      </div>
+                    <TableCell onClick={() => handleRowClick(workflow.id)} className="whitespace-nowrap">
+                      <Badge
+                        variant="secondary"
+                        className={statusColors[workflow.status]}
+                      >
+                        {WorkflowStatusLabels[workflow.status] || workflow.status}
+                      </Badge>
                     </TableCell>
-                    <TableCell onClick={() => handleRowClick(workflow.id)}>
+                    <TableCell onClick={() => handleRowClick(workflow.id)} className="whitespace-nowrap">
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
                         {formatDate(workflow.created_at)}
                       </div>
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell onClick={(e) => e.stopPropagation()} className="whitespace-nowrap">
                       <div className="flex items-center justify-center gap-2">
                         <Button
                           size="sm"

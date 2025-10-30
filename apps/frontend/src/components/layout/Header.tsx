@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
     title: '신청',
     href: '/requests',
     icon: FileText,
-    // 모든 사용자가 신청할 수 있음
+    requiredRoles: ['employee'],
   },
   {
     title: '신청 관리',
@@ -263,7 +263,7 @@ export default function Header() {
         </div>
 
         {/* Desktop Navigation - Horizontal Menu */}
-        <nav className="hidden lg:flex flex-1 items-center gap-1">
+        <nav className="hidden lg:flex flex-1 items-center justify-center gap-1">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = isNavActive(item.href);

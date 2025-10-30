@@ -131,9 +131,11 @@ export default function RequestsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="secondary">
-            전체 {pagination.total}건
-          </Badge>
+          {pagination.total > 0 && (
+            <Badge variant="secondary">
+              전체 {pagination.total}건
+            </Badge>
+          )}
           <Button onClick={() => navigate('/requests/new')}>
             <Plus className="h-4 w-4 mr-2" />
             신청하기
