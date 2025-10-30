@@ -34,10 +34,10 @@ export const assetSchema = z.object({
     .optional()
     .or(z.literal('')),
   categoryId: z.string().min(1, '카테고리는 필수입니다'),
-  locationId: z.string().min(1, '위치는 필수입니다'),
+  locationId: z.string().optional().or(z.literal('')).or(z.undefined()),
   status: z.nativeEnum(AssetStatus).optional(),
   grade: z.string().optional().or(z.literal('')), // Auto-calculated, readonly
-  assignedTo: z.string().optional().or(z.literal('')),
+  assignedTo: z.string().optional().or(z.literal('')).or(z.undefined()),
 
   // Purchase Info
   purchaseDate: z.string().optional().or(z.literal('')),
@@ -45,7 +45,6 @@ export const assetSchema = z.object({
   purchaseRequest: z.string().optional().or(z.literal('')),
   taxInvoiceDate: z.string().optional().or(z.literal('')),
   supplier: z.string().optional().or(z.literal('')),
-  warrantyUntil: z.string().optional().or(z.literal('')),
 
   // Category Details
   furnitureCategory: z.string().optional().or(z.literal('')),

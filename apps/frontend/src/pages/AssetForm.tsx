@@ -46,6 +46,7 @@ import { assetSchema, type AssetFormData } from '@/lib/validators';
 import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
 import { useGetCategories } from '@/hooks/useCategories';
 import { useGetLocations } from '@/hooks/useLocations';
+import { useGetUsers } from '@/hooks/useUsers';
 import {
   Dialog,
   DialogContent,
@@ -67,16 +68,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
  * Complete asset form with all 23+ fields from database schema
  * Organized into collapsible sections for better UX
  */
-
-// Mock data for users - TODO: fetch from API
-const MOCK_USERS = [
-  { id: 'user-1', name: '김철수' },
-  { id: 'user-2', name: '이영희' },
-  { id: 'user-3', name: '박민수' },
-  { id: 'user-4', name: '정수진' },
-];
-
-const LOCATION_UNASSIGNED = '__location-unassigned__';
 
 // Helper function to calculate grade from purchase date
 const calculateGrade = (purchaseDate?: string): string => {
@@ -149,13 +140,15 @@ export default function AssetForm() {
   const [isBulkCreating, setIsBulkCreating] = useState(false);
   const [bulkCreationProgress, setBulkCreationProgress] = useState({ completed: 0, total: 0 });
 
-  // Fetch categories and locations from API
+  // Fetch categories, locations, and users from API
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategories();
   const { data: locationsData, isLoading: locationsLoading } = useGetLocations();
+  const { data: usersData, isLoading: usersLoading } = useGetUsers({ limit: 100 });
 
   // Ensure we always have arrays
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
   const locations = Array.isArray(locationsData) ? locationsData : [];
+  const users = usersData?.items || [];
 
   // Section collapse states
   const [sectionsOpen, setSectionsOpen] = useState({
@@ -302,16 +295,15 @@ export default function AssetForm() {
       model: '',
       serialNumber: '',
       categoryId: '',
-      locationId: '',
+      locationId: 'UNSPECIFIED',
       status: AssetStatus.STOCK,
       grade: '',
-      assignedTo: '',
+      assignedTo: 'UNSPECIFIED',
       purchaseDate: '',
       purchasePrice: null,
       purchaseRequest: '',
       taxInvoiceDate: '',
       supplier: '',
-      warrantyUntil: '',
       furnitureCategory: '',
       detailedCategory: '',
       checkoutDate: '',
@@ -341,16 +333,15 @@ export default function AssetForm() {
         model: asset.model || '',
         serialNumber: asset.serial_number || '',
         categoryId: asset.category_id,
-        locationId: asset.location_id || '',
+        locationId: asset.location_id || 'UNSPECIFIED',
         status: asset.status,
         grade: asset.grade || '',
-        assignedTo: asset.assigned_to || '',
+        assignedTo: asset.assigned_to || 'UNSPECIFIED',
         purchaseDate: asset.purchase_date || '',
         purchasePrice: asset.purchase_price ?? null,
         purchaseRequest: asset.purchase_request || '',
         taxInvoiceDate: asset.tax_invoice_date || '',
         supplier: asset.supplier || '',
-        warrantyUntil: asset.warranty_end || '',
         furnitureCategory: asset.furniture_category || '',
         detailedCategory: asset.detailed_category || '',
         checkoutDate: asset.checkout_date || '',
@@ -1142,7 +1133,7 @@ export default function AssetForm() {
                       name="locationId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>위치 *</FormLabel>
+                          <FormLabel>위치</FormLabel>
                           <Select 
                             onValueChange={field.onChange} 
                             value={field.value}
@@ -1154,6 +1145,7 @@ export default function AssetForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="max-h-[300px] overflow-y-auto">
+                              <SelectItem value="UNSPECIFIED">미지정</SelectItem>
                               {locations.length === 0 && !locationsLoading ? (
                                 <SelectItem value="empty" disabled>
                                   위치가 없습니다
@@ -1235,11 +1227,11 @@ export default function AssetForm() {
                                 <SelectValue placeholder="사용자 선택" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="max-h-[300px] overflow-y-auto">
                               <SelectItem value="UNSPECIFIED">미지정</SelectItem>
-                              {MOCK_USERS.map((user) => (
+                              {users.map((user) => (
                                 <SelectItem key={user.id} value={user.id}>
-                                  {user.name}
+                                  {user.name} {user.department && `(${user.department})`}
                                 </SelectItem>
                               ))}
                             </SelectContent>

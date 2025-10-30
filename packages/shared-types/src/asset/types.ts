@@ -172,6 +172,7 @@ export interface UpdateAssetDto {
   manufacturer?: string;
   mac_address?: string;
   status?: AssetStatus;
+  grade?: AssetGrade;
   assigned_to?: string | null;  // 현 사용자
   category_id?: string;
   location_id?: string;

@@ -78,6 +78,20 @@ class Asset(BaseModel):
     purchase_date: datetime | None = Field(None, description="Purchase date (구매연일)")
     purchase_price: Decimal | None = Field(None, description="Purchase price (구매가)")
     supplier: str | None = Field(None, description="Supplier (구매처)")
+    purchase_request: str | None = Field(None, description="Purchase request (구매 품의)")
+    tax_invoice_date: datetime | None = Field(None, description="Tax invoice date (세금계산서 발행일)")
+
+    # Excel columns: furniture/detailed category
+    furniture_category: str | None = Field(None, description="Furniture category (집기품목)")
+    detailed_category: str | None = Field(None, description="Detailed category (상세품목)")
+
+    # Asset usage history
+    checkout_date: datetime | None = Field(None, description="Checkout date (반출날짜)")
+    return_date: datetime | None = Field(None, description="Return date (반납날짜)")
+
+    # Asset identification (additional)
+    old_asset_number: str | None = Field(None, description="Old asset number (기존번호)")
+    qr_code_exists: str | None = Field(None, description="QR code exists (QR코드 유무)")
 
     # QR Code
     qr_code: str | None = Field(None, description="QR code URL or Base64")
@@ -86,6 +100,7 @@ class Asset(BaseModel):
     grade: AssetGrade | None = Field(None, description="Asset grade (A/B/C)")
     description: str | None = Field(None, description="Asset description")
     notes: str | None = Field(None, description="Additional notes")
+    special_notes: str | None = Field(None, description="Special notes (특이사항)")
     specifications: str | None = Field(None, description="Technical specifications (JSON)")
 
     # Timestamps
@@ -128,14 +143,42 @@ class CreateAssetRequest(BaseModel):
 class UpdateAssetRequest(BaseModel):
     """Update asset request DTO - all fields optional."""
 
+    # Basic info
     status: AssetStatus | None = None
+    model: str | None = Field(None, max_length=200)
+    serial_number: str | None = Field(None, max_length=100)
+    grade: AssetGrade | None = None
+    
+    # Relationships
     category_id: str | None = None
     location_id: str | None = None
     assigned_to: str | None = None
+    
+    # Purchase info
     purchase_date: datetime | None = None
     purchase_price: Decimal | None = Field(None, ge=0)
+    purchase_request: str | None = Field(None, max_length=100)
+    supplier: str | None = Field(None, max_length=200)
+    tax_invoice_date: datetime | None = None
+
+    # Categories
+    furniture_category: str | None = Field(None, max_length=100)
+    detailed_category: str | None = Field(None, max_length=100)
+    
+    # Checkout/return
+    checkout_date: datetime | None = None
+    return_date: datetime | None = None
+    
+    # User history
+    first_user: str | None = Field(None, max_length=100)
+    previous_user_1: str | None = Field(None, max_length=100)
+    previous_user_2: str | None = Field(None, max_length=100)
+    
+    # Additional fields
+    old_asset_number: str | None = Field(None, max_length=50)
+    qr_code_exists: str | None = Field(None, max_length=1, pattern="^[YN]$")
     notes: str | None = Field(None, max_length=1000)
-    grade: AssetGrade | None = None
+    special_notes: str | None = Field(None, max_length=1000)
 
 
 class AssetFilterParams(BaseModel):

@@ -38,12 +38,42 @@ const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
 
 const mapFormToUpdateDto = (data: AssetFormData): UpdateAssetDto => {
   return {
+    // Basic info
+    status: data.status || undefined,
+    model: data.model || undefined,
+    serial_number: data.serialNumber || undefined,
+    grade: data.grade || undefined,
+    
+    // Relationships
     category_id: data.categoryId,
-    location_id: data.locationId,
-    purchase_date: data.purchaseDate,
+    location_id: data.locationId === 'UNSPECIFIED' ? undefined : (data.locationId || undefined),
+    assigned_to: data.assignedTo === 'UNSPECIFIED' ? undefined : (data.assignedTo || undefined),
+    
+    // Purchase info
+    purchase_date: data.purchaseDate || undefined,
     purchase_price: data.purchasePrice ?? undefined,
-    warranty_end: data.warrantyUntil,
-    notes: data.notes,
+    purchase_request: data.purchaseRequest || undefined,
+    supplier: data.supplier || undefined,
+    tax_invoice_date: data.taxInvoiceDate || undefined,
+
+    // Categories
+    furniture_category: data.furnitureCategory || undefined,
+    detailed_category: data.detailedCategory || undefined,
+    
+    // Checkout/return
+    checkout_date: data.checkoutDate || undefined,
+    return_date: data.returnDate || undefined,
+    
+    // User history
+    first_user: data.firstUser || undefined,
+    previous_user_1: data.previousUser1 || undefined,
+    previous_user_2: data.previousUser2 || undefined,
+    
+    // Additional fields
+    old_asset_number: data.oldAssetNumber || undefined,
+    qr_code_exists: data.qrCodeExists || undefined,
+    notes: data.notes || undefined,
+    special_notes: data.specialNotes || undefined,
   };
 };
 

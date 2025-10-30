@@ -12,17 +12,40 @@ export interface Asset {
   id: string;
   asset_tag: string;
   status?: 'issued' | 'loaned' | 'general' | 'stock' | 'server_room' | 'disposed';
+  grade?: 'A' | 'B' | 'C' | null;
   category_id: string;
   location_id?: string | null;
   assigned_to?: string | null;  // Updated field name to match backend
   assignee_id?: string | null;   // Kept for backward compatibility
   model?: string | null;
   serial_number?: string | null;
-  manufacturer?: string | null;
+
+  // Purchase info
   purchase_date?: string | null;
   purchase_price?: number | null;
-  warranty_expiry?: string | null;
+  purchase_request?: string | null;
+  supplier?: string | null;
+  tax_invoice_date?: string | null;
+
+  // Excel columns: furniture/detailed category
+  furniture_category?: string | null;
+  detailed_category?: string | null;
+
+  // Asset usage history
+  checkout_date?: string | null;
+  return_date?: string | null;
+
+  // Asset identification (additional)
+  old_asset_number?: string | null;
+  qr_code_exists?: string | null;
+  qr_code?: string | null;
+
+  // Metadata
+  description?: string | null;
   notes?: string | null;
+  special_notes?: string | null;
+  specifications?: string | null;
+
   created_at: string;
   updated_at: string;
   // Additional fields from backend
@@ -42,10 +65,9 @@ export interface AssetCreate {
   status?: string;
   model?: string;
   serial_number?: string;
-  manufacturer?: string;
   purchase_date?: string;
   purchase_price?: number;
-  warranty_expiry?: string;
+  supplier?: string;
   notes?: string;
 }
 
