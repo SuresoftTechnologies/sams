@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import openpyxl
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add parent directory to path
@@ -138,9 +138,23 @@ def determine_grade(purchase_date: datetime | None) -> AssetGrade:
 
 
 def map_status(status_str: str | None) -> AssetStatus:
-    """상태 매핑"""
+    """상태 매핑 - 실제 엑셀 데이터 기준"""
     if not status_str:
-        return AssetStatus.AVAILABLE
+        return AssetStatus.STOCK
+
+    # 대괄호 제거
+    status_clean = status_str.replace("[", "").replace("]", "").strip()
+
+    status_map = {
+        "지급장비": AssetStatus.ISSUED,
+        "대여용": AssetStatus.LOANED,
+        "일반장비": AssetStatus.GENERAL,
+        "재고": AssetStatus.STOCK,
+        "서버실": AssetStatus.SERVER_ROOM,
+        "불용": AssetStatus.DISPOSED,
+    }
+
+    return status_map.get(status_clean, AssetStatus.STOCK)
 
     status_map = {
         "사용중": AssetStatus.ASSIGNED,
@@ -404,7 +418,7 @@ async def migrate_excel(
             # 기존 데이터 삭제 (옵션)
             if clear_existing and not dry_run:
                 print("\n🗑️  기존 자산 데이터 삭제 중...")
-                await db.execute("DELETE FROM assets")
+                await db.execute(text("DELETE FROM assets"))
                 print("✅ 삭제 완료")
 
             # 각 시트별 마이그레이션
