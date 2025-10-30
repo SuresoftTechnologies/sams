@@ -3,7 +3,7 @@ import Root from './root';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Assets from './pages/Assets';
+import AssetList from './pages/AssetList';
 import AssetDetail from './pages/AssetDetail';
 import AssetForm from './pages/AssetForm';
 import Profile from './pages/Profile';
@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Assets />,
+            element: <AssetList />,
           },
           {
             path: 'new',
