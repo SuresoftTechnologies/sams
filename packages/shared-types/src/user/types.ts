@@ -90,8 +90,9 @@ export interface LoginDto {
  * Login response
  */
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
   user: {
     id: string;
     email: string;
@@ -104,7 +105,7 @@ export interface LoginResponse {
  * Refresh token request
  */
 export interface RefreshTokenDto {
-  refreshToken: string;
+  refresh_token: string;
 }
 
 /**

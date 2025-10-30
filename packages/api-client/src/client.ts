@@ -451,6 +451,20 @@ export class ApiClient {
     },
 
     /**
+     * Get dashboard overview statistics (alias for overview)
+     */
+    dashboard: (): Promise<{
+      total_assets: number;
+      assets_by_status: Record<string, number>;
+      pending_workflows: number;
+      total_users: number;
+      total_categories: number;
+      total_locations: number;
+    }> => {
+      return this.request('/api/v1/statistics/overview');
+    },
+
+    /**
      * Get assets by category
      */
     assetsByCategory: (): Promise<Array<{
