@@ -111,9 +111,6 @@ export default function Sidebar() {
   const location = useLocation();
   const { hasRole, role } = useRole();
 
-  // Debug: Log current user role
-  console.log('[Sidebar] Current user role:', role);
-
   // Filter nav items based on user role
   const visibleNavItems = navItems.filter((item) => {
     // If no role requirement, show to all users
@@ -123,8 +120,15 @@ export default function Sidebar() {
     // Check if user has required role
     const hasAccess = hasRole(...item.requiredRoles);
 
-    // Debug: Log filtering results for items with role requirements
-    console.log(`[Sidebar] Item: "${item.title}", Required: [${item.requiredRoles.join(', ')}], Has Access: ${hasAccess}`);
+    // Debug logging for "신청 관리" menu
+    if (item.title === '신청 관리') {
+      console.log('[Sidebar Debug] 신청 관리 menu check:', {
+        userRole: role,
+        requiredRoles: item.requiredRoles,
+        hasAccess: hasAccess,
+        hasRoleFunction: hasRole,
+      });
+    }
 
     return hasAccess;
   });

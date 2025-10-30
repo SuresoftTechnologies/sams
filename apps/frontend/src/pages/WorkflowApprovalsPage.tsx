@@ -185,7 +185,9 @@ export default function WorkflowApprovalsPage() {
     navigate(`/requests/${workflowId}`);
   };
 
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
+  const totalPages = data && typeof data.total === 'number' && !isNaN(data.total)
+    ? Math.ceil(data.total / pageSize)
+    : 0;
 
   if (isLoading) {
     return (
@@ -227,7 +229,7 @@ export default function WorkflowApprovalsPage() {
     );
   }
 
-  const workflows = data?.items || [];
+  const workflows = (data?.items || []).filter(w => w && w.id);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
