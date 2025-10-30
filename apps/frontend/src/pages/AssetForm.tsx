@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { AssetStatus } from '@sams/shared-types';
+import { useQueryClient } from '@tanstack/react-query';
+import type { CreateAssetDto } from '@sams/api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +56,7 @@ import {
 import { RECEIPT_UPLOAD } from '@/lib/constants';
 import type { AnalyzeReceiptFromImageResponse } from '@/types/receipt';
 import { analyzeReceiptFromImage } from '@/services/receipt-service';
+import { api } from '@/lib/api';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -98,6 +101,22 @@ interface BulkEditableLineItem {
   isSelected: boolean;
 }
 
+type BulkCreationStatus = 'idle' | 'processing' | 'success' | 'partial' | 'error';
+
+interface CreatedAssetSummary {
+  id: string;
+  assetTag: string;
+}
+
+interface BulkCreationResultEntry {
+  totalRequested: number;
+  successCount: number;
+  failureCount: number;
+  status: BulkCreationStatus;
+  createdAssets: CreatedAssetSummary[];
+  errors: string[];
+}
+
 const normalizeUnitPrice = (value?: string | null): string => {
   if (!value) return '';
   const digitsOnly = value.replace(/[^0-9]/g, '');
@@ -119,9 +138,15 @@ export default function AssetForm() {
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
+  const queryClient = useQueryClient();
+
   const { data: asset, isLoading: isLoadingAsset } = useGetAsset(id || '');
   const createMutation = useCreateAsset();
   const updateMutation = useUpdateAsset(id!);
+
+  const [bulkCreationResults, setBulkCreationResults] = useState<Record<string, BulkCreationResultEntry>>({});
+  const [isBulkCreating, setIsBulkCreating] = useState(false);
+  const [bulkCreationProgress, setBulkCreationProgress] = useState({ completed: 0, total: 0 });
 
   // Fetch categories and locations from API
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategories();
@@ -202,6 +227,71 @@ export default function AssetForm() {
       default:
         return 'text-muted-foreground';
     }
+  };
+
+  const parseUnitPriceToNumber = (value: string): number | undefined => {
+    if (!value) {
+      return undefined;
+    }
+
+    const numericValue = Number.parseInt(value, 10);
+    if (Number.isNaN(numericValue) || numericValue <= 0) {
+      return undefined;
+    }
+
+    return numericValue;
+  };
+
+  const getBulkItemLabel = (item: BulkEditableLineItem) => {
+    const trimmedName = item.name?.trim();
+    if (trimmedName) {
+      return trimmedName;
+    }
+
+    const normalizedExtractedName = item.extractedName?.trim();
+    if (normalizedExtractedName) {
+      return normalizedExtractedName;
+    }
+
+    const index = bulkEditableItems.findIndex((entry) => entry.id === item.id);
+    return index >= 0 ? `항목 ${index + 1}` : '영수증 항목';
+  };
+
+  const buildCreateAssetPayload = (
+    item: BulkEditableLineItem,
+    sequenceIndex: number,
+    totalCount: number,
+  ): CreateAssetDto => {
+    const modelName = item.model?.trim() || item.name?.trim() || item.extractedName;
+    const supplierFromAnalysis = bulkResult?.analysis.supplier?.trim() || undefined;
+    const purchaseDate = item.purchaseDate?.trim() || undefined;
+    const purchasePrice = parseUnitPriceToNumber(item.unitPrice);
+    const itemLabel = getBulkItemLabel(item);
+
+    const notesParts: string[] = [];
+    if (itemLabel) {
+      notesParts.push(`세금계산서 항목: ${itemLabel}`);
+    }
+    if (totalCount > 1) {
+      notesParts.push(`분할 ${sequenceIndex + 1}/${totalCount}`);
+    }
+    if (item.specifications) {
+      notesParts.push(`규격 ${item.specifications}`);
+    }
+
+    const notes = notesParts.length > 0 ? notesParts.join(' • ') : undefined;
+
+    return {
+      category_id: item.categoryId,
+      location_id: item.locationId || undefined,
+      status: AssetStatus.STOCK,
+      model: modelName || undefined,
+      purchase_date: purchaseDate,
+      purchase_price: purchasePrice,
+      supplier: supplierFromAnalysis,
+      notes,
+      special_notes: item.itemType ? `인식된 품목 유형: ${item.itemType}` : undefined,
+    };
   };
 
   const form = useForm<AssetFormData>({
@@ -300,6 +390,9 @@ export default function AssetForm() {
       setBulkEditableItems([]);
       setBulkDefaultLocationId(null);
       setBulkIsAnalyzing(false);
+      setBulkCreationResults({});
+      setIsBulkCreating(false);
+      setBulkCreationProgress({ completed: 0, total: 0 });
       initialBulkItemsRef.current = [];
     }
   }, [bulkDialogOpen]);
@@ -342,7 +435,29 @@ export default function AssetForm() {
     initialBulkItemsRef.current = initialItems.map((item) => ({ ...item }));
     setBulkEditableItems(initialItems);
     setBulkDefaultLocationId(null);
+    setBulkCreationResults({});
+    setBulkCreationProgress({ completed: 0, total: 0 });
   }, [bulkResult]);
+
+  useEffect(() => {
+    setBulkCreationResults((prev) => {
+      const activeIds = new Set(bulkEditableItems.map((item) => item.id));
+      const hasRemoved = Object.keys(prev).some((id) => !activeIds.has(id));
+
+      if (!hasRemoved) {
+        return prev;
+      }
+
+      const next: Record<string, BulkCreationResultEntry> = {};
+      bulkEditableItems.forEach((item) => {
+        if (prev[item.id]) {
+          next[item.id] = prev[item.id];
+        }
+      });
+
+      return next;
+    });
+  }, [bulkEditableItems]);
 
   useEffect(() => {
     if (!bulkResult || categories.length === 0) {
@@ -393,7 +508,36 @@ export default function AssetForm() {
     [bulkEditableItems]
   );
 
+  const selectedBulkItemsWithQuantity = useMemo(
+    () =>
+      bulkEditableItems.filter((item) =>
+        item.isSelected && Math.max(0, Math.floor(item.quantity)) > 0
+      ),
+    [bulkEditableItems]
+  );
+
   const hasBulkSelection = selectedBulkItemCount > 0;
+
+  const allSelectedItemsCompleted = useMemo(() => {
+    if (selectedBulkItemsWithQuantity.length === 0) {
+      return false;
+    }
+
+    return selectedBulkItemsWithQuantity.every((item) => {
+      const entry = bulkCreationResults[item.id];
+      const targetCount = Math.max(0, Math.floor(item.quantity));
+
+      if (!entry) {
+        return false;
+      }
+
+      return (
+        entry.status === 'success' &&
+        entry.failureCount === 0 &&
+        entry.successCount >= targetCount
+      );
+    });
+  }, [selectedBulkItemsWithQuantity, bulkCreationResults]);
 
   const updateBulkItem = (
     itemId: string,
@@ -481,48 +625,305 @@ export default function AssetForm() {
     });
   };
 
-  const resetBulkItemsToInitial = () => {
-    if (initialBulkItemsRef.current.length === 0) {
-      return;
-    }
-
-    setBulkEditableItems(initialBulkItemsRef.current.map((item) => ({ ...item })));
-    setBulkDefaultLocationId('');
-    setBulkMessage({
-      tone: 'info',
-      text: '모든 항목을 초기 분석 상태로 되돌렸습니다.',
-    });
-
-    toast.info('초기 상태로 복원했습니다.', {
-      description: '분석 직후 상태로 항목과 위치 선택을 되돌렸어요.',
-    });
+  type BulkCreationTask = {
+    itemId: string;
+    itemLabel: string;
+    total: number;
+    sequenceIndex: number;
+    createDto: CreateAssetDto;
   };
 
-  const handleBulkConfirmSelection = () => {
-    if (!hasBulkSelection) {
-      toast.error('등록할 항목을 최소 한 개 이상 선택해 주세요.');
-      return;
-    }
-
-    const itemsWithoutLocation = bulkEditableItems.filter(
-      (item) => item.isSelected && !item.locationId
-    );
-
-    if (itemsWithoutLocation.length > 0) {
-      toast.error('선택된 항목 중 위치가 지정되지 않은 항목이 있습니다.', {
-        description: '각 항목별 위치를 지정하거나 공용 위치를 적용해 주세요.',
+  const runBulkCreate = async (itemsToProcess: BulkEditableLineItem[]) => {
+    if (isBulkCreating) {
+      toast.info('이미 자산 생성이 진행 중입니다.', {
+        description: '현재 작업이 완료된 후 다시 시도해 주세요.',
       });
       return;
     }
 
-    setBulkMessage({
-      tone: 'success',
-      text: `선택된 ${selectedBulkItemCount}개 항목 등록 준비가 완료되었습니다. (${totalBulkAssetCount}개 자산 생성 예정)`,
+    const validItems = itemsToProcess
+      .map((item) => ({
+        ...item,
+        quantity: Math.max(0, Math.floor(item.quantity)),
+      }))
+      .filter((item) => item.quantity > 0);
+
+    if (validItems.length === 0) {
+      setBulkMessage({
+        tone: 'error',
+        text: '생성할 수량이 설정된 항목이 없습니다.',
+      });
+      toast.error('생성할 항목이 없습니다.', {
+        description: '수량이 0이거나 항목이 선택되지 않았습니다.',
+      });
+      return;
+    }
+
+    const missingCategoryItems = validItems.filter((item) => !item.categoryId);
+    if (missingCategoryItems.length > 0) {
+      const labels = missingCategoryItems.map((item) => getBulkItemLabel(item)).join(', ');
+      const message = `카테고리가 지정되지 않은 항목이 있습니다: ${labels}`;
+
+      setBulkMessage({ tone: 'error', text: message });
+      toast.error('카테고리를 선택해 주세요.', {
+        description: message,
+      });
+      return;
+    }
+
+    const missingLocationItems = validItems.filter((item) => !item.locationId);
+    if (missingLocationItems.length > 0) {
+      const labels = missingLocationItems.map((item) => getBulkItemLabel(item)).join(', ');
+      const message = `위치가 지정되지 않은 항목이 있습니다: ${labels}`;
+
+      setBulkMessage({ tone: 'error', text: message });
+      toast.error('위치를 지정해 주세요.', {
+        description: message,
+      });
+      return;
+    }
+
+    const nextResults: Record<string, BulkCreationResultEntry> = { ...bulkCreationResults };
+    const tasks: BulkCreationTask[] = [];
+
+    validItems.forEach((item) => {
+      const targetCount = Math.max(0, Math.floor(item.quantity));
+      const previousEntry = bulkCreationResults[item.id];
+      const previousSuccess = Math.min(previousEntry?.successCount ?? 0, targetCount);
+      const preservedAssets = previousEntry?.createdAssets.slice(0, previousSuccess > 0 ? previousSuccess : undefined) ?? [];
+      const toCreate = Math.max(0, targetCount - previousSuccess);
+
+      nextResults[item.id] = {
+        totalRequested: targetCount,
+        successCount: previousSuccess,
+        failureCount: 0,
+        status:
+          toCreate > 0
+            ? 'processing'
+            : previousSuccess >= targetCount && targetCount > 0
+            ? 'success'
+            : previousSuccess > 0
+            ? 'partial'
+            : 'idle',
+        createdAssets: preservedAssets,
+        errors: [],
+      };
+
+      if (toCreate === 0) {
+        return;
+      }
+
+      const itemLabel = getBulkItemLabel(item);
+
+      for (let i = 0; i < toCreate; i += 1) {
+        const sequenceIndex = previousSuccess + i;
+        tasks.push({
+          itemId: item.id,
+          itemLabel,
+          total: Math.max(1, targetCount),
+          sequenceIndex,
+          createDto: buildCreateAssetPayload(item, sequenceIndex, Math.max(1, targetCount)),
+        });
+      }
     });
 
-    toast.success('선택 항목 등록 준비 완료', {
-      description: '자산 생성 API 연동 시 이 항목들을 활용하면 됩니다.',
+    if (tasks.length === 0) {
+      setBulkCreationResults(nextResults);
+      setBulkMessage({
+        tone: 'info',
+        text: '모든 선택 항목이 이미 생성되었습니다. 수량을 조정하거나 새로운 항목을 선택해 주세요.',
+      });
+      toast.info('생성할 항목이 없습니다.', {
+        description: '이미 생성된 항목이거나 수량이 0입니다.',
+      });
+      return;
+    }
+
+    setBulkCreationResults(nextResults);
+    setIsBulkCreating(true);
+    setBulkCreationProgress({ completed: 0, total: tasks.length });
+    setBulkMessage({
+      tone: 'info',
+      text: `선택한 항목 ${tasks.length}건을 자산으로 생성 중입니다. 잠시만 기다려 주세요.`,
     });
+
+    const loadingToastId = toast.loading('자산 생성 중...', {
+      description: `총 ${tasks.length}건의 자산 생성 요청을 처리하고 있습니다.`,
+    });
+
+    let successCounter = 0;
+    let failureCounter = 0;
+
+    try {
+      for (const task of tasks) {
+        try {
+          const createdAsset = await api.assets.create(task.createDto);
+
+          successCounter += 1;
+
+          setBulkCreationResults((prev) => {
+            const entry = prev[task.itemId];
+            if (!entry) {
+              return prev;
+            }
+
+            const updatedSuccess = entry.successCount + 1;
+            const remaining = Math.max(0, entry.totalRequested - updatedSuccess);
+            const nextStatus: BulkCreationStatus =
+              remaining === 0 && entry.failureCount === 0 ? 'success' : entry.failureCount > 0 || remaining > 0 ? 'partial' : entry.status;
+
+            return {
+              ...prev,
+              [task.itemId]: {
+                ...entry,
+                successCount: updatedSuccess,
+                status: nextStatus,
+                createdAssets: [
+                  ...entry.createdAssets,
+                  { id: createdAsset.id, assetTag: createdAsset.asset_tag },
+                ],
+              },
+            };
+          });
+        } catch (error) {
+          failureCounter += 1;
+
+          const errorMessage =
+            error instanceof Error && error.message
+              ? error.message
+              : '자산 생성에 실패했습니다. 다시 시도해 주세요.';
+
+          let shouldNotify = false;
+
+          setBulkCreationResults((prev) => {
+            const entry = prev[task.itemId];
+            if (!entry) {
+              shouldNotify = true;
+              return prev;
+            }
+
+            if (entry.failureCount === 0) {
+              shouldNotify = true;
+            }
+
+            return {
+              ...prev,
+              [task.itemId]: {
+                ...entry,
+                failureCount: entry.failureCount + 1,
+                status: entry.successCount > 0 ? 'partial' : 'error',
+                errors: [...entry.errors, errorMessage],
+              },
+            };
+          });
+
+          if (shouldNotify) {
+            toast.error(`'${task.itemLabel}' 항목 생성 실패`, {
+              description: `${task.sequenceIndex + 1}/${task.total}번째 요청: ${errorMessage}`,
+            });
+          }
+        } finally {
+          setBulkCreationProgress((prev) => ({
+            completed: Math.min(prev.completed + 1, prev.total),
+            total: prev.total,
+          }));
+        }
+      }
+    } finally {
+      setIsBulkCreating(false);
+      setBulkCreationProgress({ completed: 0, total: 0 });
+
+      setBulkCreationResults((prev) => {
+        const next = { ...prev };
+        itemsToProcess.forEach((item) => {
+          const entry = next[item.id];
+          if (!entry) {
+            return;
+          }
+          const remaining = Math.max(0, entry.totalRequested - entry.successCount);
+          let finalStatus: BulkCreationStatus = entry.status;
+
+          if (entry.failureCount === 0 && remaining === 0) {
+            finalStatus = 'success';
+          } else if (entry.failureCount > 0 && entry.successCount > 0) {
+            finalStatus = 'partial';
+          } else if (entry.failureCount > 0 && entry.successCount === 0) {
+            finalStatus = 'error';
+          }
+
+          next[item.id] = {
+            ...entry,
+            status: finalStatus,
+          };
+        });
+        return next;
+      });
+
+      if (successCounter > 0) {
+        queryClient.invalidateQueries({ queryKey: ['assets'] }).catch(() => {});
+      }
+
+      if (failureCounter === 0) {
+        toast.success('자산 생성이 완료되었습니다.', {
+          id: loadingToastId,
+          description: `총 ${successCounter}건의 자산이 생성되었습니다.`,
+        });
+        setBulkMessage({
+          tone: 'success',
+          text: `자산 생성 완료: 총 ${successCounter}건을 생성했습니다.`,
+        });
+      } else if (successCounter > 0) {
+        toast.warning('일부 자산 생성에 실패했습니다.', {
+          id: loadingToastId,
+          description: `성공 ${successCounter}건 · 실패 ${failureCounter}건. 실패 항목에서 재시도할 수 있습니다.`,
+        });
+        setBulkMessage({
+          tone: 'info',
+          text: `성공 ${successCounter}건, 실패 ${failureCounter}건입니다. 실패한 항목에서 재시도해 주세요.`,
+        });
+      } else {
+        toast.error('자산 생성에 실패했습니다.', {
+          id: loadingToastId,
+          description: '모든 요청이 실패했습니다. 입력값을 확인한 후 다시 시도해 주세요.',
+        });
+        setBulkMessage({
+          tone: 'error',
+          text: '자산 생성에 모두 실패했습니다. 입력 정보를 다시 확인한 뒤 재시도해 주세요.',
+        });
+      }
+    }
+  };
+
+  const handleBulkConfirmSelection = () => {
+    if (!hasBulkSelection) {
+      const message = '등록할 항목을 최소 한 개 이상 선택해 주세요.';
+      setBulkMessage({ tone: 'error', text: message });
+      toast.error('선택된 항목이 없습니다.', { description: message });
+      return;
+    }
+
+    const selectedItems = bulkEditableItems.filter((item) => item.isSelected);
+    void runBulkCreate(selectedItems);
+  };
+
+  const handleBulkRetry = (itemId: string) => {
+    const targetItem = bulkEditableItems.find((item) => item.id === itemId);
+    if (!targetItem) {
+      toast.error('재시도할 항목을 찾지 못했습니다.');
+      return;
+    }
+
+    const entry = bulkCreationResults[itemId];
+    const remaining = Math.max(0, targetItem.quantity - (entry?.successCount ?? 0));
+
+    if (remaining === 0) {
+      toast.info('재시도할 요청이 없습니다.', {
+        description: '수량을 늘리거나 항목 정보를 수정한 후 다시 시도해 주세요.',
+      });
+      return;
+    }
+
+    void runBulkCreate([targetItem]);
   };
 
   const handleBulkAnalyze = async () => {
@@ -1424,6 +1825,15 @@ export default function AssetForm() {
                       각 항목의 카테고리, 수량, 단가, 구매일을 검토하고 필요 시 수정하세요.
                     </p>
 
+                    {isBulkCreating && (
+                      <div className="flex items-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-xs font-medium text-primary sm:text-sm">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>
+                          자산 생성 중... ({bulkCreationProgress.completed}/{bulkCreationProgress.total})
+                        </span>
+                      </div>
+                    )}
+
                     <div className="space-y-2 rounded-md border border-dashed border-muted-foreground/40 bg-muted/10 p-3">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex flex-1 flex-wrap items-center gap-2">
@@ -1476,7 +1886,8 @@ export default function AssetForm() {
                               locations.length === 0 ||
                               locationsLoading ||
                               !hasBulkSelection ||
-                              bulkDefaultLocationId === null
+                              bulkDefaultLocationId === null ||
+                              isBulkCreating
                             }
                           >
                             선택 항목에 적용
@@ -1487,7 +1898,7 @@ export default function AssetForm() {
                             variant="outline"
                             size="sm"
                             onClick={clearLocationsFromSelected}
-                            disabled={!hasBulkSelection}
+                            disabled={!hasBulkSelection || isBulkCreating}
                           >
                             선택 항목 위치 초기화
                           </Button>
@@ -1510,11 +1921,21 @@ export default function AssetForm() {
                               <TableHead className="w-28">수량</TableHead>
                               <TableHead className="w-32">단가(원)</TableHead>
                               <TableHead className="w-36">구매일</TableHead>
+                              <TableHead className="w-64">생성 상태</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {bulkEditableItems.map((item, index) => {
                               const formattedUnitPrice = item.unitPrice ? Number(item.unitPrice) : 0;
+                              const creationEntry = bulkCreationResults[item.id];
+                              const targetCountForRow = Math.max(0, Math.floor(item.quantity));
+                              const totalForRow = creationEntry?.totalRequested ?? targetCountForRow;
+                              const successForRow = Math.min(creationEntry?.successCount ?? 0, totalForRow);
+                              const failureForRow = creationEntry?.failureCount ?? 0;
+                              const lastError = creationEntry?.errors.slice(-1)[0];
+                              const statusForRow = creationEntry?.status ?? 'idle';
+                              const createdAssetBadges = creationEntry?.createdAssets ?? [];
+                              const totalDisplayCount = totalForRow > 0 ? totalForRow : targetCountForRow;
 
                               return (
                                 <TableRow key={item.id}>
@@ -1577,12 +1998,7 @@ export default function AssetForm() {
                                           <span className="font-medium text-foreground">규격</span>: {item.specifications}
                                         </p>
                                       )}
-                                      {item.itemType && (
-                                        <Badge variant="secondary" className="uppercase tracking-tight">
-                                          {item.itemType}
-                                        </Badge>
-                                      )}
-                                      {!item.model && !item.specifications && !item.itemType && (
+                                      {!item.model && !item.specifications && (
                                         <span className="text-xs text-muted-foreground">-</span>
                                       )}
                                     </div>
@@ -1634,6 +2050,67 @@ export default function AssetForm() {
                                       }
                                     />
                                   </TableCell>
+                                  <TableCell className="align-top">
+                                    <div className="space-y-1 text-xs">
+                                      {statusForRow === 'processing' && (
+                                        <span className="flex items-center gap-1 text-primary">
+                                          <Loader2 className="h-3 w-3 animate-spin" />
+                                          생성 중...
+                                        </span>
+                                      )}
+                                      {totalDisplayCount > 0 ? (
+                                        <span
+                                          className={
+                                            statusForRow === 'success'
+                                              ? 'font-medium text-emerald-600 dark:text-emerald-500'
+                                              : 'font-medium text-foreground'
+                                          }
+                                        >
+                                          성공 {Math.min(successForRow, totalDisplayCount)} / {totalDisplayCount}
+                                        </span>
+                                      ) : (
+                                        <span className="text-muted-foreground">대상 없음</span>
+                                      )}
+                                      {failureForRow > 0 && (
+                                        <span className="text-destructive">실패 {failureForRow}건</span>
+                                      )}
+                                      {createdAssetBadges.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 pt-1">
+                                          {createdAssetBadges.slice(-3).map((asset) => (
+                                            <Badge
+                                              key={asset.id}
+                                              variant="secondary"
+                                              className="text-[10px] font-semibold"
+                                            >
+                                              {asset.assetTag}
+                                            </Badge>
+                                          ))}
+                                          {createdAssetBadges.length > 3 && (
+                                            <span className="text-[10px] text-muted-foreground">
+                                              +{createdAssetBadges.length - 3}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {lastError && (
+                                        <p className="text-[11px] text-destructive">
+                                          최근 오류: {lastError}
+                                        </p>
+                                      )}
+                                      {failureForRow > 0 && (
+                                        <Button
+                                          type="button"
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-7 px-2 text-[11px]"
+                                          onClick={() => handleBulkRetry(item.id)}
+                                          disabled={isBulkCreating}
+                                        >
+                                          실패분 재시도
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </TableCell>
                                 </TableRow>
                               );
                             })}
@@ -1655,24 +2132,21 @@ export default function AssetForm() {
           <DialogFooter className="flex flex-col gap-2 pt-2 pb-2 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
             <div className="flex flex-wrap gap-2">
               {bulkEditableItems.length > 0 && (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={resetBulkItemsToInitial}
-                    disabled={bulkEditableItems.length === 0}
-                  >
-                    초기화
-                  </Button>
-                  <Button
-                    type="button"
-                    className="gap-2"
-                    onClick={handleBulkConfirmSelection}
-                    disabled={!hasBulkSelection}
-                  >
-                    선택 항목 등록
-                  </Button>
-                </>
+                <Button
+                  type="button"
+                  className="gap-2"
+                  onClick={handleBulkConfirmSelection}
+                  disabled={!hasBulkSelection || isBulkCreating}
+                >
+                  {isBulkCreating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      생성 중...
+                    </>
+                  ) : (
+                    '선택 항목 등록'
+                  )}
+                </Button>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1683,7 +2157,7 @@ export default function AssetForm() {
               type="button"
               className="gap-2"
               onClick={handleBulkAnalyze}
-              disabled={bulkIsAnalyzing || (!bulkFile && !bulkUrl.trim())}
+              disabled={bulkIsAnalyzing || isBulkCreating || (!bulkFile && !bulkUrl.trim())}
             >
               {bulkIsAnalyzing ? (
                 <>

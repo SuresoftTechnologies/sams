@@ -15,6 +15,14 @@ from src.models.category import Category
 from src.schemas.asset import CreateAssetRequest, UpdateAssetRequest
 
 
+CATEGORY_CODE_OVERRIDES: dict[str, str] = {
+    "DESKTOP": "11",
+    "NOTEBOOK": "12",
+    "LAPTOP": "12",
+    "MONITOR": "14",
+}
+
+
 class AssetService:
     """Service class for asset business logic."""
 
@@ -43,6 +51,9 @@ class AssetService:
         if not category:
             raise ValueError(f"Category not found: {category_id}")
 
+        raw_code = category.code.upper()
+        category_code = CATEGORY_CODE_OVERRIDES.get(raw_code, category.code)
+
         # Get year (4 digits)
         year = (purchase_date or datetime.now()).year
 
@@ -50,13 +61,13 @@ class AssetService:
         count_result = await db.execute(
             select(func.count(Asset.id)).where(
                 Asset.category_id == category_id,
-                Asset.asset_tag.like(f"{category.code}-{year}-%"),
+                Asset.asset_tag.like(f"{category_code}-{year}-%"),
             )
         )
         count = count_result.scalar_one() or 0
         seq = count + 1
 
-        return f"{category.code}-{year}-{seq:04d}"
+        return f"{category_code}-{year}-{seq:04d}"
 
     @staticmethod
     def calculate_grade(purchase_date: datetime | None) -> AssetGrade:
