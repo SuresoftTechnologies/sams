@@ -32,6 +32,8 @@ import {
 import { ArrowLeft, Save, Loader2, ChevronDown, Info } from 'lucide-react';
 import { assetSchema, type AssetFormData } from '@/lib/validators';
 import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
+import { useGetCategories } from '@/hooks/useCategories';
+import { useGetLocations } from '@/hooks/useLocations';
 
 /**
  * Asset Form Page
@@ -40,23 +42,7 @@ import { useCreateAsset, useUpdateAsset, useGetAsset } from '@/hooks/useAssets';
  * Organized into collapsible sections for better UX
  */
 
-// Mock data - TODO: fetch from API
-const MOCK_CATEGORIES = [
-  { id: 'cat-1', name: '데스크탑', code: '11' },
-  { id: 'cat-2', name: '노트북', code: '12' },
-  { id: 'cat-3', name: '태블릿', code: '13' },
-  { id: 'cat-4', name: '모니터', code: '14' },
-  { id: 'cat-5', name: '주변기기', code: '15' },
-];
-
-const MOCK_LOCATIONS = [
-  { id: 'loc-1', name: '판교 1F' },
-  { id: 'loc-2', name: '판교 2F' },
-  { id: 'loc-3', name: '판교 3F' },
-  { id: 'loc-4', name: '대전 본사' },
-  { id: 'loc-5', name: '서버실' },
-];
-
+// Mock data for users - TODO: fetch from API
 const MOCK_USERS = [
   { id: 'user-1', name: '김철수' },
   { id: 'user-2', name: '이영희' },
@@ -81,6 +67,14 @@ export default function AssetForm() {
   const { data: asset, isLoading: isLoadingAsset } = useGetAsset(id || '');
   const createMutation = useCreateAsset();
   const updateMutation = useUpdateAsset(id!);
+
+  // Fetch categories and locations from API
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategories();
+  const { data: locationsData, isLoading: locationsLoading } = useGetLocations();
+
+  // Ensure we always have arrays
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+  const locations = Array.isArray(locationsData) ? locationsData : [];
 
   // Section collapse states
   const [sectionsOpen, setSectionsOpen] = useState({
@@ -278,18 +272,28 @@ export default function AssetForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>카테고리 *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={categoriesLoading}
+                          >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="카테고리를 선택하세요" />
+                                <SelectValue placeholder={categoriesLoading ? "로딩 중..." : "카테고리를 선택하세요"} />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
-                              {MOCK_CATEGORIES.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  {cat.name} ({cat.code})
+                            <SelectContent className="max-h-[300px] overflow-y-auto">
+                              {categories.length === 0 && !categoriesLoading ? (
+                                <SelectItem value="empty" disabled>
+                                  카테고리가 없습니다
                                 </SelectItem>
-                              ))}
+                              ) : (
+                                categories.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -303,18 +307,28 @@ export default function AssetForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>위치 *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={locationsLoading}
+                          >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="위치를 선택하세요" />
+                                <SelectValue placeholder={locationsLoading ? "로딩 중..." : "위치를 선택하세요"} />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
-                              {MOCK_LOCATIONS.map((loc) => (
+                            <SelectContent className="max-h-[300px] overflow-y-auto">
+                              {locations.length === 0 && !locationsLoading ? (
+                                <SelectItem value="empty" disabled>
+                                  위치가 없습니다
+                                </SelectItem>
+                              ) : (
+                                locations.map((loc) => (
                                 <SelectItem key={loc.id} value={loc.id}>
                                   {loc.name}
                                 </SelectItem>
-                              ))}
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <FormMessage />
