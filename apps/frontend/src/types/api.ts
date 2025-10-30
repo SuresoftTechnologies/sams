@@ -14,7 +14,8 @@ export interface Asset {
   status?: 'issued' | 'loaned' | 'general' | 'stock' | 'server_room' | 'disposed';
   category_id: string;
   location_id?: string | null;
-  assignee_id?: string | null;
+  assigned_to?: string | null;  // Updated field name to match backend
+  assignee_id?: string | null;   // Kept for backward compatibility
   model?: string | null;
   serial_number?: string | null;
   manufacturer?: string | null;
@@ -24,6 +25,10 @@ export interface Asset {
   notes?: string | null;
   created_at: string;
   updated_at: string;
+  // Additional fields from backend
+  category_name?: string;
+  location_name?: string;
+  assigned_user_name?: string;
 }
 
 export interface AssetCreate {

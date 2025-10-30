@@ -18,6 +18,9 @@ class WorkflowType(str, Enum):
     CHECKIN = "checkin"  # Asset return request
     TRANSFER = "transfer"  # Transfer between users
     MAINTENANCE = "maintenance"  # Maintenance request
+    RENTAL = "rental"  # Rental request for loaned assets
+    RETURN = "return"  # Return request for borrowed assets
+    DISPOSAL = "disposal"  # Disposal request for old assets
 
 
 class WorkflowStatus(str, Enum):

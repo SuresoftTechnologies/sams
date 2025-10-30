@@ -21,6 +21,7 @@ from src.models.workflow import WorkflowStatus, WorkflowType
 from src.schemas.common import PaginatedResponse
 from src.schemas.workflow import (
     ApprovalRequest,
+    CreateWorkflowRequest,
     Workflow,
 )
 
@@ -86,6 +87,109 @@ async def get_workflows(
         skip=skip,
         limit=limit,
     )
+
+
+@router.post("", response_model=Workflow, status_code=status.HTTP_201_CREATED)
+async def create_workflow(
+    request: CreateWorkflowRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> Workflow:
+    """
+    Create a new workflow (rental, return, disposal, maintenance).
+
+    Validation logic:
+    - RENTAL: Asset must be LOANED status and not assigned
+    - RETURN: Asset must be assigned to current user
+    - DISPOSAL/MAINTENANCE: Admin/Manager only
+
+    Args:
+        request: Workflow creation request
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Created workflow object
+
+    Raises:
+        HTTPException: 404 if asset not found
+        HTTPException: 400 if validation fails
+    """
+    # Verify asset exists
+    result = await db.execute(
+        select(AssetModel).where(AssetModel.id == request.asset_id)
+    )
+    asset = result.scalar_one_or_none()
+
+    if asset is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Asset not found",
+        )
+
+    # Validate based on workflow type
+    if request.type == WorkflowType.RENTAL:
+        # Check if asset is available for rental
+        if asset.status != AssetStatus.LOANED:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이 자산은 대여할 수 없습니다. 대여용 자산만 대여 가능합니다.",
+            )
+        if asset.assigned_to is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="이 자산은 이미 대여 중입니다.",
+            )
+        # Rental requires expected return date
+        if request.expected_return_date is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="대여 신청 시 반납 예정일은 필수입니다.",
+            )
+
+    elif request.type == WorkflowType.RETURN:
+        # Check if asset is assigned to current user
+        if asset.assigned_to != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="본인이 대여한 자산만 반납할 수 있습니다.",
+            )
+
+    elif request.type == WorkflowType.DISPOSAL:
+        # Only admins and managers can request disposal
+        if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="불용 신청은 관리자만 가능합니다.",
+            )
+
+    elif request.type == WorkflowType.MAINTENANCE:
+        # Only admins and managers can request maintenance
+        if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="유지보수 신청은 관리자만 가능합니다.",
+            )
+
+    # Create workflow
+    workflow = WorkflowModel(
+        id=str(uuid.uuid4()),
+        type=request.type,
+        status=WorkflowStatus.PENDING,
+        asset_id=request.asset_id,
+        requester_id=current_user.id,
+        assignee_id=request.assignee_id if request.type == WorkflowType.TRANSFER else (
+            current_user.id if request.type == WorkflowType.RENTAL else None
+        ),
+        reason=request.reason,
+        expected_return_date=request.expected_return_date,
+    )
+
+    db.add(workflow)
+    await db.commit()
+    await db.refresh(workflow)
+
+    return Workflow.model_validate(workflow)
 
 
 @router.get("/my-requests", response_model=PaginatedResponse[Workflow])
@@ -384,6 +488,56 @@ async def approve_workflow(
                 action=HistoryAction.UNASSIGNED,
                 description=f"Asset returned via workflow approval: {workflow.reason or 'No reason provided'}",
                 from_user_id=workflow.requester_id,
+                workflow_id=workflow_id,
+            )
+            db.add(history)
+
+        elif workflow.type == WorkflowType.RENTAL:
+            # Assign the loaned asset to the requester
+            asset.assigned_to = workflow.requester_id
+            # Keep status as LOANED since it's a temporary loan
+
+            # Create history entry
+            history = AssetHistory(
+                id=str(uuid.uuid4()),
+                asset_id=asset.id,
+                performed_by=current_user.id,
+                action=HistoryAction.ASSIGNED,
+                description=f"Asset rented via workflow approval: {workflow.reason or 'No reason provided'}",
+                to_user_id=workflow.requester_id,
+                workflow_id=workflow_id,
+            )
+            db.add(history)
+
+        elif workflow.type == WorkflowType.RETURN:
+            # Return the asset, make it available for rental again
+            asset.assigned_to = None
+            # Keep status as LOANED so it's available for others
+
+            # Create history entry
+            history = AssetHistory(
+                id=str(uuid.uuid4()),
+                asset_id=asset.id,
+                performed_by=current_user.id,
+                action=HistoryAction.UNASSIGNED,
+                description=f"Asset returned via workflow approval: {workflow.reason or 'No reason provided'}",
+                from_user_id=workflow.requester_id,
+                workflow_id=workflow_id,
+            )
+            db.add(history)
+
+        elif workflow.type == WorkflowType.DISPOSAL:
+            # Mark asset as disposed
+            asset.status = AssetStatus.DISPOSED
+            asset.assigned_to = None
+
+            # Create history entry
+            history = AssetHistory(
+                id=str(uuid.uuid4()),
+                asset_id=asset.id,
+                performed_by=current_user.id,
+                action=HistoryAction.STATUS_CHANGED,
+                description=f"Asset disposed via workflow approval: {workflow.reason or 'No reason provided'}",
                 workflow_id=workflow_id,
             )
             db.add(history)
