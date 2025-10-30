@@ -445,10 +445,10 @@ apps/backend/
 
 ---
 
-## 🔐 Phase 6: 인증/보안 구현
+## 🔐 Phase 6: 인증/보안 구현 ✅
 
 ### 6.1 보안 유틸리티 (src/utils/security.py)
-- [ ] 비밀번호 해싱 함수 (bcrypt)
+- [x] 비밀번호 해싱 함수 (bcrypt)
   ```python
   from passlib.context import CryptContext
 
@@ -460,7 +460,7 @@ apps/backend/
   def verify_password(plain_password: str, hashed_password: str) -> bool:
       return pwd_context.verify(plain_password, hashed_password)
   ```
-- [ ] JWT 토큰 생성 함수
+- [x] JWT 토큰 생성 함수
   ```python
   from jose import jwt
   from datetime import datetime, timedelta
@@ -471,11 +471,11 @@ apps/backend/
       to_encode.update({"exp": expire})
       return jwt.encode(to_encode, settings.jwt_access_secret, algorithm=settings.jwt_algorithm)
   ```
-- [ ] JWT 토큰 검증 함수
-- [ ] Refresh 토큰 생성/검증
+- [x] JWT 토큰 검증 함수
+- [x] Refresh 토큰 생성/검증
 
 ### 6.2 인증 의존성 (src/middlewares/auth.py)
-- [ ] get_current_user() 의존성 함수
+- [x] get_current_user() 의존성 함수
   ```python
   from fastapi import Depends, HTTPException, status
   from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -490,7 +490,7 @@ apps/backend/
       # JWT 검증 및 사용자 조회
       ...
   ```
-- [ ] require_role() 데코레이터
+- [x] require_role() 데코레이터
   ```python
   def require_role(*roles: str):
       def role_checker(current_user: User = Depends(get_current_user)):
@@ -501,21 +501,22 @@ apps/backend/
   ```
 
 ### 6.3 인증 서비스 (src/services/auth_service.py)
-- [ ] login() - 로그인 처리
-- [ ] refresh_token() - 토큰 갱신
-- [ ] change_password() - 비밀번호 변경
+- [x] login() - 로그인 처리
+- [x] refresh_token() - 토큰 갱신
+- [x] change_password() - 비밀번호 변경
 - [ ] verify_email() - 이메일 검증 (선택적)
 
 ---
 
 ## 🌐 Phase 7: API 엔드포인트 구현
 
-### 7.1 인증 API (src/api/v1/endpoints/auth.py)
-- [ ] POST /auth/login - 로그인
-- [ ] POST /auth/refresh - 토큰 갱신
-- [ ] POST /auth/logout - 로그아웃
-- [ ] GET /auth/me - 현재 사용자 정보
-- [ ] PUT /auth/change-password - 비밀번호 변경
+### 7.1 인증 API (src/api/v1/endpoints/auth.py) ✅
+- [x] POST /auth/login - 로그인
+- [x] POST /auth/refresh - 토큰 갱신
+- [x] POST /auth/logout - 로그아웃
+- [x] GET /auth/me - 현재 사용자 정보
+- [x] PUT /auth/change-password - 비밀번호 변경
+- [x] POST /auth/register - 회원가입 (추가 구현)
 
 ### 7.2 사용자 API (src/api/v1/endpoints/users.py)
 - [ ] GET /users - 사용자 목록 (Admin)
