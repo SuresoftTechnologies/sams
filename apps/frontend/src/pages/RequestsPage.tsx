@@ -6,10 +6,6 @@ import {
   Package,
   ArrowRight,
   Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   FileText,
   Plus
 } from 'lucide-react';
@@ -46,14 +42,6 @@ const statusColors = {
   rejected: 'bg-red-100 text-red-800',
   cancelled: 'bg-gray-100 text-gray-800',
   completed: 'bg-blue-100 text-blue-800',
-};
-
-const statusIcons = {
-  pending: <Clock className="h-4 w-4" />,
-  approved: <CheckCircle className="h-4 w-4" />,
-  rejected: <XCircle className="h-4 w-4" />,
-  cancelled: <AlertCircle className="h-4 w-4" />,
-  completed: <CheckCircle className="h-4 w-4" />,
 };
 
 const typeLabels: Record<string, string> = {
@@ -180,7 +168,7 @@ export default function RequestsPage() {
                   <TableHead className="min-w-[180px] max-w-[250px]">자산명</TableHead>
                   <TableHead className="w-[140px]">자산코드</TableHead>
                   <TableHead className="min-w-[200px] max-w-[300px]">사유</TableHead>
-                  <TableHead className="w-[100px]">상태</TableHead>
+                  <TableHead className="w-[100px] text-center">상태</TableHead>
                   <TableHead className="w-[160px]">신청일시</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -260,20 +248,17 @@ export default function RequestsPage() {
                         );
                       })()}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {statusIcons[workflow.status]}
-                        <Badge
-                          variant="secondary"
-                          className={statusColors[workflow.status]}
-                        >
-                          {workflow.status === 'pending' && '대기중'}
-                          {workflow.status === 'approved' && '승인됨'}
-                          {workflow.status === 'rejected' && '반려됨'}
-                          {workflow.status === 'cancelled' && '취소됨'}
-                          {workflow.status === 'completed' && '완료'}
-                        </Badge>
-                      </div>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="secondary"
+                        className={statusColors[workflow.status]}
+                      >
+                        {workflow.status === 'pending' && '대기중'}
+                        {workflow.status === 'approved' && '승인됨'}
+                        {workflow.status === 'rejected' && '반려됨'}
+                        {workflow.status === 'cancelled' && '취소됨'}
+                        {workflow.status === 'completed' && '완료'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
