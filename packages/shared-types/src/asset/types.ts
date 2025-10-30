@@ -37,32 +37,60 @@ export enum AssetCategory {
 /**
  * Asset entity interface
  * Note: Using snake_case to match Python backend API
+ * Total 23+ core fields matching database schema
  */
 export interface Asset {
+  // Identity fields
   id: string;
-  asset_tag: string;
-  name: string;
+  asset_tag: string;  // 자산번호 (e.g., SRS-11-2024-0001)
+
+  // Basic Info
+  name: string;  // 자산명
   category_id: string;
   category_name?: string;
-  model?: string;
-  serial_number?: string;
+  model?: string;  // 규격/모델명
+  serial_number?: string;  // MAC 또는 시리얼넘버
   manufacturer?: string;
   mac_address?: string;
-  status: AssetStatus;
-  grade?: AssetGrade;
-  assigned_to?: string | null;
-  location_id?: string | null;
+  status: AssetStatus;  // 상태 (issued/loaned/general/stock/server_room/disposed)
+  grade?: AssetGrade;  // 등급 (A/B/C, auto-calculated from purchase year)
+  assigned_to?: string | null;  // 현 사용자
+  location_id?: string | null;  // 위치
   location_name?: string;
-  purchase_price?: number;
-  purchase_date?: string;
+
+  // Purchase Info
+  purchase_price?: number;  // 구매가
+  purchase_date?: string;  // 구매일
   purchase_order?: string;
+  purchase_request?: string;  // 구매 품의
+  tax_invoice_date?: string;  // 세금계산서 발행일
   invoice_number?: string;
-  supplier?: string;
-  warranty_end?: string;
-  notes?: string;
-  description?: string;
+  supplier?: string;  // 공급업체
+  warranty_end?: string;  // 보증기간
+
+  // Category Details
+  furniture_category?: string;  // 집기품목
+  detailed_category?: string;  // 상세품목
+
+  // Checkout/Return Info
+  checkout_date?: string;  // 반출날짜
+  return_date?: string;  // 반납날짜
+
+  // User History
+  previous_user_1?: string;  // 이전 사용자 1
+  previous_user_2?: string;  // 이전 사용자 2
+  first_user?: string;  // 최초 사용자
+
+  // Other Info
+  old_asset_number?: string;  // 기존번호
   qr_code?: string;
+  qr_code_exists?: string;  // QR코드 유무
+  notes?: string;  // 비고
+  description?: string;
+  special_notes?: string;  // 특이사항
   specifications?: string;
+
+  // Timestamps
   created_at: string;
   updated_at: string;
   deleted_at?: string | null;
@@ -94,7 +122,8 @@ export interface AssetWithRelations extends Asset {
  * Note: Using snake_case to match Python backend API
  */
 export interface CreateAssetDto {
-  asset_tag?: string;
+  // Basic Info
+  asset_tag?: string;  // Auto-generated if not provided
   name: string;
   category_id: string;
   model?: string;
@@ -102,13 +131,36 @@ export interface CreateAssetDto {
   manufacturer?: string;
   mac_address?: string;
   status?: AssetStatus;
+  assigned_to?: string;  // 현 사용자
   location_id?: string;
+
+  // Purchase Info
   purchase_price?: number;
   purchase_date?: string;
   purchase_order?: string;
+  purchase_request?: string;  // 구매 품의
+  tax_invoice_date?: string;  // 세금계산서 발행일
   supplier?: string;
   warranty_end?: string;
+
+  // Category Details
+  furniture_category?: string;  // 집기품목
+  detailed_category?: string;  // 상세품목
+
+  // Checkout/Return Info
+  checkout_date?: string;  // 반출날짜
+  return_date?: string;  // 반납날짜
+
+  // User History
+  previous_user_1?: string;  // 이전 사용자 1
+  previous_user_2?: string;  // 이전 사용자 2
+  first_user?: string;  // 최초 사용자
+
+  // Other Info
+  old_asset_number?: string;  // 기존번호
+  qr_code_exists?: string;  // QR코드 유무
   notes?: string;
+  special_notes?: string;  // 특이사항
 }
 
 /**
@@ -116,18 +168,44 @@ export interface CreateAssetDto {
  * Note: Using snake_case to match Python backend API
  */
 export interface UpdateAssetDto {
+  // Basic Info
   name?: string;
   model?: string;
   serial_number?: string;
   manufacturer?: string;
   mac_address?: string;
   status?: AssetStatus;
+  assigned_to?: string | null;  // 현 사용자
   category_id?: string;
   location_id?: string;
+
+  // Purchase Info
   purchase_price?: number;
   purchase_date?: string;
+  purchase_order?: string;
+  purchase_request?: string;  // 구매 품의
+  tax_invoice_date?: string;  // 세금계산서 발행일
+  supplier?: string;
   warranty_end?: string;
+
+  // Category Details
+  furniture_category?: string;  // 집기품목
+  detailed_category?: string;  // 상세품목
+
+  // Checkout/Return Info
+  checkout_date?: string;  // 반출날짜
+  return_date?: string;  // 반납날짜
+
+  // User History
+  previous_user_1?: string;  // 이전 사용자 1
+  previous_user_2?: string;  // 이전 사용자 2
+  first_user?: string;  // 최초 사용자
+
+  // Other Info
+  old_asset_number?: string;  // 기존번호
+  qr_code_exists?: string;  // QR코드 유무
   notes?: string;
+  special_notes?: string;  // 특이사항
 }
 
 /**

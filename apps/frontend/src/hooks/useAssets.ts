@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import type { AssetFormData } from '@/lib/validators';
-import type { CreateAssetDto, UpdateAssetDto, AssetStatus } from '@sams/api-client';
+import type { CreateAssetDto, UpdateAssetDto } from '@sams/api-client';
+import { AssetStatus } from '@sams/api-client';
 
 /**
  * Asset Management Hooks
@@ -26,11 +27,11 @@ const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
     name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
-    status: AssetStatus.AVAILABLE,
+    status: AssetStatus.STOCK,
     purchase_date: data.purchaseDate,
     purchase_price: data.purchasePrice ?? undefined,
     warranty_end: data.warrantyUntil,
-    notes: data.description,
+    notes: data.notes,
   };
 };
 
@@ -42,7 +43,7 @@ const mapFormToUpdateDto = (data: AssetFormData): UpdateAssetDto => {
     purchase_date: data.purchaseDate,
     purchase_price: data.purchasePrice ?? undefined,
     warranty_end: data.warrantyUntil,
-    notes: data.description,
+    notes: data.notes,
   };
 };
 
