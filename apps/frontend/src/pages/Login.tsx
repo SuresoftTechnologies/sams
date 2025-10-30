@@ -24,7 +24,10 @@ import { useLogin } from '@/hooks/useAuth';
  * - Loading states and error handling
  * - Auto-redirect after successful login
  *
- * Demo credentials: demo@suresoft.com / demo123
+ * Demo credentials:
+ * - Admin: admin@suresoft.com / admin123!
+ * - Manager: manager@suresoft.com / manager123!
+ * - Employee: employee@suresoft.com / employee123!
  */
 export default function Login() {
   const loginMutation = useLogin();
@@ -119,9 +122,18 @@ export default function Login() {
           </Form>
 
           {/* Demo credentials hint */}
-          <div className="mt-4 p-3 bg-muted rounded-md">
+          <div className="mt-4 p-3 bg-muted rounded-md space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground text-center mb-1">
+              Demo Accounts:
+            </p>
             <p className="text-xs text-muted-foreground text-center">
-              <strong>Demo:</strong> demo@suresoft.com / demo123
+              👤 Admin: admin@suresoft.com / admin123!
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              👤 Manager: manager@suresoft.com / manager123!
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              👤 Employee: employee@suresoft.com / employee123!
             </p>
           </div>
         </CardContent>
