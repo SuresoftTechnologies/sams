@@ -81,13 +81,13 @@ export default function AssetForm() {
     if (isEditMode && asset) {
       form.reset({
         name: asset.name,
-        serialNumber: asset.serialNumber || '',
+        serialNumber: asset.serial_number || '',
         description: asset.description || '',
-        categoryId: asset.categoryId,
-        locationId: asset.locationId,
-        purchaseDate: asset.purchaseDate || '',
-        purchasePrice: asset.purchasePrice ?? null,
-        warrantyUntil: asset.warrantyUntil || '',
+        categoryId: asset.category_id,
+        locationId: asset.location_id || '',
+        purchaseDate: asset.purchase_date || '',
+        purchasePrice: asset.purchase_price ?? null,
+        warrantyUntil: asset.warranty_end || '',
       });
     }
   }, [asset, isEditMode, form]);

@@ -233,14 +233,14 @@ export function AssetTable({
             >
               <TableCell className="font-medium">{asset.name}</TableCell>
               <TableCell>
-                {asset.serialNumber ? (
-                  <code className="text-sm">{asset.serialNumber}</code>
+                {asset.serial_number ? (
+                  <code className="text-sm">{asset.serial_number}</code>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell>{asset.categoryName || '-'}</TableCell>
-              <TableCell>{asset.locationName || '-'}</TableCell>
+              <TableCell>{asset.category_name || '-'}</TableCell>
+              <TableCell>{asset.location_name || '-'}</TableCell>
               <TableCell>
                 <Badge variant={getStatusBadgeVariant(asset.status)}>
                   {getStatusLabel(asset.status)}

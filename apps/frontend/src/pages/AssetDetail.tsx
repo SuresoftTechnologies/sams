@@ -182,11 +182,11 @@ export default function AssetDetail() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Category</p>
-                  <p className="text-base mt-1">{asset.categoryName || '-'}</p>
+                  <p className="text-base mt-1">{asset.category_name || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Location</p>
-                  <p className="text-base mt-1">{asset.locationName || '-'}</p>
+                  <p className="text-base mt-1">{asset.location_name || '-'}</p>
                 </div>
               </div>
 

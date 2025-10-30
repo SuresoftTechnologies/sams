@@ -162,22 +162,34 @@ async def get_asset_by_number(
         GET /api/v1/assets/by-number/14-2022-23
     """
     result = await db.execute(
-        select(AssetModel).where(
+        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        .outerjoin(Category, AssetModel.category_id == Category.id)
+        .outerjoin(Location, AssetModel.location_id == Location.id)
+        .where(
             and_(
                 AssetModel.asset_tag == asset_number,
                 AssetModel.deleted_at.is_(None)
             )
         )
     )
-    asset = result.scalar_one_or_none()
+    row = result.one_or_none()
 
-    if asset is None:
+    if row is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Asset with number '{asset_number}' not found",
         )
 
-    return Asset.model_validate(asset)
+    # Build Asset response with joined data
+    asset_model = row[0]
+    category_name = row[1]
+    location_name = row[2]
+
+    asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
+    asset_dict["category_name"] = category_name
+    asset_dict["location_name"] = location_name
+
+    return Asset(**asset_dict)
 
 
 @router.get("/{asset_id}", response_model=Asset)
@@ -201,22 +213,34 @@ async def get_asset(
         HTTPException: 404 if asset not found
     """
     result = await db.execute(
-        select(AssetModel).where(
+        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        .outerjoin(Category, AssetModel.category_id == Category.id)
+        .outerjoin(Location, AssetModel.location_id == Location.id)
+        .where(
             and_(
                 AssetModel.id == asset_id,
                 AssetModel.deleted_at.is_(None)
             )
         )
     )
-    asset = result.scalar_one_or_none()
+    row = result.one_or_none()
 
-    if asset is None:
+    if row is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Asset not found",
         )
 
-    return Asset.model_validate(asset)
+    # Build Asset response with joined data
+    asset_model = row[0]
+    category_name = row[1]
+    location_name = row[2]
+
+    asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
+    asset_dict["category_name"] = category_name
+    asset_dict["location_name"] = location_name
+
+    return Asset(**asset_dict)
 
 
 @router.post("", response_model=Asset, status_code=status.HTTP_201_CREATED)

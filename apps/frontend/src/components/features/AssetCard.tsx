@@ -79,8 +79,8 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <CardTitle className="text-lg">{asset.name}</CardTitle>
-            {asset.serialNumber && (
-              <code className="text-xs text-muted-foreground">{asset.serialNumber}</code>
+            {asset.serial_number && (
+              <code className="text-xs text-muted-foreground">{asset.serial_number}</code>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -148,18 +148,18 @@ export function AssetCard({ asset, onClick, onEdit, onDelete, onViewQR }: AssetC
 
       <CardContent className="pb-3">
         <div className="space-y-2 text-sm">
-          {asset.categoryName && (
+          {asset.category_name && (
             <div className="flex items-center text-muted-foreground">
               <span className="font-medium min-w-20">Category:</span>
-              <span>{asset.categoryName}</span>
+              <span>{asset.category_name}</span>
             </div>
           )}
 
-          {asset.locationName && (
+          {asset.location_name && (
             <div className="flex items-center text-muted-foreground">
               <MapPin className="mr-1.5 h-3.5 w-3.5" />
               <span className="font-medium min-w-20">Location:</span>
-              <span>{asset.locationName}</span>
+              <span>{asset.location_name}</span>
             </div>
           )}
 

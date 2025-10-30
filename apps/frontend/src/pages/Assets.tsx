@@ -32,13 +32,13 @@ export default function Assets() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter assets by search query
-  const filteredAssets = data?.data.filter((asset) => {
+  const filteredAssets = data?.items.filter((asset) => {
     const query = searchQuery.toLowerCase();
     return (
       asset.name.toLowerCase().includes(query) ||
-      asset.serialNumber?.toLowerCase().includes(query) ||
-      asset.categoryName?.toLowerCase().includes(query) ||
-      asset.locationName?.toLowerCase().includes(query)
+      asset.serial_number?.toLowerCase().includes(query) ||
+      asset.category_name?.toLowerCase().includes(query) ||
+      asset.location_name?.toLowerCase().includes(query)
     );
   });
 
@@ -133,13 +133,13 @@ export default function Assets() {
                     >
                       <TableCell className="font-medium">{asset.name}</TableCell>
                       <TableCell className="text-muted-foreground">
-                        {asset.serialNumber || '-'}
+                        {asset.serial_number || '-'}
                       </TableCell>
-                      <TableCell>{asset.categoryName || '-'}</TableCell>
-                      <TableCell>{asset.locationName || '-'}</TableCell>
+                      <TableCell>{asset.category_name || '-'}</TableCell>
+                      <TableCell>{asset.location_name || '-'}</TableCell>
                       <TableCell>{getStatusBadge(asset.status)}</TableCell>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(asset.createdAt), 'MMM d, yyyy')}
+                        {format(new Date(asset.created_at), 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

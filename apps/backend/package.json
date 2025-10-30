@@ -20,7 +20,7 @@
     "db:migrate": "uv run alembic upgrade head",
     "db:migrate:create": "uv run alembic revision --autogenerate -m",
     "db:reset": "uv run alembic downgrade base && uv run alembic upgrade head",
-    "db:seed": "uv run python scripts/seed.py",
+    "db:seed": "PYTHONPATH=. uv run python scripts/seed.py",
     "db:setup": "pnpm db:up && sleep 3 && pnpm db:migrate && pnpm db:seed",
     "migrate:excel": "uv run python scripts/migrate_excel.py",
     "migrate:excel:check": "uv run python scripts/migrate_excel.py --dry-run",

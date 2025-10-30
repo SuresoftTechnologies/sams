@@ -40,7 +40,7 @@ export function AssetQRCode({
   const qrValue = JSON.stringify({
     id: asset.id,
     name: asset.name,
-    serialNumber: asset.serialNumber,
+    serialNumber: asset.serial_number,
     assetTag: asset.id, // In real app, use actual asset tag
     url: `${window.location.origin}/assets/${asset.id}`,
   });
@@ -136,7 +136,7 @@ export function AssetQRCode({
             ${svgData}
             <div class="asset-info">
               <h2>${asset.name}</h2>
-              ${asset.serialNumber ? `<p>Serial: ${asset.serialNumber}</p>` : ''}
+              ${asset.serial_number ? `<p>Serial: ${asset.serial_number}</p>` : ''}
               <p>Asset ID: ${asset.id}</p>
             </div>
           </div>
@@ -179,9 +179,9 @@ export function AssetQRCode({
         {includeLabel && (
           <div className="text-center space-y-1">
             <p className="font-semibold text-lg">{asset.name}</p>
-            {asset.serialNumber && (
+            {asset.serial_number && (
               <p className="text-sm text-muted-foreground">
-                Serial: <code>{asset.serialNumber}</code>
+                Serial: <code>{asset.serial_number}</code>
               </p>
             )}
             <p className="text-xs text-muted-foreground">Asset ID: {asset.id}</p>
@@ -222,7 +222,7 @@ export function AssetQRCodeSimple({
   const qrValue = JSON.stringify({
     id: asset.id,
     name: asset.name,
-    serialNumber: asset.serialNumber,
+    serialNumber: asset.serial_number,
     url: `${window.location.origin}/assets/${asset.id}`,
   });
 

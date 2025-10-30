@@ -176,7 +176,7 @@ export default function Dashboard() {
                       {asset.status.replace('_', ' ')}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(asset.createdAt), 'MMM d, yyyy')}
+                      {format(new Date(asset.created_at), 'MMM d, yyyy')}
                     </span>
                   </div>
                 </div>

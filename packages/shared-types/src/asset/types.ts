@@ -35,30 +35,36 @@ export enum AssetCategory {
 
 /**
  * Asset entity interface
+ * Note: Using snake_case to match Python backend API
  */
 export interface Asset {
   id: string;
-  assetTag: string;
+  asset_tag: string;
   name: string;
-  categoryId: string;
+  category_id: string;
+  category_name?: string;
   model?: string;
-  serialNumber?: string;
-  macAddress?: string;
+  serial_number?: string;
+  manufacturer?: string;
+  mac_address?: string;
   status: AssetStatus;
   grade?: AssetGrade;
-  currentUserId?: string | null;
-  locationId: string;
-  purchasePrice?: number;
-  purchaseDate?: Date;
-  purchaseOrder?: string;
-  invoiceNumber?: string;
+  assigned_to?: string | null;
+  location_id?: string | null;
+  location_name?: string;
+  purchase_price?: number;
+  purchase_date?: string;
+  purchase_order?: string;
+  invoice_number?: string;
   supplier?: string;
-  warrantyUntil?: Date;
+  warranty_end?: string;
   notes?: string;
-  qrCode?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date | null;
+  description?: string;
+  qr_code?: string;
+  specifications?: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
 }
 
 /**
@@ -84,65 +90,74 @@ export interface AssetWithRelations extends Asset {
 
 /**
  * Create asset DTO
+ * Note: Using snake_case to match Python backend API
  */
 export interface CreateAssetDto {
-  assetTag: string;
+  asset_tag?: string;
   name: string;
-  categoryId: string;
+  category_id: string;
   model?: string;
-  serialNumber?: string;
-  macAddress?: string;
+  serial_number?: string;
+  manufacturer?: string;
+  mac_address?: string;
   status?: AssetStatus;
-  locationId: string;
-  purchasePrice?: number;
-  purchaseDate?: Date;
-  purchaseOrder?: string;
+  location_id?: string;
+  purchase_price?: number;
+  purchase_date?: string;
+  purchase_order?: string;
   supplier?: string;
+  warranty_end?: string;
   notes?: string;
 }
 
 /**
  * Update asset DTO
+ * Note: Using snake_case to match Python backend API
  */
 export interface UpdateAssetDto {
   name?: string;
   model?: string;
-  serialNumber?: string;
-  macAddress?: string;
+  serial_number?: string;
+  manufacturer?: string;
+  mac_address?: string;
   status?: AssetStatus;
-  locationId?: string;
-  purchasePrice?: number;
-  purchaseDate?: Date;
+  category_id?: string;
+  location_id?: string;
+  purchase_price?: number;
+  purchase_date?: string;
+  warranty_end?: string;
   notes?: string;
 }
 
 /**
  * Asset filter params
+ * Note: Using snake_case to match Python backend API
  */
 export interface AssetFilterParams {
   status?: AssetStatus;
   grade?: AssetGrade;
-  categoryId?: string;
-  locationId?: string;
-  currentUserId?: string;
+  category_id?: string;
+  location_id?: string;
+  assigned_to?: string;
   search?: string;
 }
 
 /**
  * Asset history entry
+ * Note: Using snake_case to match Python backend API
  */
 export interface AssetHistory {
   id: string;
-  assetId: string;
+  asset_id: string;
   action: AssetHistoryAction;
-  fromUserId?: string | null;
-  toUserId?: string | null;
-  fromLocationId?: string | null;
-  toLocationId?: string | null;
-  oldValues?: Record<string, any>;
-  newValues?: Record<string, any>;
-  createdBy: string;
-  createdAt: Date;
+  from_user_id?: string | null;
+  to_user_id?: string | null;
+  from_location_id?: string | null;
+  to_location_id?: string | null;
+  old_values?: Record<string, any>;
+  new_values?: Record<string, any>;
+  created_by: string;
+  created_at: string;
 }
 
 /**

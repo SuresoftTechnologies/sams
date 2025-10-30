@@ -27,7 +27,7 @@ const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
     name: data.name,
     category_id: data.categoryId,
     location_id: data.locationId,
-    status: 'available' as AssetStatus,
+    status: AssetStatus.AVAILABLE,
     purchase_date: data.purchaseDate,
     purchase_price: data.purchasePrice ?? undefined,
     warranty_end: data.warrantyUntil,

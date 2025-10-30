@@ -53,11 +53,11 @@ export default function AssetList() {
       return false;
     }
 
-    if (filters.categoryId && asset.categoryId !== filters.categoryId) {
+    if (filters.categoryId && asset.category_id !== filters.categoryId) {
       return false;
     }
 
-    if (filters.locationId && asset.locationId !== filters.locationId) {
+    if (filters.locationId && asset.location_id !== filters.locationId) {
       return false;
     }
 
