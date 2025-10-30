@@ -1,39 +1,37 @@
 """
-Category model for asset classification.
+Department model for organizational structure.
 """
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
 
 
-class Category(Base):
-    """Category model for grouping assets."""
+class Department(Base):
+    """Department model for organizational hierarchy."""
 
-    __tablename__ = "categories"
+    __tablename__ = "departments"
 
     # Primary key
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
 
-    # Category info
-    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    # Department info
+    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     code: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
-    description: Mapped[str | None] = mapped_column(Text)
 
     # Hierarchical structure
     parent_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("categories.id"), index=True
+        String(36), ForeignKey("departments.id"), index=True
+    )
+    manager_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("users.id")
     )
 
     # Display order
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-
-    # Icon/Color for UI (optional)
-    icon: Mapped[str | None] = mapped_column(String(50))
-    color: Mapped[str | None] = mapped_column(String(7))  # Hex color code
 
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -47,7 +45,13 @@ class Category(Base):
     )
 
     # Relationships
-    # assets: Mapped[list["Asset"]] = relationship("Asset", back_populates="category")
+    parent: Mapped["Department"] = relationship(
+        "Department", remote_side=[id], back_populates="children", lazy="select"
+    )
+    children: Mapped[list["Department"]] = relationship(
+        "Department", back_populates="parent", lazy="select"
+    )
+    manager: Mapped["User"] = relationship("User", lazy="select")
 
     def __repr__(self) -> str:
-        return f"<Category(id={self.id}, name={self.name}, code={self.code})>"
+        return f"<Department(id={self.id}, name={self.name}, code={self.code})>"

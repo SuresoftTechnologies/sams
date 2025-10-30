@@ -373,7 +373,7 @@ class AssetRepository(CRUDBase[Asset, CreateAssetRequest, UpdateAssetRequest]):
         """
         return (
             db.query(Asset)
-            .filter(Asset.status == AssetStatus.AVAILABLE, Asset.deleted_at.is_(None))
+            .filter(Asset.status.in_([AssetStatus.LOANED, AssetStatus.STOCK]), Asset.deleted_at.is_(None))
             .offset(skip)
             .limit(limit)
             .all()

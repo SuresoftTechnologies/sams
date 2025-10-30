@@ -6,7 +6,8 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text, func
+import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -66,20 +67,20 @@ class Asset(Base):
     )
 
     # Purchase information
-    purchase_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    purchase_date: Mapped[datetime | None] = mapped_column(sa.Date)
     purchase_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
     supplier: Mapped[str | None] = mapped_column(String(100))
     purchase_request: Mapped[str | None] = mapped_column(String(100))  # 구매 품의
-    tax_invoice_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 세금계산서 발행일
-    warranty_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    tax_invoice_date: Mapped[datetime | None] = mapped_column(sa.Date)  # 세금계산서 발행일
+    warranty_end: Mapped[datetime | None] = mapped_column(sa.Date)
     
     # Excel columns: furniture/detailed category
     furniture_category: Mapped[str | None] = mapped_column(String(50))  # 집기품목
     detailed_category: Mapped[str | None] = mapped_column(String(50))  # 상세품목
     
     # Asset usage history (from Excel)
-    checkout_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 반출날짜
-    return_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 반납날짜
+    checkout_date: Mapped[datetime | None] = mapped_column(sa.Date)  # 반출날짜
+    return_date: Mapped[datetime | None] = mapped_column(sa.Date)  # 반납날짜
     previous_user_1: Mapped[str | None] = mapped_column(String(100))  # 이전 사용자 1
     previous_user_2: Mapped[str | None] = mapped_column(String(100))  # 이전 사용자 2
     first_user: Mapped[str | None] = mapped_column(String(100))  # 최초 사용자
@@ -114,7 +115,9 @@ class Asset(Base):
     category: Mapped["Category"] = relationship("Category", lazy="select")
     location: Mapped["Location"] = relationship("Location", lazy="select")
     assigned_user: Mapped["User"] = relationship("User", lazy="select")
-    # history: Mapped[list["AssetHistory"]] = relationship("AssetHistory", back_populates="asset")
+    history: Mapped[list["AssetHistory"]] = relationship("AssetHistory", back_populates="asset", lazy="select")
+    attachments: Mapped[list["AssetAttachment"]] = relationship("AssetAttachment", back_populates="asset", lazy="select")
+    workflows: Mapped[list["Workflow"]] = relationship("Workflow", back_populates="asset", lazy="select")
 
     @property
     def is_deleted(self) -> bool:

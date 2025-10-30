@@ -726,11 +726,11 @@ async def assign_asset_user(
 
     # Update status based on assignment
     if user_id:
-        asset.status = AssetStatus.ASSIGNED
+        asset.status = AssetStatus.ISSUED
         action = HistoryAction.ASSIGNED
         description = reason or f"Asset assigned to user {user_id}"
     else:
-        asset.status = AssetStatus.AVAILABLE
+        asset.status = AssetStatus.LOANED
         action = HistoryAction.UNASSIGNED
         description = reason or "Asset unassigned"
 

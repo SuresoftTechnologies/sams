@@ -41,7 +41,7 @@ class WorkflowService:
         if not asset:
             raise ValueError(f"Asset not found: {workflow_data.asset_id}")
 
-        if asset.status not in [AssetStatus.AVAILABLE, AssetStatus.IN_TRANSIT]:
+        if asset.status not in [AssetStatus.LOANED, AssetStatus.STOCK]:
             raise ValueError(f"Asset not available for checkout: {asset.status}")
 
         # Create workflow
@@ -86,7 +86,7 @@ class WorkflowService:
         if not asset:
             raise ValueError(f"Asset not found: {workflow_data.asset_id}")
 
-        if asset.status != AssetStatus.ASSIGNED:
+        if asset.status != AssetStatus.ISSUED:
             raise ValueError(f"Asset is not assigned, cannot check in: {asset.status}")
 
         # Verify requester is the assigned user
