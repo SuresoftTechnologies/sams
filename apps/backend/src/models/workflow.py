@@ -93,6 +93,7 @@ class Workflow(Base):
         "User", foreign_keys=[approver_id], lazy="joined"
     )
     approvals: Mapped[list["Approval"]] = relationship("Approval", back_populates="workflow", lazy="select")
+    comments: Mapped[list["WorkflowComment"]] = relationship("WorkflowComment", back_populates="workflow", lazy="select", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<Workflow(id={self.id}, type={self.type}, status={self.status}, asset_id={self.asset_id})>"

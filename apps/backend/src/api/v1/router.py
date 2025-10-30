@@ -14,6 +14,7 @@ from src.api.v1.endpoints import (
     receipts,
     statistics,
     users,
+    workflow_comments,
     workflows,
 )
 
@@ -55,6 +56,11 @@ api_router.include_router(
     workflows.router,
     prefix="/workflows",
     tags=["Workflows"],
+)
+
+api_router.include_router(
+    workflow_comments.router,
+    tags=["Workflow Comments"],
 )
 
 api_router.include_router(

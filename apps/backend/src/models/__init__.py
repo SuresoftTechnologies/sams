@@ -14,6 +14,7 @@ from src.models.department import Department
 from src.models.location import Location, LocationSite
 from src.models.user import User, UserRole
 from src.models.workflow import Workflow, WorkflowStatus, WorkflowType
+from src.models.workflow_comment import WorkflowComment
 from src.models.workflow_history import WorkflowHistory
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "Location",
     "User",
     "Workflow",
+    "WorkflowComment",
     "WorkflowHistory",
     # Enums
     "AssetGrade",
