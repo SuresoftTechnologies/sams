@@ -25,8 +25,119 @@ from src.schemas.workflow import (
     RejectionRequest,
     Workflow,
 )
+from src.schemas.common import PaginatedResponse, MessageResponse
+from src.services.email_service import email_service
 
 router = APIRouter()
+
+
+async def _notify_managers_of_workflow(
+    db: AsyncSession,
+    workflow_type: WorkflowType,
+    current_user: UserModel,
+    asset: AssetModel,
+    reason: str | None,
+) -> None:
+    """Send workflow notification email to active managers."""
+
+    try:
+        manager_result = await db.execute(
+            select(UserModel).where(
+                UserModel.role == UserRole.MANAGER,
+                UserModel.is_active == True,
+            )
+        )
+        managers = manager_result.scalars().all()
+
+        manager_emails = [manager.email for manager in managers if manager.email]
+
+        if not manager_emails:
+            return
+
+        # 안전하게 처리: Enum이면 .value, 문자열이면 그대로 사용
+        workflow_type_value = workflow_type.value if hasattr(workflow_type, 'value') else workflow_type
+
+        # Asset name 안전하게 처리
+        asset_name = (
+            getattr(asset, "name", None)
+            or getattr(asset, "model", None)
+            or getattr(asset, "asset_tag", "알 수 없음")
+        )
+
+        success, message, _ = email_service.send_workflow_notification(
+            workflow_type=workflow_type_value,
+            requester_name=current_user.name,
+            requester_email=current_user.email,
+            requester_department=current_user.department,
+            asset_name=asset_name,
+            asset_tag=asset.asset_tag,
+            asset_model=asset.model,
+            reason=reason,
+            manager_emails=manager_emails,
+        )
+
+        if not success:
+            print(f"Failed to send manager notification email: {message}")
+        else:
+            print(f"Manager notification email sent: {message}")
+    except Exception as exc:  # pragma: no cover - notification failure should not block workflow
+        print(f"Failed to send email notification: {exc}")
+
+
+async def _notify_requester_of_workflow_decision(
+    db: AsyncSession,
+    workflow: WorkflowModel,
+    asset: AssetModel | None,
+    approver: UserModel,
+    decision: str,
+    comment: str | None,
+) -> None:
+    """Send notification to requester about workflow decision."""
+
+    try:
+        requester_result = await db.execute(
+            select(UserModel).where(UserModel.id == workflow.requester_id)
+        )
+        requester = requester_result.scalar_one_or_none()
+
+        if not requester or not requester.email:
+            return
+
+        asset_name = (
+            getattr(asset, "name", None)
+            or getattr(asset, "model", None)
+            or getattr(asset, "asset_tag", "알 수 없음")
+        )
+        asset_tag = getattr(asset, "asset_tag", "알 수 없음")
+        asset_model = getattr(asset, "model", None)
+
+        expected_return_date = None
+        if workflow.expected_return_date:
+            expected_return_date = workflow.expected_return_date.strftime("%Y-%m-%d")
+
+        # 안전하게 처리: Enum이면 .value, 문자열이면 그대로 사용
+        workflow_type_value = workflow.type.value if hasattr(workflow.type, 'value') else workflow.type
+
+        success, message, _ = email_service.send_workflow_decision_notification(
+            requester_email=requester.email,
+            requester_name=requester.name,
+            workflow_type=workflow_type_value,
+            decision=decision,
+            asset_name=asset_name,
+            asset_tag=asset_tag,
+            asset_model=asset_model,
+            approver_name=approver.name,
+            reason=workflow.reason,
+            expected_return_date=expected_return_date,
+            comment=comment,
+        )
+
+        if not success:
+            print(f"Failed to send requester notification email: {message}")
+        else:
+            print(f"Requester notification email sent: {message}")
+    except Exception as exc:  # pragma: no cover
+        print(f"Failed to send workflow decision email: {exc}")
 
 
 @router.get("", response_model=PaginatedResponse[Workflow])
@@ -190,6 +301,14 @@ async def create_workflow(
     await db.commit()
     await db.refresh(workflow)
 
+    await _notify_managers_of_workflow(
+        db=db,
+        workflow_type=workflow.type,
+        current_user=current_user,
+        asset=asset,
+        reason=request.reason,
+    )
+
     return Workflow.model_validate(workflow)
 
 
@@ -346,6 +465,14 @@ async def create_checkout_request(
     await db.commit()
     await db.refresh(workflow)
 
+    await _notify_managers_of_workflow(
+        db=db,
+        workflow_type=WorkflowType.CHECKOUT,
+        current_user=current_user,
+        asset=asset,
+        reason=reason,
+    )
+
     return Workflow.model_validate(workflow)
 
 
@@ -403,6 +530,14 @@ async def create_checkin_request(
     db.add(workflow)
     await db.commit()
     await db.refresh(workflow)
+
+    await _notify_managers_of_workflow(
+        db=db,
+        workflow_type=WorkflowType.CHECKIN,
+        current_user=current_user,
+        asset=asset,
+        reason=reason,
+    )
 
     return Workflow.model_validate(workflow)
 
@@ -545,6 +680,15 @@ async def approve_workflow(
 
     await db.commit()
     await db.refresh(workflow)
+
+    await _notify_requester_of_workflow_decision(
+        db=db,
+        workflow=workflow,
+        asset=asset,
+        approver=current_user,
+        decision="approved",
+        comment=request.comment,
+    )
 
     return Workflow.model_validate(workflow)
 
