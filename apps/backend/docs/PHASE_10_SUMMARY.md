@@ -109,20 +109,15 @@ Successfully completed Phase 10 (데이터베이스 마이그레이션) of the B
 
 *Configurable via `ADMIN_PASSWORD` environment variable
 
-**2. Categories (10 types)**:
+**2. Categories (3 types for OCR)**:
 
-| Name       | Code      | Icon       | Color   |
-|------------|-----------|------------|---------|
-| 데스크탑    | DESKTOP   | computer   | #3B82F6 |
-| 노트북      | LAPTOP    | laptop     | #8B5CF6 |
-| 모니터      | MONITOR   | monitor    | #10B981 |
-| 키보드      | KEYBOARD  | keyboard   | #F59E0B |
-| 마우스      | MOUSE     | mouse      | #EF4444 |
-| 프린터      | PRINTER   | printer    | #6366F1 |
-| 네트워크장비 | NETWORK   | network    | #14B8A6 |
-| 모바일기기   | MOBILE    | smartphone | #EC4899 |
-| 주변기기     | PERIPHERAL| device     | #84CC16 |
-| 서버        | SERVER    | server     | #06B6D4 |
+| Name       | Code | Icon       | Color   | 용도 |
+|------------|------|------------|---------|------|
+| 데스크탑    | 11   | computer   | #3B82F6 | 영수증 OCR 자동 인식 |
+| 노트북      | 12   | laptop     | #8B5CF6 | 영수증 OCR 자동 인식 |
+| 모니터      | 14   | monitor    | #10B981 | 영수증 OCR 자동 인식 |
+
+**Note**: 영수증 OCR 시스템에서 자동으로 카테고리를 추론하기 위해 숫자 코드(11, 12, 14)를 사용합니다.
 
 **3. Locations (16 locations)**:
 

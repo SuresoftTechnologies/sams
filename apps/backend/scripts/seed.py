@@ -109,7 +109,12 @@ async def seed_users(db: AsyncSession) -> dict[str, User]:
 
 async def seed_categories(db: AsyncSession) -> list[Category]:
     """
-    Seed default asset categories.
+    Seed default asset categories for receipt OCR system.
+    
+    Only 3 categories are supported for automatic OCR recognition:
+    - 데스크탑 (11)
+    - 노트북 (12)
+    - 모니터 (14)
 
     Returns:
         List of created categories
@@ -120,8 +125,8 @@ async def seed_categories(db: AsyncSession) -> list[Category]:
         {
             "id": str(uuid.uuid4()),
             "name": "데스크탑",
-            "code": "DESKTOP",
-            "description": "데스크탑 컴퓨터",
+            "code": "11",
+            "description": "데스크탑 컴퓨터 (영수증 OCR 자동 인식)",
             "icon": "computer",
             "color": "#3B82F6",
             "is_active": True,
@@ -129,8 +134,8 @@ async def seed_categories(db: AsyncSession) -> list[Category]:
         {
             "id": str(uuid.uuid4()),
             "name": "노트북",
-            "code": "LAPTOP",
-            "description": "노트북 컴퓨터",
+            "code": "12",
+            "description": "노트북 컴퓨터 (영수증 OCR 자동 인식)",
             "icon": "laptop",
             "color": "#8B5CF6",
             "is_active": True,
@@ -138,73 +143,10 @@ async def seed_categories(db: AsyncSession) -> list[Category]:
         {
             "id": str(uuid.uuid4()),
             "name": "모니터",
-            "code": "MONITOR",
-            "description": "디스플레이 모니터",
+            "code": "14",
+            "description": "디스플레이 모니터 (영수증 OCR 자동 인식)",
             "icon": "monitor",
             "color": "#10B981",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "키보드",
-            "code": "KEYBOARD",
-            "description": "키보드 및 입력장치",
-            "icon": "keyboard",
-            "color": "#F59E0B",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "마우스",
-            "code": "MOUSE",
-            "description": "마우스 및 포인팅 장치",
-            "icon": "mouse",
-            "color": "#EF4444",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "프린터",
-            "code": "PRINTER",
-            "description": "프린터 및 복합기",
-            "icon": "printer",
-            "color": "#6366F1",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "네트워크장비",
-            "code": "NETWORK",
-            "description": "스위치, 라우터 등 네트워크 장비",
-            "icon": "network",
-            "color": "#14B8A6",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "모바일기기",
-            "code": "MOBILE",
-            "description": "스마트폰, 태블릿 등",
-            "icon": "smartphone",
-            "color": "#EC4899",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "주변기기",
-            "code": "PERIPHERAL",
-            "description": "기타 주변기기",
-            "icon": "device",
-            "color": "#84CC16",
-            "is_active": True,
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "name": "서버",
-            "code": "SERVER",
-            "description": "서버 및 저장장치",
-            "icon": "server",
-            "color": "#06B6D4",
             "is_active": True,
         },
     ]

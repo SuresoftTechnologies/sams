@@ -174,10 +174,9 @@ The seed script creates:
    - Manager: `manager@suresoft.com` (password: `manager123!`)
    - Employee: `employee@suresoft.com` (password: `employee123!`)
 
-2. **Categories** (10 types)
-   - Desktop, Laptop, Monitor, Keyboard, Mouse
-   - Printer, Network Equipment, Mobile Devices
-   - Peripherals, Servers
+2. **Categories** (3 types for OCR)
+   - 데스크탑 (11), 노트북 (12), 모니터 (14)
+   - 영수증 OCR 시스템에서 자동 인식용
 
 3. **Locations** (16 locations)
    - 판교: Main Building (3 floors), Research Building (2 floors), Storage

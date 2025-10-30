@@ -709,7 +709,7 @@ apps/backend/
 
 ### 10.3 시드 데이터 (scripts/seed.py)
 - [x] 관리자 계정 생성 (admin@suresoft.com, manager@suresoft.com, employee@suresoft.com)
-- [x] 기본 카테고리 생성 (10개: 노트북, 데스크탑, 모니터, 네트워크장비, 소프트웨어, 키보드, 마우스, 서버장비, 주변기기, 기타)
+- [x] 기본 카테고리 생성 (영수증 OCR용 3개: 데스크탑(11), 노트북(12), 모니터(14))
 - [x] 기본 위치 생성 (16개: 대전/판교, 본사/연구소, 층별 위치)
 - [x] 시드 스크립트 실행 명령어 추가 (idempotent 설계)
 - [x] Docker Compose로 PostgreSQL/Redis 구성

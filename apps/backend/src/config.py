@@ -50,6 +50,26 @@ class Settings(BaseSettings):
     QR_CODE_BASE_URL: str = "http://localhost:5173/assets"
     APP_FRONTEND_URL: str = "http://localhost:5173"
 
+
+    # DeepSeek OCR API (Vision 모델)
+    DEEPSEEK_API_BASE: str = "http://10.10.10.200:19751/v1"
+    DEEPSEEK_OCR_MODEL: str = "deepseek-ai/DeepSeek-OCR"  # Vision 모델 (OCR용)
+    DEEPSEEK_API_KEY: str = "EMPTY"
+    DEEPSEEK_TIMEOUT: int = 60
+
+    # Qwen Chat API (텍스트 분석용)
+    QWEN_API_BASE: str = "http://10.10.10.200:19750/v1"
+    QWEN_CHAT_MODEL: str = "Qwen/Qwen3-32B"  # Chat 모델 (텍스트 분석용)
+    QWEN_API_KEY: str = "EMPTY"
+    QWEN_TIMEOUT: int = 60
+
+    # Receipt Analysis Settings
+    USE_VISION_FOR_ANALYSIS: bool = False  # True: Vision 직접 분석, False: Chat 모델 사용 (권장)
+    
+    # OCR Settings
+    DEFAULT_OCR_METHOD: str = "deepseek"  # Only DeepSeek OCR is supported
+    OCR_LANGUAGE: str = "kor+eng"  # Not used for DeepSeek (kept for backward compatibility)
+
     @property
     def MAX_UPLOAD_SIZE_BYTES(self) -> int:
         """Convert MB to bytes."""
