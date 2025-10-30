@@ -656,3 +656,85 @@ async def cancel_workflow(
     await db.refresh(workflow)
 
     return Workflow.model_validate(workflow)
+
+
+@router.get("/my-unviewed-count", response_model=dict)
+async def get_my_unviewed_completed_count(
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> dict:
+    """
+    Get count of unviewed completed workflows for the current user.
+
+    Returns the number of workflows requested by the current user
+    that have been approved or rejected but not yet viewed.
+
+    Args:
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Dictionary with 'count' key
+    """
+    query = (
+        select(func.count())
+        .select_from(WorkflowModel)
+        .where(WorkflowModel.requester_id == current_user.id)
+        .where(WorkflowModel.viewed_by_requester == False)
+        .where(
+            (WorkflowModel.status == WorkflowStatus.APPROVED)
+            | (WorkflowModel.status == WorkflowStatus.REJECTED)
+        )
+    )
+
+    result = await db.execute(query)
+    count = result.scalar_one()
+
+    return {"count": count}
+
+
+@router.patch("/{workflow_id}/mark-viewed", response_model=Workflow)
+async def mark_workflow_viewed(
+    workflow_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> Workflow:
+    """
+    Mark a workflow as viewed by the requester.
+
+    Args:
+        workflow_id: Workflow ID
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Updated workflow
+
+    Raises:
+        HTTPException: If workflow not found or user is not the requester
+    """
+    # Get workflow
+    query = select(WorkflowModel).where(WorkflowModel.id == workflow_id)
+    result = await db.execute(query)
+    workflow = result.scalar_one_or_none()
+
+    if not workflow:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Workflow with id {workflow_id} not found",
+        )
+
+    # Check if current user is the requester
+    if workflow.requester_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the requester can mark this workflow as viewed",
+        )
+
+    # Mark as viewed
+    workflow.viewed_by_requester = True
+
+    await db.commit()
+    await db.refresh(workflow)
+
+    return Workflow.model_validate(workflow)

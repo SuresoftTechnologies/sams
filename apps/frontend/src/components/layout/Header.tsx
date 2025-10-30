@@ -17,6 +17,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { NotificationBadge } from '@/components/ui/notification-badge';
 import {
   User,
   LogOut,
@@ -29,6 +30,8 @@ import {
 } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
+import { useMyUnviewedCompletedCount } from '@/hooks/useMyUnviewedCompletedCount';
+import { usePendingWorkflowsCount } from '@/hooks/usePendingWorkflowsCount';
 import { cn } from '@/lib/utils';
 
 /**
@@ -80,9 +83,11 @@ const navItems: NavItem[] = [
 export default function Header() {
   const user = useUser();
   const logoutMutation = useLogout();
-  const { hasRole } = useRole();
+  const { hasRole, role } = useRole();
+  const { data: myUnviewedCount } = useMyUnviewedCompletedCount();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: pendingCount = 0 } = usePendingWorkflowsCount();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -146,6 +151,11 @@ export default function Header() {
               {visibleNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = isNavActive(item.href);
+                const isWorkflowMenu = item.href === '/workflows';
+                const showWorkflowBadge = isWorkflowMenu && pendingCount > 0;
+                const isRequestsMenu = item.href === '/requests';
+                const showRequestsBadge = isRequestsMenu && role === 'employee' && myUnviewedCount && myUnviewedCount > 0;
+                const showBadge = showWorkflowBadge || showRequestsBadge;
 
                 return (
                   <Link
@@ -161,9 +171,30 @@ export default function Header() {
                     )}
                     aria-current={isActive ? 'page' : undefined}
                     aria-disabled={item.disabled}
+                    aria-label={
+                      showWorkflowBadge
+                        ? `${item.title}, 처리 대기 중인 신청 ${pendingCount}건`
+                        : showRequestsBadge
+                        ? `${item.title}, 확인 필요한 신청 ${myUnviewedCount}건`
+                        : item.title
+                    }
                   >
                     <Icon className="h-5 w-5" />
-                    <span>{item.title}</span>
+                    <span className="flex-1">{item.title}</span>
+                    {showWorkflowBadge && (
+                      <NotificationBadge
+                        count={pendingCount}
+                        variant="compact"
+                        ariaLabel={`처리 대기 중인 신청 ${pendingCount}건`}
+                      />
+                    )}
+                    {showRequestsBadge && (
+                      <NotificationBadge
+                        count={myUnviewedCount || 0}
+                        variant="compact"
+                        ariaLabel={`확인 필요한 신청 ${myUnviewedCount}건`}
+                      />
+                    )}
                   </Link>
                 );
               })}
@@ -236,13 +267,18 @@ export default function Header() {
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = isNavActive(item.href);
+            const isWorkflowMenu = item.href === '/workflows';
+            const showWorkflowBadge = isWorkflowMenu && pendingCount > 0;
+            const isRequestsMenu = item.href === '/requests';
+            const showRequestsBadge = isRequestsMenu && role === 'employee' && myUnviewedCount && myUnviewedCount > 0;
+            const showBadge = showWorkflowBadge || showRequestsBadge;
 
             return (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors relative',
                   isActive
                     ? 'bg-secondary text-foreground'
                     : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
@@ -250,9 +286,30 @@ export default function Header() {
                 )}
                 aria-current={isActive ? 'page' : undefined}
                 aria-disabled={item.disabled}
+                aria-label={
+                  showWorkflowBadge
+                    ? `${item.title}, 처리 대기 중인 신청 ${pendingCount}건`
+                    : showRequestsBadge
+                    ? `${item.title}, 확인 필요한 신청 ${myUnviewedCount}건`
+                    : item.title
+                }
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.title}</span>
+                {showWorkflowBadge && (
+                  <NotificationBadge
+                    count={pendingCount}
+                    className="ml-1"
+                    ariaLabel={`처리 대기 중인 신청 ${pendingCount}건`}
+                  />
+                )}
+                {showRequestsBadge && (
+                  <NotificationBadge
+                    count={myUnviewedCount || 0}
+                    className="ml-1"
+                    ariaLabel={`확인 필요한 신청 ${myUnviewedCount}건`}
+                  />
+                )}
               </Link>
             );
           })}

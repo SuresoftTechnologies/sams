@@ -64,6 +64,9 @@ class Workflow(BaseModel):
     # Completion
     completed_at: datetime | None = Field(None, description="Completion timestamp")
     completion_notes: str | None = Field(None, description="Completion notes")
+    
+    # View tracking
+    viewed_by_requester: bool = Field(default=False, description="Whether the requester has viewed the completed workflow")
 
     # Timestamps
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -125,6 +128,20 @@ class ApprovalRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "comment": "승인합니다",
+            }
+        }
+    )
+
+
+class RejectionRequest(BaseModel):
+    """Workflow rejection request DTO."""
+
+    reason: str = Field(..., max_length=1000, description="Rejection reason")
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "reason": "요청 사유가 불충분합니다",
             }
         }
     )

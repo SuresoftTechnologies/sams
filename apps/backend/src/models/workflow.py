@@ -75,6 +75,9 @@ class Workflow(Base):
     # Completion
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completion_notes: Mapped[str | None] = mapped_column(Text)
+    
+    # View tracking
+    viewed_by_requester: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
