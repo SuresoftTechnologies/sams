@@ -35,3 +35,29 @@
     color: var(--color-foreground);
   }
 }
+
+@layer utilities {
+  /* Custom scrollbar styling for asset table */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: oklch(90.59% 0.005 285.75);
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: oklch(80% 0.005 285.75);
+  }
+
+  /* Smooth scrolling for table containers */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+}

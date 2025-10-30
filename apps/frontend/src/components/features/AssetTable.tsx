@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -19,23 +17,56 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SortIndicator } from '@/components/ui/sort-indicator';
 import { MoreHorizontal, Edit, Trash2, Eye, QrCode } from 'lucide-react';
 import type { Asset } from '@/hooks/useAssets';
 
 /**
- * AssetTable Component
+ * AssetTable Component - Fixed Scroll & Sticky Header Version
  *
- * Displays assets in a table format with sorting and filtering
- * - Desktop-optimized view
- * - Column sorting
- * - Row actions (view, edit, delete)
- * - Status badges
+ * Responsive table with dual sticky positioning (header + action column)
+ *
+ * UX Improvements:
+ * - FIXED: Sticky header remains visible during vertical scroll
+ * - FIXED: Horizontal scrollbar immediately accessible at top
+ * - Single overflow container for both X and Y scroll
+ * - Optimized column widths that respect container boundaries
+ * - Sticky action column with visual separator shadow
+ * - Improved loading skeletons
+ * - Better responsive behavior
+ *
+ * Layout Strategy:
+ * - Individual sticky positioning on each TableHead cell
+ * - min-w-[XXXpx] for minimum column widths
+ * - max-w-0 on cells for proper truncation with ellipsis
+ * - Single overflow-auto container (no nested overflow contexts)
+ * - Table set to min-w-full to respect parent width
+ *
+ * Technical Details:
+ * - Each header cell has: sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]
+ * - Action column header has: sticky top-0 right-0 z-30 (highest z-index)
+ * - Action column cells have: sticky right-0 z-10
+ * - Z-index hierarchy: Action header (30) > Headers (20) > Action cells (10)
+ * - Removed TableHeader-level sticky (moved to individual cells)
+ * - Single overflow context ensures predictable scroll behavior
+ *
+ * Scroll Behavior:
+ * - Vertical scroll: Headers stay fixed at top
+ * - Horizontal scroll: Action column stays fixed at right
+ * - Scrollbar visible immediately without scrolling down
+ *
+ * Responsive Design:
+ * - Desktop (>1024px): Full table with all columns
+ * - Tablet (768px-1024px): Horizontal scroll enabled
+ * - Mobile (<768px): Optimized for card view (handled in parent)
  *
  * Usage:
  * <AssetTable
  *   assets={assets}
+ *   isLoading={isLoading}
  *   onEdit={(id) => navigate(`/assets/${id}/edit`)}
  *   onDelete={(id) => deleteAsset(id)}
+ *   onViewQR={(id) => showQRDialog(id)}
  * />
  */
 
@@ -47,7 +78,7 @@ interface AssetTableProps {
   onViewQR?: (id: string) => void;
 }
 
-type SortField = 'name' | 'asset_tag' | 'model' | 'serial_number' | 'status' | 'purchase_date' | 'grade' | 'supplier';
+type SortField = 'asset_tag' | 'model' | 'serial_number' | 'status' | 'purchase_date' | 'grade' | 'supplier';
 type SortOrder = 'asc' | 'desc';
 
 export function AssetTable({
@@ -58,7 +89,7 @@ export function AssetTable({
   onViewQR,
 }: AssetTableProps) {
   const navigate = useNavigate();
-  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortField, setSortField] = useState<SortField>('asset_tag');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
   // Sort assets
@@ -146,246 +177,249 @@ export function AssetTable({
 
   if (isLoading) {
     return (
-      <div className="rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="min-w-[120px]">자산번호</TableHead>
-              <TableHead className="min-w-[150px]">자산명</TableHead>
-              <TableHead className="min-w-[120px]">모델</TableHead>
-              <TableHead className="min-w-[120px]">시리얼번호</TableHead>
-              <TableHead className="min-w-[60px]">등급</TableHead>
-              <TableHead className="min-w-[100px]">카테고리</TableHead>
-              <TableHead className="min-w-[80px]">상태</TableHead>
-              <TableHead className="min-w-[100px]">사용자</TableHead>
-              <TableHead className="min-w-[100px]">위치</TableHead>
-              <TableHead className="min-w-[120px]">공급업체</TableHead>
-              <TableHead className="text-right min-w-[80px]">작업</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <TableRow key={i}>
-                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-8" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  }
-
-  if (assets.length === 0) {
-    return (
-      <div className="rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="min-w-[120px]">자산번호</TableHead>
-              <TableHead className="min-w-[150px]">자산명</TableHead>
-              <TableHead className="min-w-[120px]">모델</TableHead>
-              <TableHead className="min-w-[120px]">시리얼번호</TableHead>
-              <TableHead className="min-w-[60px]">등급</TableHead>
-              <TableHead className="min-w-[100px]">카테고리</TableHead>
-              <TableHead className="min-w-[80px]">상태</TableHead>
-              <TableHead className="min-w-[100px]">사용자</TableHead>
-              <TableHead className="min-w-[100px]">위치</TableHead>
-              <TableHead className="min-w-[120px]">공급업체</TableHead>
-              <TableHead className="text-right min-w-[80px]">작업</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                자산을 찾을 수 없습니다. 첫 번째 자산을 생성하여 시작하세요.
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+      <div className="w-full rounded-md border bg-background">
+        <div className="relative overflow-auto max-h-[calc(100vh-24rem)] scrollbar-thin smooth-scroll">
+          <table className="w-full caption-bottom text-sm min-w-full">
+            <thead>
+              <TableRow>
+                  <TableHead className="min-w-[140px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">자산번호</TableHead>
+                  <TableHead className="min-w-[180px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">모델</TableHead>
+                  <TableHead className="min-w-[150px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">시리얼번호</TableHead>
+                  <TableHead className="min-w-[80px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">등급</TableHead>
+                  <TableHead className="min-w-[120px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">카테고리</TableHead>
+                  <TableHead className="min-w-[100px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">상태</TableHead>
+                  <TableHead className="min-w-[120px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">사용자</TableHead>
+                  <TableHead className="min-w-[150px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">위치</TableHead>
+                  <TableHead className="min-w-[120px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">공급업체</TableHead>
+                  <TableHead className="min-w-[80px] text-right sticky top-0 right-0 z-30 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.04),0_2px_0_0_hsl(var(--border))]">작업</TableHead>
+                </TableRow>
+            </thead>
+              <TableBody>
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-36" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-28" /></TableCell>
+                    <TableCell className="sticky right-0 z-10 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.04)]">
+                      <Skeleton className="h-8 w-8 ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </table>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead
-              className="cursor-pointer select-none min-w-[120px]"
-              onClick={() => handleSort('asset_tag')}
-            >
-              자산번호 {sortField === 'asset_tag' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[150px]"
-              onClick={() => handleSort('name')}
-            >
-              자산명 {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[120px]"
-              onClick={() => handleSort('model')}
-            >
-              모델 {sortField === 'model' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[120px]"
-              onClick={() => handleSort('serial_number')}
-            >
-              시리얼번호{' '}
-              {sortField === 'serial_number' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[60px]"
-              onClick={() => handleSort('grade')}
-            >
-              등급 {sortField === 'grade' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead className="min-w-[100px]">카테고리</TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[80px]"
-              onClick={() => handleSort('status')}
-            >
-              상태 {sortField === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead className="min-w-[100px]">사용자</TableHead>
-            <TableHead className="min-w-[100px]">위치</TableHead>
-            <TableHead
-              className="cursor-pointer select-none min-w-[120px]"
-              onClick={() => handleSort('supplier')}
-            >
-              공급업체 {sortField === 'supplier' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </TableHead>
-            <TableHead className="text-right min-w-[80px]">작업</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedAssets.map((asset) => (
-            <TableRow
-              key={asset.id}
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => navigate(`/assets/${asset.id}`)}
-            >
-              <TableCell>
-                <code className="text-sm font-medium">{asset.asset_tag}</code>
-              </TableCell>
-              <TableCell className="font-medium">{asset.name}</TableCell>
-              <TableCell>
-                {asset.model ? (
-                  <span className="text-sm">{asset.model}</span>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {asset.serial_number ? (
-                  <code className="text-sm">{asset.serial_number}</code>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {asset.grade ? (
-                  <Badge variant={getGradeBadgeVariant(asset.grade)}>
-                    {asset.grade}급
-                  </Badge>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              <TableCell>{asset.category_name || '-'}</TableCell>
-              <TableCell>
-                <Badge variant={getStatusBadgeVariant(asset.status)}>
-                  {getStatusLabel(asset.status)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {asset.assigned_to ? (
-                  <span className="text-sm">{asset.assigned_to}</span>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              <TableCell>{asset.location_name || '-'}</TableCell>
-              <TableCell>
-                {asset.supplier ? (
-                  <span className="text-sm">{asset.supplier}</span>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>작업</DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/assets/${asset.id}`);
-                      }}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      상세 보기
-                    </DropdownMenuItem>
-                    {onViewQR && (
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onViewQR(asset.id);
-                        }}
-                      >
-                        <QrCode className="mr-2 h-4 w-4" />
-                        QR 코드 보기
-                      </DropdownMenuItem>
+    <div className="w-full rounded-md border bg-background">
+      <div className="relative overflow-auto max-h-[calc(100vh-24rem)] scrollbar-thin smooth-scroll">
+        <table className="w-full caption-bottom text-sm min-w-full">
+          <thead>
+              <TableRow>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[140px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('asset_tag')}
+                >
+                  자산번호
+                  <SortIndicator
+                    active={sortField === 'asset_tag'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[180px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('model')}
+                >
+                  모델
+                  <SortIndicator
+                    active={sortField === 'model'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[150px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('serial_number')}
+                >
+                  시리얼번호
+                  <SortIndicator
+                    active={sortField === 'serial_number'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[80px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('grade')}
+                >
+                  등급
+                  <SortIndicator
+                    active={sortField === 'grade'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">카테고리</TableHead>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[100px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('status')}
+                >
+                  상태
+                  <SortIndicator
+                    active={sortField === 'status'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">사용자</TableHead>
+                <TableHead className="min-w-[150px] sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]">위치</TableHead>
+                <TableHead
+                  className="cursor-pointer select-none min-w-[120px] hover:bg-muted transition-colors sticky top-0 z-20 bg-background shadow-[0_2px_0_0_hsl(var(--border))]"
+                  onClick={() => handleSort('supplier')}
+                >
+                  공급업체
+                  <SortIndicator
+                    active={sortField === 'supplier'}
+                    direction={sortOrder}
+                  />
+                </TableHead>
+                <TableHead className="min-w-[80px] text-right sticky top-0 right-0 z-30 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.04),0_2px_0_0_hsl(var(--border))]">
+                  작업
+                </TableHead>
+              </TableRow>
+            </thead>
+            <TableBody>
+              {sortedAssets.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                    자산이 없습니다
+                  </TableCell>
+                </TableRow>
+              ) : (
+                sortedAssets.map((asset) => (
+                  <TableRow
+                    key={asset.id}
+                    className="cursor-pointer hover:bg-muted transition-colors"
+                    onClick={() => navigate(`/assets/${asset.id}`)}
+                  >
+                    <TableCell className="font-mono text-sm font-medium">
+                      {asset.asset_tag}
+                    </TableCell>
+                    <TableCell className="max-w-0 truncate" title={asset.model || undefined}>
+                    {asset.model ? (
+                      <span className="text-sm">{asset.model}</span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
                     )}
-                    <DropdownMenuSeparator />
-                    {onEdit && (
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(asset.id);
-                        }}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        편집
-                      </DropdownMenuItem>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs max-w-0 truncate" title={asset.serial_number || undefined}>
+                    {asset.serial_number ? (
+                      asset.serial_number
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
                     )}
-                    {onDelete && (
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(asset.id);
-                        }}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        삭제
-                      </DropdownMenuItem>
+                  </TableCell>
+                  <TableCell>
+                    {asset.grade ? (
+                      <Badge variant={getGradeBadgeVariant(asset.grade)} className="font-medium">
+                        {asset.grade}급
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                  </TableCell>
+                  <TableCell className="max-w-0 truncate" title={asset.category_name || undefined}>
+                    {asset.category_name || '-'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusBadgeVariant(asset.status)} className="whitespace-nowrap">
+                      {getStatusLabel(asset.status)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="max-w-0 truncate" title={asset.assigned_to || undefined}>
+                    {asset.assigned_to ? (
+                      <span className="text-sm">{asset.assigned_to}</span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="max-w-0 truncate" title={asset.location_name || undefined}>
+                    {asset.location_name || '-'}
+                  </TableCell>
+                  <TableCell className="max-w-0 truncate" title={asset.supplier || undefined}>
+                    {asset.supplier ? (
+                      <span className="text-sm">{asset.supplier}</span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right sticky right-0 z-10 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.04)]">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">메뉴 열기</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>작업</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/assets/${asset.id}`);
+                          }}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          상세 보기
+                        </DropdownMenuItem>
+                        {onViewQR && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewQR(asset.id);
+                            }}
+                          >
+                            <QrCode className="mr-2 h-4 w-4" />
+                            QR 코드 보기
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        {onEdit && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit(asset.id);
+                            }}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            편집
+                          </DropdownMenuItem>
+                        )}
+                        {onDelete && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(asset.id);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            삭제
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </table>
+      </div>
     </div>
   );
 }
