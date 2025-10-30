@@ -122,9 +122,8 @@ export default function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
-                <img src="/logo.png" alt="SureSoft" className="h-6 w-auto" />
-                <span>AMS</span>
+              <SheetTitle className="flex items-center">
+                <img src="/logo.png" alt="SureSoft" className="h-8 w-auto" />
               </SheetTitle>
             </SheetHeader>
 
@@ -207,17 +206,14 @@ export default function Header() {
           </SheetContent>
         </Sheet>
 
-        {/* Logo & Title */}
-        <div className="mr-6 flex items-center space-x-2">
-          <Link to="/dashboard" className="flex items-center space-x-3">
+        {/* Logo */}
+        <div className="mr-6 flex items-center">
+          <Link to="/dashboard" className="flex items-center">
             <img
               src="/logo.png"
               alt="SureSoft Logo"
-              className="h-8 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
-            <span className="hidden font-bold text-lg sm:inline-block">
-              AMS
-            </span>
           </Link>
         </div>
 

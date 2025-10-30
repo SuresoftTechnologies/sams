@@ -133,7 +133,7 @@ export default function AssetDetail() {
 
   return (
     <>
-      <div className="space-y-4 md:space-y-6 px-4">
+      <div className="space-y-4 md:space-y-6 px-4 pb-8">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/assets')}>
             <ArrowLeft className="h-4 w-4" />

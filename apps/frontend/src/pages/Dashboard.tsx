@@ -123,9 +123,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6 -mt-0 pb-8">
       {/* Header */}
-      <div>
+      <div className="pt-0">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">대시보드</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           SureSoft 자산 관리 시스템에 오신 것을 환영합니다

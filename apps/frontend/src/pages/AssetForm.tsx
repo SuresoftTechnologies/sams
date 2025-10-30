@@ -111,26 +111,26 @@ export default function AssetForm() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/assets')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {isEditMode ? 'Edit Asset' : 'Create New Asset'}
+            {isEditMode ? '자산 편집' : '새 자산 생성'}
           </h1>
           <p className="text-muted-foreground">
-            {isEditMode ? `Editing: ${asset?.name}` : 'Add a new asset to the system'}
+            {isEditMode ? `편집 중: ${asset?.name}` : '시스템에 새 자산을 추가합니다'}
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Asset Details</CardTitle>
+          <CardTitle>자산 상세</CardTitle>
           <CardDescription>
-            Enter the information for this asset. All fields marked with * are required.
+            자산 정보를 입력하세요. *로 표시된 모든 필드는 필수입니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,16 +138,16 @@ export default function AssetForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Basic Information</h3>
+                <h3 className="text-lg font-semibold">기본 정보</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Asset Name *</FormLabel>
+                        <FormLabel>자산 이름 *</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., MacBook Pro 16-inch" {...field} />
+                          <Input placeholder="예: MacBook Pro 16인치" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -159,9 +159,9 @@ export default function AssetForm() {
                     name="serialNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Serial Number</FormLabel>
+                        <FormLabel>시리얼 번호</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., ABC123456" {...field} />
+                          <Input placeholder="예: ABC123456" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -173,11 +173,11 @@ export default function AssetForm() {
                     name="categoryId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category *</FormLabel>
+                        <FormLabel>카테고리 *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
+                              <SelectValue placeholder="카테고리를 선택하세요" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -198,11 +198,11 @@ export default function AssetForm() {
                     name="locationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location *</FormLabel>
+                        <FormLabel>위치 *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
+                              <SelectValue placeholder="위치를 선택하세요" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -222,14 +222,14 @@ export default function AssetForm() {
 
               {/* Purchase Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Purchase Information</h3>
+                <h3 className="text-lg font-semibold">구매 정보</h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="purchaseDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Purchase Date</FormLabel>
+                        <FormLabel>구매 날짜</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -243,7 +243,7 @@ export default function AssetForm() {
                     name="purchasePrice"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Purchase Price (KRW)</FormLabel>
+                        <FormLabel>구매 가격 (원)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -256,7 +256,7 @@ export default function AssetForm() {
                             }}
                           />
                         </FormControl>
-                        <FormDescription>Enter amount in Korean Won</FormDescription>
+                        <FormDescription>금액을 원화로 입력하세요</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -267,7 +267,7 @@ export default function AssetForm() {
                     name="warrantyUntil"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Warranty Until</FormLabel>
+                        <FormLabel>보증 기간</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -284,15 +284,15 @@ export default function AssetForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>설명</FormLabel>
                     <FormControl>
                       <textarea
                         className="w-full min-h-[100px] px-3 py-2 text-sm rounded-md border border-input bg-transparent focus:outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="Additional notes about this asset..."
+                        placeholder="자산에 대한 추가 메모..."
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>Optional details about the asset</FormDescription>
+                    <FormDescription>자산에 대한 선택적 세부 정보</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -306,18 +306,18 @@ export default function AssetForm() {
                   onClick={() => navigate('/assets')}
                   disabled={isPending}
                 >
-                  Cancel
+                  취소
                 </Button>
                 <Button type="submit" className="gap-2" disabled={isPending}>
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {isEditMode ? 'Updating...' : 'Creating...'}
+                      {isEditMode ? '수정 중...' : '생성 중...'}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      {isEditMode ? 'Update Asset' : 'Create Asset'}
+                      {isEditMode ? '자산 수정' : '자산 생성'}
                     </>
                   )}
                 </Button>
