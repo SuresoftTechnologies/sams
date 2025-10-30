@@ -11,6 +11,7 @@ import {
   FolderTree,
   MapPin,
   GitPullRequest,
+  FileText,
 } from 'lucide-react';
 import { useRole } from '@/hooks/useRole';
 
@@ -45,6 +46,12 @@ const navItems: NavItem[] = [
     title: 'Assets',
     href: '/assets',
     icon: Package,
+  },
+  {
+    title: '신청',
+    href: '/requests',
+    icon: FileText,
+    requiredRoles: ['employee'],
   },
   {
     title: 'Workflows',

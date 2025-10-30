@@ -8,6 +8,8 @@ import AssetList from './pages/AssetList';
 import AssetDetail from './pages/AssetDetail';
 import AssetForm from './pages/AssetForm';
 import Profile from './pages/Profile';
+import RequestsPage from './pages/RequestsPage';
+import RequestDetailPage from './pages/RequestDetailPage';
 import { ProtectedRoute, ManagerRoute } from './components/layout/ProtectedRoute';
 
 /**
@@ -85,6 +87,27 @@ export const router = createBrowserRouter([
               <ManagerRoute>
                 <AssetForm />
               </ManagerRoute>
+            ),
+          },
+        ],
+      },
+      {
+        path: 'requests',
+        children: [
+          {
+            index: true,
+            element: (
+              <ProtectedRoute>
+                <RequestsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ':id',
+            element: (
+              <ProtectedRoute>
+                <RequestDetailPage />
+              </ProtectedRoute>
             ),
           },
         ],

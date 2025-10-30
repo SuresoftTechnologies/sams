@@ -88,6 +88,55 @@ async def get_workflows(
     )
 
 
+@router.get("/my-requests", response_model=PaginatedResponse[Workflow])
+async def get_my_requests(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    workflow_type: WorkflowType | None = Query(None, description="Filter by type"),
+    status: WorkflowStatus | None = Query(None, description="Filter by status"),
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> PaginatedResponse[Workflow]:
+    """
+    Get list of workflows created by the current user.
+
+    Args:
+        skip: Number of items to skip
+        limit: Number of items per page
+        workflow_type: Filter by workflow type
+        status: Filter by status
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Paginated list of user's workflows
+    """
+    query = select(WorkflowModel).where(WorkflowModel.requester_id == current_user.id)
+
+    # Apply filters
+    if workflow_type:
+        query = query.where(WorkflowModel.type == workflow_type)
+    if status:
+        query = query.where(WorkflowModel.status == status)
+
+    # Get total count
+    count_query = select(func.count()).select_from(query.subquery())
+    total_result = await db.execute(count_query)
+    total = total_result.scalar_one()
+
+    # Apply pagination
+    query = query.offset(skip).limit(limit).order_by(WorkflowModel.created_at.desc())
+    result = await db.execute(query)
+    workflows = result.scalars().all()
+
+    return PaginatedResponse(
+        items=[Workflow.model_validate(wf) for wf in workflows],
+        total=total,
+        skip=skip,
+        limit=limit,
+    )
+
+
 @router.get("/{workflow_id}", response_model=Workflow)
 async def get_workflow(
     workflow_id: str,
