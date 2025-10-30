@@ -119,6 +119,7 @@ const updateAsset = async ({ id, data }: { id: string; data: AssetFormData }): P
   return {
     ...asset,
     ...data,
+    purchasePrice: data.purchasePrice ?? undefined,
     updatedAt: new Date().toISOString(),
   };
 };

@@ -194,47 +194,55 @@ src/
 ## 📝 Phase 7: 기본 페이지 생성
 
 ### 7.1 레이아웃 컴포넌트
-- [ ] components/layout/RootLayout.tsx
-  - [ ] Header (네비게이션)
-  - [ ] Sidebar (메뉴)
-  - [ ] Main content area
-  - [ ] Footer
-- [ ] components/layout/Header.tsx
-- [ ] components/layout/Sidebar.tsx
+- [x] components/layout/RootLayout.tsx
+  - [x] Header (네비게이션)
+  - [x] Sidebar (메뉴)
+  - [x] Main content area
+  - [x] Footer
+- [x] components/layout/Header.tsx
+- [x] components/layout/Sidebar.tsx
 
 ### 7.2 인증 페이지
-- [ ] pages/Login.tsx
-  - [ ] 로그인 폼 (React Hook Form + Zod)
-  - [ ] 이메일/비밀번호 입력
-  - [ ] 로그인 API 호출 (useMutation)
+- [x] pages/Login.tsx
+  - [x] 로그인 폼 (React Hook Form + Zod)
+  - [x] 이메일/비밀번호 입력
+  - [x] 로그인 API 호출 (useMutation)
 
 ### 7.3 대시보드 페이지
-- [ ] pages/Dashboard.tsx
-  - [ ] 통계 카드 (총 자산 수, 사용 중, 사용 가능 등)
-  - [ ] 최근 활동 목록
-  - [ ] 차트 (선택적)
+- [x] pages/Dashboard.tsx
+  - [x] 통계 카드 (총 자산 수, 사용 중, 사용 가능 등)
+  - [x] 최근 활동 목록
+  - [x] 차트 (선택적)
 
 ### 7.4 자산 목록 페이지
-- [ ] pages/Assets.tsx
-  - [ ] 자산 목록 테이블 (@tanstack/react-table)
-  - [ ] 검색/필터 기능
-  - [ ] 페이지네이션
-  - [ ] useQuery로 데이터 페칭
+- [x] pages/Assets.tsx
+  - [x] 자산 목록 테이블 (shadcn/ui Table)
+  - [x] 검색/필터 기능
+  - [x] 페이지네이션 (준비됨)
+  - [x] useQuery로 데이터 페칭
 
 ### 7.5 자산 상세 페이지
-- [ ] pages/AssetDetail.tsx
-  - [ ] 자산 정보 표시
-  - [ ] QR 코드 표시
-  - [ ] 수정/삭제 버튼
-  - [ ] 히스토리 (체크인/아웃)
+- [x] pages/AssetDetail.tsx
+  - [x] 자산 정보 표시
+  - [x] QR 코드 표시 (placeholder)
+  - [x] 수정/삭제 버튼
+  - [x] 히스토리 (체크인/아웃) (placeholder)
 
 ### 7.6 자산 생성/수정 페이지
-- [ ] pages/AssetForm.tsx
-  - [ ] 자산 폼 (React Hook Form + Zod)
-  - [ ] 카테고리 선택
-  - [ ] 위치 선택
-  - [ ] 구매 정보 입력
-  - [ ] useMutation으로 저장
+- [x] pages/AssetForm.tsx
+  - [x] 자산 폼 (React Hook Form + Zod)
+  - [x] 카테고리 선택
+  - [x] 위치 선택
+  - [x] 구매 정보 입력
+  - [x] useMutation으로 저장
+
+### 7.7 Custom Hooks
+- [x] hooks/useAuth.ts (useLogin, useLogout, useCurrentUser)
+- [x] hooks/useAssets.ts (CRUD operations)
+
+### 7.8 Validation & Utils
+- [x] lib/validators.ts (Zod schemas)
+- [x] Mock data for development
 
 ---
 
