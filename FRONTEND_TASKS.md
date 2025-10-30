@@ -691,3 +691,186 @@ src/
 **생성일**: 2025-10-29
 **업데이트**: 2025-10-30 (Phase 14-15 추가)
 **프로젝트**: SureSoft SAMS (슈커톤 해커톤)
+
+---
+
+## Phase 16: Dashboard Status Enum Refactoring
+
+### 개요
+Dashboard 페이지의 데이터 요소 적절성 검토 중 critical bug 발견:
+- 대시보드가 잘못된 status 값 사용 (available, in_use, maintenance, retired)
+- 실제 비즈니스 요구사항과 불일치
+- 6가지 실제 자산 상태 타입 반영 필요
+
+### 비즈니스 요구사항
+
+#### 자산 상태 (AssetStatus) - 6가지
+1. **ISSUED** (`issued`) - 지급장비
+   - 직원에게 지급된 장비
+   - 색상: blue
+   
+2. **LOANED** (`loaned`) - 대여용
+   - 임시 대여 가능한 장비
+   - 색상: purple
+   
+3. **GENERAL** (`general`) - 일반장비
+   - 일반 용도 장비
+   - 색상: green
+   
+4. **STOCK** (`stock`) - 재고
+   - 창고 보관 중인 장비
+   - 색상: gray
+   
+5. **SERVER_ROOM** (`server_room`) - 서버실
+   - 서버실에 설치된 장비
+   - 색상: cyan
+   
+6. **DISPOSED** (`disposed`) - 불용
+   - 폐기 처분된 장비
+   - 색상: red
+
+### 수정된 파일 (9개)
+
+#### 1. Core Type Definitions
+- **`packages/shared-types/src/asset/types.ts`**
+  - AssetStatus enum을 4개에서 6개로 확장
+  - Frontend-Backend 타입 동기화 보장
+  - 모든 status에 한글 레이블 매핑
+
+#### 2. Application Constants
+- **`apps/frontend/src/lib/constants.ts`**
+  - ASSET_STATUSES 배열 업데이트 (6개 status)
+  - 각 status별 한글 label과 color 정의
+  - 전역 상수로 일관성 유지
+
+#### 3. Dashboard Statistics Hook
+- **`apps/frontend/src/hooks/useDashboardStats.ts`**
+  - statusDistribution 인터페이스 수정
+  - 4개 잘못된 status → 6개 올바른 status
+  - 각 status별 필터링 로직 업데이트
+  - 통계 계산 정확성 확보
+
+#### 4. Dashboard Page UI
+- **`apps/frontend/src/pages/Dashboard.tsx`**
+  - 4개 status 카드 → 7개 카드 (전체 + 6개 status)
+  - 레이아웃: 전체 자산 full-width + 2x3 그리드
+  - Status별 적절한 아이콘 추가:
+    - UserCheck (지급장비)
+    - HandHelping (대여용)
+    - Box (일반장비)
+    - Archive (재고)
+    - Server (서버실)
+    - XCircle (불용)
+  - 시각적 일관성과 UX 개선
+
+#### 5. Component Updates
+- **`apps/frontend/src/components/features/AssetTable.tsx`**
+  - getStatusBadgeVariant 함수 업데이트
+  - getStatusLabel 함수 업데이트
+  - 6개 status 완전 지원
+
+- **`apps/frontend/src/components/features/AssetCard.tsx`**
+  - getStatusBadgeVariant 함수 업데이트
+  - getStatusLabel 함수 업데이트
+  - Badge 색상 일관성 유지
+
+#### 6. Type Definitions
+- **`apps/frontend/src/types/api.ts`**
+  - Asset interface status 타입 업데이트
+  - AssetStatus 상수 객체 업데이트
+  - TypeScript 타입 안전성 보장
+
+#### 7. Page Components
+- **`apps/frontend/src/pages/AssetDetail.tsx`**
+  - getStatusBadge 함수 6개 status 지원
+  - 상세 페이지 status 표시 정확성
+
+- **`apps/frontend/src/pages/Assets.tsx`**
+  - getStatusBadge 함수 한글 레이블 매핑
+  - 목록 페이지 status 필터링 지원
+
+### 기술적 영향
+
+#### Type Safety
+```typescript
+// Before: 잘못된 status 사용
+statusDistribution: {
+  available: number;
+  in_use: number;
+  maintenance: number;
+  retired: number;
+}
+
+// After: 올바른 6가지 status
+statusDistribution: {
+  issued: number;
+  loaned: number;
+  general: number;
+  stock: number;
+  server_room: number;
+  disposed: number;
+}
+```
+
+#### UI Consistency
+- 모든 status badge 색상 통일
+- 한글 레이블 일관성 확보
+- 아이콘 의미적 적절성 향상
+
+### 테스트 체크리스트
+
+#### Dashboard 페이지
+- [ ] 전체 자산 수 카드 정상 표시
+- [ ] 6개 status별 카드 정상 표시
+- [ ] 각 status 카드의 아이콘 적절성
+- [ ] 각 status 카드의 색상 일관성
+- [ ] 한글 레이블 정확성
+
+#### Asset 목록/상세 페이지
+- [ ] AssetTable status badge 6개 모두 표시
+- [ ] AssetCard status badge 6개 모두 표시
+- [ ] AssetDetail status badge 정확성
+- [ ] Assets 페이지 status 필터링
+
+#### Type Safety
+- [ ] TypeScript 컴파일 오류 없음
+- [ ] shared-types 패키지 동기화 확인
+- [ ] 모든 컴포넌트 타입 안전성
+
+### Backend 작업 필요
+
+⚠️ **중요**: Backend 코드도 동일한 6개 status로 업데이트 필요
+
+1. **Database Schema**
+   - Asset 테이블 status enum 업데이트
+   - Migration 스크립트 작성
+   - 기존 데이터 마이그레이션 전략
+
+2. **API Models**
+   - Pydantic schemas status 필드 업데이트
+   - Validation 로직 수정
+
+3. **Business Logic**
+   - Status transition 규칙 재정의
+   - Status별 권한 제어 업데이트
+
+### 참고 문서
+- 프로젝트 메모리: `dashboard-status-refactoring.md`
+- Type definitions: `packages/shared-types/src/asset/types.ts`
+- Constants: `apps/frontend/src/lib/constants.ts`
+
+### 완료 상태
+- [x] Frontend type definitions 업데이트
+- [x] Dashboard UI 리팩토링
+- [x] 모든 컴포넌트 status 지원 업데이트
+- [x] 프로젝트 메모리 문서화
+- [x] FRONTEND_TASKS.md 업데이트
+- [ ] Backend models/schemas 업데이트 (pending)
+- [ ] Database migration (pending)
+- [ ] E2E 테스트 (pending)
+
+---
+
+**생성일**: 2025-10-29
+**업데이트**: 2025-10-30 (Phase 14-16 추가)
+**프로젝트**: SureSoft SAMS (슈커톤 해커톤)
