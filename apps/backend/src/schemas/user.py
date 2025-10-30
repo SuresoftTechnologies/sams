@@ -5,7 +5,7 @@ User schemas matching TypeScript shared-types.
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserRole(str, Enum):

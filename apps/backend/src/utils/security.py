@@ -2,8 +2,8 @@
 Security utilities for password hashing and JWT token management.
 """
 
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
 from jose import JWTError, jwt
@@ -47,7 +47,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
-def create_access_token(data: Dict[str, Any]) -> str:
+def create_access_token(data: dict[str, Any]) -> str:
     """
     Create a JWT access token.
 
@@ -59,7 +59,7 @@ def create_access_token(data: Dict[str, Any]) -> str:
         Encoded JWT access token string
     """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_ACCESS_EXPIRES_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=settings.JWT_ACCESS_EXPIRES_MINUTES)
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
@@ -70,7 +70,7 @@ def create_access_token(data: Dict[str, Any]) -> str:
     return encoded_jwt
 
 
-def create_refresh_token(data: Dict[str, Any]) -> str:
+def create_refresh_token(data: dict[str, Any]) -> str:
     """
     Create a JWT refresh token.
 
@@ -82,7 +82,7 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
         Encoded JWT refresh token string
     """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.JWT_REFRESH_EXPIRES_DAYS)
+    expire = datetime.now(UTC) + timedelta(days=settings.JWT_REFRESH_EXPIRES_DAYS)
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
@@ -93,7 +93,7 @@ def create_refresh_token(data: Dict[str, Any]) -> str:
     return encoded_jwt
 
 
-def verify_token(token: str, secret: str) -> Dict[str, Any]:
+def verify_token(token: str, secret: str) -> dict[str, Any]:
     """
     Verify and decode a JWT token.
 

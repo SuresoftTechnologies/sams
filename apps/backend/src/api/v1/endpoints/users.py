@@ -3,15 +3,18 @@ User management endpoints.
 """
 
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.middlewares.auth import get_current_user, require_role
-from src.models.user import User as UserModel, UserRole
-from src.schemas.user import User, CreateUserRequest, UpdateUserRequest, UserRole as UserRoleSchema
-from src.schemas.common import MessageResponse, PaginatedResponse
+from src.models.user import User as UserModel
+from src.models.user import UserRole
+from src.schemas.common import PaginatedResponse
+from src.schemas.user import CreateUserRequest, UpdateUserRequest, User
+from src.schemas.user import UserRole as UserRoleSchema
 from src.utils.security import hash_password
 
 router = APIRouter()

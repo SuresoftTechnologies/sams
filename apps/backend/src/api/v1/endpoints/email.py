@@ -4,7 +4,7 @@ Email sending endpoints.
 
 from fastapi import APIRouter, HTTPException, status
 
-from src.schemas.email import SendEmailRequest, EmailResponse
+from src.schemas.email import EmailResponse, SendEmailRequest
 from src.services.email_service import email_service
 
 router = APIRouter()

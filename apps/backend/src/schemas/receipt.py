@@ -145,7 +145,7 @@ class AnalyzeReceiptFromImageResponse(BaseModel):
     suggested_name: str = Field(..., description="Suggested asset name (manufacturer + name)")
     suggested_notes: str | None = Field(None, description="Suggested notes field content")
     suggested_category_code: str | None = Field(
-        None, 
+        None,
         description="Auto-inferred category code (11=데스크탑, 12=노트북, 14=모니터)"
     )
     processing_time: float = Field(..., description="Total processing time in seconds")

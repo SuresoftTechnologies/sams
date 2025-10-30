@@ -88,7 +88,7 @@ class AssetFromReceiptService:
 
             # Step 3: Analyze with LLM (이미지 + 텍스트 함께 전달)
             analysis, llm_time = await self.llm_service.analyze_receipt(
-                extracted_text, 
+                extracted_text,
                 category_id=category_id,
                 image_path=file_path  # 원본 이미지 전달!
             )
@@ -141,7 +141,7 @@ class AssetFromReceiptService:
             self._cleanup_file(file_path)
 
     async def extract_text_only(
-        self, 
+        self,
         file: UploadFile | None = None,
         image_url: str | None = None,
         method: OCRMethod = OCRMethod.DEEPSEEK
@@ -237,7 +237,7 @@ class AssetFromReceiptService:
 
             # Step 3: Analyze with LLM (이미지 + 텍스트 함께 전달)
             analysis, llm_time = await self.llm_service.analyze_receipt(
-                extracted_text, 
+                extracted_text,
                 category_id=None,
                 image_path=file_path  # 원본 이미지 전달!
             )
@@ -254,13 +254,13 @@ class AssetFromReceiptService:
 
             # Step 3.5: Infer category from item_type
             suggested_category_code = None
-            
+
             if analysis.line_items:
                 from src.utils.category_mapper import infer_category_code
-                
+
                 item_type = analysis.line_items[0].item_type
                 suggested_category_code = infer_category_code(item_type)
-                
+
                 if not suggested_category_code:
                     warnings.append(
                         f"카테고리를 자동으로 추론할 수 없습니다 (품목 타입: {item_type}). "
@@ -387,7 +387,7 @@ class AssetFromReceiptService:
         # Determine file extension from URL
         url_path = url.split("?")[0]  # Remove query params
         file_ext = Path(url_path).suffix.lower()
-        
+
         # Default to .jpg if no extension or unsupported
         allowed_extensions = {".png", ".jpg", ".jpeg", ".pdf", ".webp"}
         if file_ext not in allowed_extensions:
@@ -407,7 +407,7 @@ class AssetFromReceiptService:
                             status_code=400,
                             detail=f"이미지 다운로드 실패: HTTP {response.status}"
                         )
-                    
+
                     # Check content type
                     content_type = response.headers.get("Content-Type", "")
                     if not content_type.startswith(("image/", "application/pdf")):
@@ -415,10 +415,10 @@ class AssetFromReceiptService:
                             status_code=400,
                             detail=f"지원하지 않는 파일 타입입니다: {content_type}"
                         )
-                    
+
                     # Download and save
                     content = await response.read()
-                    
+
                     # Check file size (max 10MB by default)
                     max_size = getattr(settings, "MAX_UPLOAD_SIZE_MB", 10) * 1024 * 1024
                     if len(content) > max_size:
@@ -426,12 +426,12 @@ class AssetFromReceiptService:
                             status_code=400,
                             detail=f"파일 크기가 너무 큽니다 (최대 {max_size // (1024 * 1024)}MB)"
                         )
-                    
+
                     with open(file_path, "wb") as f:
                         f.write(content)
-            
+
             return file_path
-        
+
         except aiohttp.ClientError as e:
             raise HTTPException(
                 status_code=400,
@@ -470,15 +470,15 @@ class AssetFromReceiptService:
             Formatted notes string or None
         """
         notes_parts = []
-        
+
         # Document info
         if analysis.document_type:
             notes_parts.append(f"문서 유형: {analysis.document_type}")
-        
+
         # Supplier info
         if analysis.supplier:
             notes_parts.append(f"공급업체: {analysis.supplier}")
-        
+
         # Line items summary
         if analysis.line_items:
             items_summary = []
@@ -490,7 +490,7 @@ class AssetFromReceiptService:
                     item_info += f" ({item.model})"
                 items_summary.append(item_info)
             notes_parts.append("품목: " + ", ".join(items_summary))
-        
+
         # Confidence
         notes_parts.append(f"영수증 분석 신뢰도: {analysis.confidence:.2%}")
 
@@ -525,7 +525,7 @@ class AssetFromReceiptService:
         if analysis.line_items:
             first_item = analysis.line_items[0]
             name = first_item.name or "미확인 자산"
-            
+
             # Use first item's unit price (calculate total if needed)
             if first_item.unit_price:
                 purchase_price = first_item.unit_price * first_item.quantity

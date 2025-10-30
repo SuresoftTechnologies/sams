@@ -2,17 +2,18 @@
 Tests for authentication functionality.
 """
 
-import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
+import pytest
+
+from src.config import settings
 from src.utils.security import (
-    hash_password,
-    verify_password,
     create_access_token,
     create_refresh_token,
+    hash_password,
+    verify_password,
     verify_token,
 )
-from src.config import settings
 
 
 class TestPasswordHashing:
@@ -113,8 +114,8 @@ class TestJWTTokens:
         exp_timestamp = payload["exp"]
 
         # Convert to datetime
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-        now = datetime.now(timezone.utc)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
+        now = datetime.now(UTC)
 
         # Should expire in approximately JWT_ACCESS_EXPIRES_MINUTES
         time_diff = exp_datetime - now

@@ -5,16 +5,16 @@ API v1 Router - Aggregates all v1 endpoints
 from fastapi import APIRouter
 
 from src.api.v1.endpoints import (
-    auth,
-    users,
     assets,
+    auth,
     categories,
-    locations,
-    workflows,
-    qrcode,
-    statistics,
     email,
+    locations,
+    qrcode,
     receipts,
+    statistics,
+    users,
+    workflows,
 )
 
 # Create main API router

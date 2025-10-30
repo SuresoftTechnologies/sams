@@ -7,7 +7,7 @@ DeepSeek Vision API를 사용하여 이미지를 직접 처리합니다.
 역할:
   - 이미지 → 텍스트 추출 (OCR)
   - Vision 모델 사용
-  
+
 다음 단계:
   - 추출된 텍스트는 LLMService에서 분석됨
 """

@@ -2,7 +2,7 @@
 Authentication middleware and dependencies.
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

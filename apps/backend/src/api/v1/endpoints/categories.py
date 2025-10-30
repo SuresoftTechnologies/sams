@@ -3,14 +3,16 @@ Category management endpoints.
 """
 
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.middlewares.auth import get_current_user, require_role
-from src.models.user import User as UserModel, UserRole
 from src.models.category import Category as CategoryModel
+from src.models.user import User as UserModel
+from src.models.user import UserRole
 from src.schemas.category import Category, CreateCategoryRequest, UpdateCategoryRequest
 from src.schemas.common import PaginatedResponse
 

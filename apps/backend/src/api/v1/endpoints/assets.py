@@ -7,23 +7,24 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func, or_, and_
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.middlewares.auth import get_current_user, require_role
-from src.models.user import User as UserModel, UserRole
-from src.models.asset import Asset as AssetModel, AssetStatus, AssetGrade
+from src.models.asset import Asset as AssetModel
+from src.models.asset import AssetGrade, AssetStatus
 from src.models.asset_history import AssetHistory, HistoryAction
 from src.models.category import Category
 from src.models.location import Location
+from src.models.user import User as UserModel
+from src.models.user import UserRole
 from src.schemas.asset import (
     Asset,
     CreateAssetRequest,
     UpdateAssetRequest,
-    AssetFilterParams,
 )
-from src.schemas.common import MessageResponse, PaginatedResponse
+from src.schemas.common import PaginatedResponse
 
 router = APIRouter()
 

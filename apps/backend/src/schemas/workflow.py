@@ -4,7 +4,8 @@ Workflow schemas for asset check-in/check-out requests.
 
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WorkflowType(str, Enum):

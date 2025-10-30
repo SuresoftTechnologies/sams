@@ -2,15 +2,15 @@
 SureSoft Asset Management System - Main Application
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
-from src.config import settings
 from src.api.v1.router import api_router
+from src.config import settings
 
 
 @asynccontextmanager

@@ -3,7 +3,8 @@ Authentication schemas matching TypeScript shared-types.
 """
 
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from src.schemas.user import User, UserRole
 

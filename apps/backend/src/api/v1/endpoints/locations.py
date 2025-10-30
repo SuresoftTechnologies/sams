@@ -3,16 +3,18 @@ Location management endpoints.
 """
 
 import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.middlewares.auth import get_current_user, require_role
-from src.models.user import User as UserModel, UserRole
 from src.models.location import Location as LocationModel
-from src.schemas.location import Location, CreateLocationRequest, UpdateLocationRequest
+from src.models.user import User as UserModel
+from src.models.user import UserRole
 from src.schemas.common import PaginatedResponse
+from src.schemas.location import CreateLocationRequest, Location, UpdateLocationRequest
 
 router = APIRouter()
 

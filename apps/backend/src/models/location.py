@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import Boolean, DateTime, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database import Base
 

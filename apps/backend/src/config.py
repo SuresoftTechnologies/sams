@@ -80,7 +80,7 @@ class Settings(BaseSettings):
 
     # Receipt Analysis Settings
     USE_VISION_FOR_ANALYSIS: bool = False  # True: Vision 직접 분석, False: Chat 모델 사용 (권장)
-    
+
     # OCR Settings
     DEFAULT_OCR_METHOD: str = "deepseek"  # Only DeepSeek OCR is supported
     OCR_LANGUAGE: str = "kor+eng"  # Not used for DeepSeek (kept for backward compatibility)

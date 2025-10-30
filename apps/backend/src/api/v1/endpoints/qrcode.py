@@ -3,19 +3,18 @@ QR Code generation endpoints.
 """
 
 import io
-from typing import List
+
+import qrcode
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import StreamingResponse, Response
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import qrcode
-from qrcode.image.pil import PilImage
 
+from src.config import settings
 from src.database import get_db
 from src.middlewares.auth import get_current_user
-from src.models.user import User as UserModel
 from src.models.asset import Asset as AssetModel
-from src.config import settings
+from src.models.user import User as UserModel
 
 router = APIRouter()
 
@@ -164,7 +163,7 @@ async def decode_qr_code(
 
 @router.post("/bulk-generate")
 async def bulk_generate_qr_codes(
-    asset_ids: List[str] = Query(..., description="List of asset IDs"),
+    asset_ids: list[str] = Query(..., description="List of asset IDs"),
     db: AsyncSession = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ) -> dict:

@@ -55,7 +55,7 @@ async def extract_text_from_receipt(
             status_code=400,
             detail="파일 또는 이미지 URL 중 하나를 제공해야 합니다."
         )
-    
+
     if file and image_url:
         raise HTTPException(
             status_code=400,
@@ -66,7 +66,7 @@ async def extract_text_from_receipt(
     if file:
         if not file.filename:
             raise HTTPException(status_code=400, detail="파일명이 없습니다.")
-        
+
         allowed_extensions = {".png", ".jpg", ".jpeg", ".pdf", ".webp"}
         file_ext = file.filename.lower().split(".")[-1]
         if f".{file_ext}" not in allowed_extensions:
@@ -162,10 +162,10 @@ async def analyze_receipt_from_image(
     # Validate input: either file or image_url must be provided
     if not file and not image_url:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="파일 또는 이미지 URL 중 하나를 제공해야 합니다."
         )
-    
+
     if file and image_url:
         raise HTTPException(
             status_code=400,
@@ -176,7 +176,7 @@ async def analyze_receipt_from_image(
     if file:
         if not file.filename:
             raise HTTPException(status_code=400, detail="파일명이 없습니다.")
-        
+
         allowed_extensions = {".png", ".jpg", ".jpeg", ".pdf", ".webp"}
         file_ext = file.filename.lower().split(".")[-1]
         if f".{file_ext}" not in allowed_extensions:
@@ -266,7 +266,7 @@ async def create_asset_from_receipt(
     Create asset from receipt image - Full workflow (DEPRECATED).
 
     ⚠️ **DEPRECATED**: Use `/receipts/analyze-receipt` + `/receipts/create-asset-from-analysis` instead.
-    
+
     This endpoint creates asset immediately without user review.
     For better UX, use the two-step workflow:
     1. POST /receipts/analyze-receipt (preview)

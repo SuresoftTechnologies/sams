@@ -3,10 +3,9 @@ Email service using smtplib for sending emails.
 """
 
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.utils import formataddr
-from typing import List
 
 from src.config import settings
 
@@ -26,12 +25,12 @@ class EmailService:
 
     def _create_message(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         body: str,
         html_body: str | None = None,
-        cc: List[str] | None = None,
-        bcc: List[str] | None = None,
+        cc: list[str] | None = None,
+        bcc: list[str] | None = None,
     ) -> MIMEMultipart:
         """Create email message."""
         message = MIMEMultipart("alternative")
@@ -53,12 +52,12 @@ class EmailService:
 
     def send_email(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         body: str,
         html_body: str | None = None,
-        cc: List[str] | None = None,
-        bcc: List[str] | None = None,
+        cc: list[str] | None = None,
+        bcc: list[str] | None = None,
     ) -> tuple[bool, str, str | None]:
         """
         Send email using SMTP.

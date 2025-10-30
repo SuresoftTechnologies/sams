@@ -3,12 +3,13 @@ Authentication service for login, registration, and password management.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config import settings
 from src.models.user import User, UserRole
 from src.schemas.auth import LoginResponse, RegisterRequest
 from src.schemas.user import User as UserSchema
@@ -19,7 +20,6 @@ from src.utils.security import (
     verify_password,
     verify_token,
 )
-from src.config import settings
 
 
 async def login(
@@ -63,7 +63,7 @@ async def login(
         )
 
     # Update last login timestamp
-    user.last_login_at = datetime.now(timezone.utc)
+    user.last_login_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(user)
 
@@ -205,7 +205,7 @@ async def change_password(
 
     # Update password
     user.password_hash = hash_password(new_password)
-    user.updated_at = datetime.now(timezone.utc)
+    user.updated_at = datetime.now(UTC)
 
     await db.commit()
     await db.refresh(user)
@@ -252,8 +252,8 @@ async def register_user(
         department=user_data.department,
         is_active=True,
         is_verified=False,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
 
     db.add(new_user)

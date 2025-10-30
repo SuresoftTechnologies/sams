@@ -2,8 +2,9 @@
 Common schemas for API responses and pagination.
 """
 
-from typing import Generic, TypeVar
-from pydantic import BaseModel, Field, ConfigDict
+from typing import TypeVar
+
+from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 
@@ -24,7 +25,7 @@ class PaginationParams(BaseModel):
     )
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     """Generic paginated response wrapper."""
 
     items: list[T] = Field(..., description="List of items")

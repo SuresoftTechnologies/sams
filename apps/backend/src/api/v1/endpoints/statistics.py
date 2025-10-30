@@ -3,16 +3,18 @@ Statistics and analytics endpoints.
 """
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
 from src.middlewares.auth import get_current_user
-from src.models.user import User as UserModel
-from src.models.asset import Asset as AssetModel, AssetStatus, AssetGrade
+from src.models.asset import Asset as AssetModel
+from src.models.asset import AssetGrade, AssetStatus
 from src.models.category import Category as CategoryModel
 from src.models.location import Location as LocationModel
-from src.models.workflow import Workflow as WorkflowModel, WorkflowStatus
+from src.models.user import User as UserModel
+from src.models.workflow import Workflow as WorkflowModel
+from src.models.workflow import WorkflowStatus
 
 router = APIRouter()
 
@@ -59,19 +61,19 @@ async def get_dashboard_overview(
 
     # Total users
     total_users_result = await db.execute(
-        select(func.count(UserModel.id)).where(UserModel.is_active == True)
+        select(func.count(UserModel.id)).where(UserModel.is_active)
     )
     total_users = total_users_result.scalar_one()
 
     # Total categories
     total_categories_result = await db.execute(
-        select(func.count(CategoryModel.id)).where(CategoryModel.is_active == True)
+        select(func.count(CategoryModel.id)).where(CategoryModel.is_active)
     )
     total_categories = total_categories_result.scalar_one()
 
     # Total locations
     total_locations_result = await db.execute(
-        select(func.count(LocationModel.id)).where(LocationModel.is_active == True)
+        select(func.count(LocationModel.id)).where(LocationModel.is_active)
     )
     total_locations = total_locations_result.scalar_one()
 
@@ -110,7 +112,7 @@ async def get_assets_by_category(
         )
         .outerjoin(AssetModel, CategoryModel.id == AssetModel.category_id)
         .where(
-            CategoryModel.is_active == True,
+            CategoryModel.is_active,
             (AssetModel.deleted_at.is_(None)) | (AssetModel.id.is_(None))
         )
         .group_by(CategoryModel.id, CategoryModel.name, CategoryModel.code)
@@ -157,7 +159,7 @@ async def get_assets_by_location(
         )
         .outerjoin(AssetModel, LocationModel.id == AssetModel.location_id)
         .where(
-            LocationModel.is_active == True,
+            LocationModel.is_active,
             (AssetModel.deleted_at.is_(None)) | (AssetModel.id.is_(None))
         )
         .group_by(

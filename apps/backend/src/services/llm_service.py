@@ -38,7 +38,7 @@ class LLMService:
             base_url=settings.DEEPSEEK_API_BASE,
             timeout=settings.DEEPSEEK_TIMEOUT,
         )
-        
+
         # Qwen Chat 클라이언트 (텍스트 분석용)
         self.chat_client = AsyncOpenAI(
             api_key=settings.QWEN_API_KEY,
@@ -47,14 +47,14 @@ class LLMService:
         )
 
     async def analyze_receipt(
-        self, 
-        text: str, 
+        self,
+        text: str,
         category_id: str | None = None,
         image_path: Path | None = None
     ) -> tuple[ReceiptAnalysisResult, float]:
         """
         Analyze receipt and extract asset information.
-        
+
         두 가지 분석 방식을 지원합니다:
         1. Chat 모델 (권장): OCR 텍스트를 Chat 모델로 분석 (더 정확한 추론)
         2. Vision 모델: 이미지를 Vision 모델로 직접 분석 (시각적 정보 활용)
@@ -139,7 +139,7 @@ class LLMService:
 
 ## ⚠️ 중요 주의사항
 
-1. **여러 품목 처리**: 
+1. **여러 품목 처리**:
    - 모니터 2대, 노트북 1대가 함께 있으면 line_items에 각각 추가
    - 각 품목의 수량(quantity)을 정확히 파악
 
@@ -228,21 +228,21 @@ class LLMService:
     def _build_vision_message(self, text: str, image_path: Path) -> list:
         """
         Build message content with image for Vision API.
-        
+
         Vision 모델에게 이미지와 OCR 텍스트를 함께 제공합니다.
         이미지를 직접 보면서 분석하므로 더 정확합니다.
-        
+
         Args:
             text: OCR로 추출된 텍스트 (참고용)
             image_path: 원본 이미지 경로
-            
+
         Returns:
             Vision API용 content 배열
         """
         # Encode image to base64
         image_base64 = self._encode_image(image_path)
         image_url = f"data:image/jpeg;base64,{image_base64}"
-        
+
         return [
             {
                 "type": "text",
@@ -258,24 +258,24 @@ class LLMService:
                 "image_url": {"url": image_url, "detail": "high"}
             }
         ]
-    
+
     def _build_text_only_message(self, text: str) -> str:
         """
         Build message content with text only (fallback).
-        
+
         이미지가 없을 때 텍스트만으로 분석합니다.
         Vision 모델에게 텍스트만 주는 것이므로 정확도가 떨어질 수 있습니다.
-        
+
         Args:
             text: OCR로 추출된 텍스트
-            
+
         Returns:
             텍스트 프롬프트
         """
         return f"""다음 영수증 텍스트를 분석하여 자산 정보를 JSON 형식으로 추출하세요:
 
 {text}"""
-    
+
     def _encode_image(self, file_path: Path) -> str:
         """
         Encode image file to base64 string.
@@ -301,12 +301,12 @@ class LLMService:
         """
         # Extract JSON from response
         json_text = response_text.strip()
-        
+
         # Remove <think> tags (Qwen 모델이 사고 과정을 출력하는 경우)
         import re
         json_text = re.sub(r'<think>.*?</think>', '', json_text, flags=re.DOTALL)
         json_text = json_text.strip()
-        
+
         # Handle markdown code blocks
         if json_text.startswith("```json"):
             json_text = json_text[7:]  # Remove ```json
