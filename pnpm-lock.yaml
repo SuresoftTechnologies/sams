@@ -37,12 +37,6 @@ importers:
 
   apps/frontend:
     dependencies:
-      '@ams/api-client':
-        specifier: workspace:^
-        version: link:../../packages/api-client
-      '@ams/shared-types':
-        specifier: workspace:^
-        version: link:../../packages/shared-types
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.65.0)
@@ -67,6 +61,12 @@ importers:
       '@react-router/node':
         specifier: 7.1.3
         version: 7.1.3(react-router@7.1.3)(typescript@5.9.3)
+      '@sams/api-client':
+        specifier: workspace:^
+        version: link:../../packages/api-client
+      '@sams/shared-types':
+        specifier: workspace:^
+        version: link:../../packages/shared-types
       '@tanstack/react-query':
         specifier: ^5.90.5
         version: 5.90.5(react@19.2.0)
@@ -164,11 +164,11 @@ importers:
 
   packages/api-client:
     dependencies:
-      '@ams/shared-types':
+      '@sams/shared-types':
         specifier: workspace:*
         version: link:../shared-types
     devDependencies:
-      '@ams/config':
+      '@sams/config':
         specifier: workspace:*
         version: link:../config
       openapi-typescript:
@@ -210,7 +210,7 @@ importers:
 
   packages/shared-types:
     devDependencies:
-      '@ams/config':
+      '@sams/config':
         specifier: workspace:*
         version: link:../config
       typescript:
