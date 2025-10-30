@@ -86,27 +86,30 @@
 ## 🎨 Phase 3: shadcn/ui 설정
 
 ### 3.1 shadcn/ui 초기화
-- [ ] `npx shadcn@latest init` 실행
-- [ ] 스타일 선택: Default
-- [ ] Base color 선택: Zinc
-- [ ] CSS variables: Yes
-- [ ] components.json 생성 확인
+- [x] components.json 수동 생성 (tsconfig path alias 이슈로 수동 설정)
+- [x] 스타일 선택: Default
+- [x] Base color 선택: Zinc
+- [x] CSS variables: Yes
+- [x] Tailwind CSS v4 호환 설정
 
 ### 3.2 기본 컴포넌트 설치
-- [ ] `npx shadcn@latest add button`
-- [ ] `npx shadcn@latest add input`
-- [ ] `npx shadcn@latest add form`
-- [ ] `npx shadcn@latest add table`
-- [ ] `npx shadcn@latest add dialog`
-- [ ] `npx shadcn@latest add card`
-- [ ] `npx shadcn@latest add badge`
-- [ ] `npx shadcn@latest add dropdown-menu`
-- [ ] `npx shadcn@latest add select`
-- [ ] `npx shadcn@latest add toast` (sonner)
+- [x] button, input, form, table 설치
+- [x] dialog, card, badge 설치
+- [x] dropdown-menu, select 설치
+- [x] label (자동 설치됨)
+- [x] sonner (toast) 설치
+- [x] class-variance-authority 추가 설치
+- [x] 총 11개 컴포넌트 설치 완료
 
 ### 3.3 lib/utils.ts 확인
-- [ ] cn() 함수 생성 확인
-- [ ] clsx + tailwind-merge 통합 확인
+- [x] src/lib/utils.ts 생성
+- [x] cn() 함수 생성 확인
+- [x] clsx + tailwind-merge 통합 확인
+
+### 3.4 CSS 변수 설정
+- [x] src/index.css에 shadcn/ui CSS 변수 추가
+- [x] Light/Dark 테마 변수 설정
+- [x] border-border, bg-background 유틸리티 추가
 
 ---
 
