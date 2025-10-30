@@ -73,6 +73,21 @@ export function SearchInput({
     setLocalValue(value);
   }, [value]);
 
+  // Clear search
+  const handleClear = useCallback(() => {
+    setLocalValue('');
+    onChange('');
+    onSearch?.('');
+
+    // Clear debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Return focus to input
+    inputRef.current?.focus();
+  }, [onChange, onSearch]);
+
   // Handle keyboard shortcut (/) to focus search
   useEffect(() => {
     if (!enableShortcut) return;
@@ -117,21 +132,6 @@ export function SearchInput({
       }, debounceMs);
     }
   };
-
-  // Clear search
-  const handleClear = useCallback(() => {
-    setLocalValue('');
-    onChange('');
-    onSearch?.('');
-
-    // Clear debounce timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Return focus to input
-    inputRef.current?.focus();
-  }, [onChange, onSearch]);
 
   // Cleanup debounce timer on unmount
   useEffect(() => {

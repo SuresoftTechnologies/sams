@@ -428,7 +428,7 @@ export default function AssetForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">미지정</SelectItem>
+                              <SelectItem value="UNSPECIFIED">미지정</SelectItem>
                               {MOCK_USERS.map((user) => (
                                 <SelectItem key={user.id} value={user.id}>
                                   {user.name}
@@ -790,7 +790,7 @@ export default function AssetForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">미지정</SelectItem>
+                              <SelectItem value="UNSPECIFIED">미지정</SelectItem>
                               <SelectItem value="Y">있음</SelectItem>
                               <SelectItem value="N">없음</SelectItem>
                             </SelectContent>
