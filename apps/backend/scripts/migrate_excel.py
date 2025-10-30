@@ -7,6 +7,7 @@ Excel 데이터 마이그레이션 스크립트
 
 import argparse
 import asyncio
+import re
 import sys
 import uuid
 from datetime import datetime
@@ -25,7 +26,7 @@ from src.database import AsyncSessionLocal
 from src.models.asset import Asset, AssetStatus, AssetGrade
 from src.models.category import Category
 from src.models.location import Location
-from src.models.user import User
+from src.models.user import User, UserRole
 from src.utils.security import hash_password
 
 
@@ -282,6 +283,170 @@ async def get_user_by_name(db: AsyncSession, name: str) -> User | None:
     return result.scalar_one_or_none()
 
 
+async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
+    """이메일로 사용자 조회"""
+    result = await db.execute(select(User).where(User.email == email))
+    return result.scalar_one_or_none()
+
+
+def is_valid_user_name(name: str) -> bool:
+    """실제 사용자 이름인지 검증"""
+    if not name:
+        return False
+
+    # 제외할 키워드 리스트
+    exclude_keywords = [
+        '회의실', '서버실', '개발실', '서버', '공용', '대여',
+        '폐기', '불용', '창고', '보관', '재고',
+        '전시회', 'TBD', 'Cloud', 'PMS', 'AX', 'SDx', 'SQA',
+        '확인필', '미확인', '지급장비', '대여용', '일반장비',
+        '품질기술팀', '사업개발'
+    ]
+
+    # 제외할 정확한 값들
+    exclude_exact = {
+        '-', 'nan', 'NaN', 'N/A', 'n/a', '없음', '미정', '노후'
+    }
+
+    # 정확히 일치하는 경우 제외
+    if name in exclude_exact:
+        return False
+
+    # 키워드 포함 여부 확인
+    for keyword in exclude_keywords:
+        if keyword in name:
+            return False
+
+    # 숫자로 시작하는 경우 제외
+    if re.match(r'^\d', name):
+        return False
+
+    # 괄호 안에 숫자만 있는 경우 제외
+    if re.match(r'^.*\(\d+.*\).*$', name):
+        return False
+
+    # 영문 대문자로만 구성된 경우 제외
+    if re.match(r'^[A-Z]+$', name):
+        return False
+
+    # 한글 이름 패턴 확인 (2-4자)
+    korean_name_pattern = r'^[가-힣]{2,4}$'
+    if re.match(korean_name_pattern, name):
+        return True
+
+    # 영문 이름 뒤에 알파벳 하나 (강동훈B 등)
+    if re.match(r'^[가-힣]{2,4}[A-Z]$', name):
+        return True
+
+    return False
+
+
+def generate_email(name: str, counter: int = 0) -> str:
+    """이름에서 이메일 생성"""
+    if counter == 0:
+        return f"{name}@suresoft.com"
+    else:
+        return f"{name}{counter}@suresoft.com"
+
+
+async def create_user_from_name(
+    db: AsyncSession,
+    name: str,
+    password: str = "user123!",
+    role: UserRole = UserRole.EMPLOYEE,
+) -> User:
+    """사용자 이름에서 사용자 생성"""
+    # 이메일 생성 (중복 처리)
+    counter = 0
+    email = generate_email(name, counter)
+
+    while await get_user_by_email(db, email):
+        counter += 1
+        email = generate_email(name, counter)
+        if counter > 100:  # 안전 장치
+            raise ValueError(f"이메일 생성 실패: {name} (너무 많은 중복)")
+
+    # 사용자 생성
+    user = User(
+        id=str(uuid.uuid4()),
+        name=name,
+        email=email,
+        password_hash=hash_password(password),
+        role=role,
+        is_active=True,
+        is_verified=False,
+    )
+    db.add(user)
+    await db.flush()
+    return user
+
+
+async def extract_and_create_users(
+    db: AsyncSession,
+    wb: Any,
+    sheet_names: list[str],
+) -> dict[str, int]:
+    """엑셀에서 사용자 추출 및 생성"""
+    print("\n" + "=" * 60)
+    print("👥 사용자 추출 및 생성")
+    print("=" * 60)
+
+    user_names = set()
+
+    # 각 시트에서 사용자 이름 추출
+    for sheet_name in sheet_names:
+        if sheet_name not in wb.sheetnames:
+            continue
+
+        sheet = wb[sheet_name]
+        rows = list(sheet.iter_rows(min_row=2, values_only=True))
+
+        for row in rows:
+            current_user = row[1] if len(row) > 1 else None
+            if current_user:
+                user_str = clean_string(current_user)
+                if user_str and is_valid_user_name(user_str):
+                    user_names.add(user_str)
+
+    print(f"✅ 발견된 고유 사용자: {len(user_names)}명")
+
+    # 사용자 생성
+    created_count = 0
+    existing_count = 0
+    error_count = 0
+
+    for name in sorted(user_names):
+        try:
+            # 이미 존재하는지 확인
+            existing = await get_user_by_name(db, name)
+            if existing:
+                existing_count += 1
+                continue
+
+            # 사용자 생성
+            await create_user_from_name(db, name)
+            created_count += 1
+
+            # 진행 상황 출력
+            if created_count % 50 == 0:
+                print(f"   ✅ {created_count}명 생성 중...")
+
+        except Exception as e:
+            error_count += 1
+            print(f"   ❌ {name}: {str(e)}")
+
+    print(f"\n📊 사용자 생성 완료:")
+    print(f"   신규 생성: {created_count}명")
+    print(f"   기존 존재: {existing_count}명")
+    print(f"   생성 실패: {error_count}명")
+
+    return {
+        "created": created_count,
+        "existing": existing_count,
+        "error": error_count,
+    }
+
+
 async def migrate_sheet(
     db: AsyncSession,
     sheet: Any,
@@ -452,7 +617,10 @@ async def migrate_sheet(
 
 
 async def migrate_excel(
-    excel_path: str, dry_run: bool = False, clear_existing: bool = False
+    excel_path: str,
+    dry_run: bool = False,
+    clear_existing: bool = False,
+    create_users: bool = True,
 ) -> None:
     """Excel 데이터 마이그레이션 메인 함수"""
     print("=" * 60)
@@ -461,6 +629,7 @@ async def migrate_excel(
     print(f"파일: {excel_path}")
     print(f"모드: {'드라이런 (실제 저장 안함)' if dry_run else '실제 마이그레이션'}")
     print(f"기존 데이터: {'삭제' if clear_existing else '유지'}")
+    print(f"사용자 생성: {'예' if create_users else '아니오'}")
     print("=" * 60)
 
     # 파일 존재 확인
@@ -483,13 +652,21 @@ async def migrate_excel(
                 await db.execute(text("DELETE FROM assets"))
                 print("✅ 삭제 완료")
 
-            # 각 시트별 마이그레이션
+            # 시트 매핑
             sheet_map = {
                 "데스크탑(11)": ("데스크탑", "DESKTOP"),
                 "노트북(12)": ("노트북", "LAPTOP"),
                 "모니터(14)": ("모니터", "MONITOR"),
             }
+            sheet_names = list(sheet_map.keys())
 
+            # 1. 사용자 생성 (옵션)
+            if create_users and not dry_run:
+                await extract_and_create_users(db, wb, sheet_names)
+                await db.commit()
+                print("✅ 사용자 커밋 완료\n")
+
+            # 2. 각 시트별 자산 마이그레이션
             for sheet_name, (category_name, category_code) in sheet_map.items():
                 if sheet_name in wb.sheetnames:
                     sheet = wb[sheet_name]
@@ -535,6 +712,11 @@ def main():
         action="store_true",
         help="기존 자산 데이터 삭제 후 마이그레이션",
     )
+    parser.add_argument(
+        "--no-create-users",
+        action="store_true",
+        help="사용자 생성 건너뛰기 (기본: 자동 생성)",
+    )
 
     args = parser.parse_args()
 
@@ -542,7 +724,14 @@ def main():
     project_root = Path(__file__).parent.parent.parent.parent
     excel_path = project_root / args.file
 
-    asyncio.run(migrate_excel(str(excel_path), args.dry_run, args.clear))
+    asyncio.run(
+        migrate_excel(
+            str(excel_path),
+            args.dry_run,
+            args.clear,
+            not args.no_create_users,
+        )
+    )
 
 
 if __name__ == "__main__":
