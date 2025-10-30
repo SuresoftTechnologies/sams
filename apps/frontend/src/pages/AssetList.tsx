@@ -49,7 +49,15 @@ type ViewMode = 'table' | 'cards';
 
 export default function AssetList() {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+
+  // Auto-detect mobile and default to card view
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 ? 'cards' : 'table';
+    }
+    return 'table';
+  });
+
   const [filters, setFilters] = useState<AssetFilterValues>({});
   const [qrAsset, setQrAsset] = useState<Asset | null>(null);
 
@@ -156,7 +164,7 @@ export default function AssetList() {
         <SearchInput
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="자산 태그, 이름, 모델 또는 시리얼 번호로 검색..."
+          placeholder="자산번호, 모델, 시리얼번호로 검색..."
           isLoading={isDebouncing || isLoading}
           enableShortcut={true}
           aria-label="자산 검색"
@@ -171,13 +179,11 @@ export default function AssetList() {
         </div>
       </div>
 
-      {/* Filters and View Toggle */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-64 shrink-0">
-          <AssetFilters filters={filters} onFiltersChange={handleFiltersChange} />
-        </div>
+      {/* Filters */}
+      <AssetFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
-        <div className="flex-1 space-y-4">
+      {/* Content */}
+      <div className="space-y-4">
           {/* Toolbar: Count + View Toggle */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
@@ -268,20 +274,19 @@ export default function AssetList() {
             </AssetCardGrid>
           )}
 
-          {/* Enhanced Pagination Controls */}
-          {totalPages > 1 && !isLoading && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              pageSize={pageSize}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={handlePageSizeChange}
-              showPageSize={true}
-              pageSizeOptions={[25, 50, 100, 200]}
-            />
-          )}
-        </div>
+        {/* Enhanced Pagination Controls */}
+        {totalPages > 1 && !isLoading && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={handlePageSizeChange}
+            showPageSize={true}
+            pageSizeOptions={[25, 50, 100, 200]}
+          />
+        )}
       </div>
 
       {/* QR Code Dialog */}

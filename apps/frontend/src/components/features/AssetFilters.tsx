@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -9,15 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, X, Filter } from 'lucide-react';
-import { ASSET_STATUSES, ASSET_CATEGORIES, ASSET_LOCATIONS } from '@/lib/constants';
+import { X } from 'lucide-react';
+import { ASSET_STATUSES } from '@/lib/constants';
+import { useGetCategories } from '@/hooks/useCategories';
+import { useGetLocations } from '@/hooks/useLocations';
 
 /**
  * AssetFilters Component
  *
- * Comprehensive filtering UI for asset list
- * - Text search
+ * Horizontal filtering UI for asset list
  * - Status filter
  * - Category filter
  * - Location filter
@@ -31,7 +29,7 @@ import { ASSET_STATUSES, ASSET_CATEGORIES, ASSET_LOCATIONS } from '@/lib/constan
  */
 
 export interface AssetFilterValues {
-  search?: string;
+  search?: string; // Kept for compatibility but not used in this component
   status?: string;
   categoryId?: string;
   locationId?: string;
@@ -41,20 +39,32 @@ interface AssetFiltersProps {
   filters: AssetFilterValues;
   onFiltersChange: (filters: AssetFilterValues) => void;
   className?: string;
-  compact?: boolean; // Compact mode for mobile
 }
 
 export function AssetFilters({
   filters,
   onFiltersChange,
   className = '',
-  compact = false,
 }: AssetFiltersProps) {
-  const [isExpanded, setIsExpanded] = useState(!compact);
+  // Fetch categories and locations from API
+  const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useGetCategories();
+  const { data: locationsData, isLoading: locationsLoading, error: locationsError } = useGetLocations();
 
-  const handleSearchChange = (value: string) => {
-    onFiltersChange({ ...filters, search: value });
-  };
+  // Ensure we always have arrays
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+  const locations = Array.isArray(locationsData) ? locationsData : [];
+
+  // Debug logging
+  console.log('AssetFilters - categoriesData:', categoriesData);
+  console.log('AssetFilters - categoriesLoading:', categoriesLoading);
+  console.log('AssetFilters - categoriesError:', categoriesError);
+  console.log('AssetFilters - categories:', categories);
+  console.log('AssetFilters - categories.length:', categories.length);
+  console.log('AssetFilters - locationsData:', locationsData);
+  console.log('AssetFilters - locationsLoading:', locationsLoading);
+  console.log('AssetFilters - locationsError:', locationsError);
+  console.log('AssetFilters - locations:', locations);
+  console.log('AssetFilters - locations.length:', locations.length);
 
   const handleStatusChange = (value: string) => {
     onFiltersChange({ ...filters, status: value === 'all' ? undefined : value });
@@ -69,178 +79,113 @@ export function AssetFilters({
   };
 
   const handleClearFilters = () => {
-    onFiltersChange({});
+    onFiltersChange({ categoryId: undefined, locationId: undefined, status: undefined });
   };
 
-  const hasActiveFilters =
-    filters.search || filters.status || filters.categoryId || filters.locationId;
-
-  if (compact && !isExpanded) {
-    return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="자산 검색..."
-            value={filters.search || ''}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {filters.search && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-              onClick={() => handleSearchChange('')}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsExpanded(true)}
-          className="shrink-0"
-        >
-          <Filter className="h-4 w-4 mr-2" />
-          필터
-          {hasActiveFilters && (
-            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs">
-              {[filters.status, filters.categoryId, filters.locationId].filter(Boolean).length}
-            </span>
-          )}
-        </Button>
-      </div>
-    );
-  }
+  const hasActiveFilters = filters.status || filters.categoryId || filters.locationId;
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">필터</CardTitle>
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="h-8 px-2 text-muted-foreground"
-            >
-              <X className="h-4 w-4 mr-1" />
-              모두 지우기
-            </Button>
-          )}
-          {compact && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(false)}
-              className="h-8 px-2"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+    <div className={`flex flex-wrap items-end gap-3 ${className}`}>
+      {/* Status Filter */}
+      <div className="flex-1 min-w-[180px] space-y-1.5">
+        <Label htmlFor="status" className="text-sm font-medium">
+          상태
+        </Label>
+        <Select value={filters.status || 'all'} onValueChange={handleStatusChange}>
+          <SelectTrigger id="status" className="w-full">
+            <SelectValue placeholder="모든 상태" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">모든 상태</SelectItem>
+            {ASSET_STATUSES.map((status) => (
+              <SelectItem key={status.value} value={status.value}>
+                {status.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <CardContent className="space-y-4">
-        {/* Search */}
-        <div className="space-y-2">
-          <Label htmlFor="search">검색</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="search"
-              placeholder="이름 또는 시리얼 번호로 검색..."
-              value={filters.search || ''}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 pr-10"
-            />
-            {filters.search && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                onClick={() => handleSearchChange('')}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Status Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="status">상태</Label>
-          <Select
-            value={filters.status || 'all'}
-            onValueChange={handleStatusChange}
-          >
-            <SelectTrigger id="status">
-              <SelectValue placeholder="모든 상태" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">모든 상태</SelectItem>
-              {ASSET_STATUSES.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
-                  {status.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Category Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="category">카테고리</Label>
-          <Select
-            value={filters.categoryId || 'all'}
-            onValueChange={handleCategoryChange}
-          >
-            <SelectTrigger id="category">
-              <SelectValue placeholder="모든 카테고리" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">모든 카테고리</SelectItem>
-              {ASSET_CATEGORIES.map((category) => (
+      {/* Category Filter */}
+      <div className="flex-1 min-w-[180px] space-y-1.5">
+        <Label htmlFor="category" className="text-sm font-medium">
+          카테고리
+        </Label>
+        <Select 
+          value={filters.categoryId || 'all'} 
+          onValueChange={handleCategoryChange}
+          disabled={categoriesLoading}
+        >
+          <SelectTrigger id="category" className="w-full">
+            <SelectValue placeholder={categoriesLoading ? "로딩 중..." : "모든 카테고리"} />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px] overflow-y-auto">
+            <SelectItem value="all">모든 카테고리</SelectItem>
+            {categoriesError ? (
+              <SelectItem value="error" disabled>
+                오류: 데이터를 불러올 수 없습니다
+              </SelectItem>
+            ) : categories.length === 0 && !categoriesLoading ? (
+              <SelectItem value="empty" disabled>
+                카테고리가 없습니다
+              </SelectItem>
+            ) : (
+              categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
 
-        {/* Location Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="location">위치</Label>
-          <Select
-            value={filters.locationId || 'all'}
-            onValueChange={handleLocationChange}
-          >
-            <SelectTrigger id="location">
-              <SelectValue placeholder="모든 위치" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">모든 위치</SelectItem>
-              {ASSET_LOCATIONS.map((location) => (
+      {/* Location Filter */}
+      <div className="flex-1 min-w-[180px] space-y-1.5">
+        <Label htmlFor="location" className="text-sm font-medium">
+          위치
+        </Label>
+        <Select 
+          value={filters.locationId || 'all'} 
+          onValueChange={handleLocationChange}
+          disabled={locationsLoading}
+        >
+          <SelectTrigger id="location" className="w-full">
+            <SelectValue placeholder={locationsLoading ? "로딩 중..." : "모든 위치"} />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px] overflow-y-auto">
+            <SelectItem value="all">모든 위치</SelectItem>
+            {locationsError ? (
+              <SelectItem value="error" disabled>
+                오류: 데이터를 불러올 수 없습니다
+              </SelectItem>
+            ) : locations.length === 0 && !locationsLoading ? (
+              <SelectItem value="empty" disabled>
+                위치가 없습니다
+              </SelectItem>
+            ) : (
+              locations.map((location) => (
                 <SelectItem key={location.id} value={location.id}>
                   {location.name}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
 
-/**
- * AssetFiltersCompact - Mobile-optimized filters
- * Same functionality, different layout for mobile screens
- */
-export function AssetFiltersCompact(props: Omit<AssetFiltersProps, 'compact'>) {
-  return <AssetFilters {...props} compact={true} />;
+      {/* Clear Filters Button */}
+      {hasActiveFilters && (
+        <Button
+          variant="outline"
+          size="default"
+          onClick={handleClearFilters}
+          className="shrink-0"
+        >
+          <X className="h-4 w-4 mr-2" />
+          필터 지우기
+        </Button>
+      )}
+    </div>
+  );
 }

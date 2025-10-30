@@ -298,8 +298,9 @@ export class ApiClient {
     /**
      * Get all categories
      */
-    list: (): Promise<Category[]> => {
-      return this.request<Category[]>('/api/v1/categories');
+    list: async (): Promise<Category[]> => {
+      const response = await this.request<PaginatedResponse<Category>>('/api/v1/categories?limit=100');
+      return response.items;
     },
 
     /**
@@ -346,8 +347,9 @@ export class ApiClient {
     /**
      * Get all locations
      */
-    list: (): Promise<Location[]> => {
-      return this.request<Location[]>('/api/v1/locations');
+    list: async (): Promise<Location[]> => {
+      const response = await this.request<PaginatedResponse<Location>>('/api/v1/locations?limit=100');
+      return response.items;
     },
 
     /**

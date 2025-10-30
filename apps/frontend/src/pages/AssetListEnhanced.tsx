@@ -146,7 +146,7 @@ export default function AssetListEnhanced() {
         <SearchInput
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Search by asset tag, name, model, or serial number..."
+          placeholder="Search by asset number, model, or serial number..."
           isLoading={isDebouncing || isLoading}
           enableShortcut={true}
           aria-label="Search assets"
@@ -161,15 +161,11 @@ export default function AssetListEnhanced() {
         </div>
       </div>
 
-      {/* Filters and Content */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Filter Sidebar */}
-        <div className="lg:w-64 shrink-0">
-          <AssetFilters filters={filters} onFiltersChange={handleFiltersChange} />
-        </div>
+      {/* Filters */}
+      <AssetFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
-        {/* Main Content */}
-        <div className="flex-1 space-y-4">
+      {/* Content */}
+      <div className="space-y-4">
           {/* Toolbar: Count + View Toggle */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
@@ -274,19 +270,18 @@ export default function AssetListEnhanced() {
             />
           )}
 
-          {/* Performance Info (development only) */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
-              <div>Page: {currentPage} / {totalPages}</div>
-              <div>Page Size: {pageSize}</div>
-              <div>Total Items: {totalItems}</div>
-              <div>Items Shown: {assets.length}</div>
-              <div>Search: {debouncedSearchQuery || 'None'}</div>
-              <div>Is Loading: {isLoading ? 'Yes' : 'No'}</div>
-              <div>Is Debouncing: {isDebouncing ? 'Yes' : 'No'}</div>
-            </div>
-          )}
-        </div>
+        {/* Performance Info (development only) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
+            <div>Page: {currentPage} / {totalPages}</div>
+            <div>Page Size: {pageSize}</div>
+            <div>Total Items: {totalItems}</div>
+            <div>Items Shown: {assets.length}</div>
+            <div>Search: {debouncedSearchQuery || 'None'}</div>
+            <div>Is Loading: {isLoading ? 'Yes' : 'No'}</div>
+            <div>Is Debouncing: {isDebouncing ? 'Yes' : 'No'}</div>
+          </div>
+        )}
       </div>
 
       {/* QR Code Dialog */}
