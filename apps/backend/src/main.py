@@ -17,7 +17,7 @@ from src.api.v1.router import api_router
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     # Startup
-    print("🚀 Starting SureSoft AMS API Server...")
+    print("🚀 Starting SureSoft SAMS API Server...")
     print(f"   Environment: {settings.APP_ENV}")
     print(f"   Debug Mode: {settings.APP_DEBUG}")
     print(f"   Database: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else 'Not configured'}")
@@ -25,12 +25,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # Shutdown
-    print("👋 Shutting down SureSoft AMS API Server...")
+    print("👋 Shutting down SureSoft SAMS API Server...")
 
 
 # Create FastAPI application
 app = FastAPI(
-    title="SureSoft AMS API",
+    title="SureSoft SAMS API",
     description="Asset Management System API for 슈커톤 Hackathon",
     version="1.0.0",
     docs_url="/docs",
@@ -60,7 +60,7 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "SureSoft AMS API",
+        "service": "SureSoft SAMS API",
         "version": "1.0.0",
         "environment": settings.APP_ENV,
     }
@@ -70,7 +70,7 @@ async def health_check():
 async def root():
     """Root endpoint with API information."""
     return {
-        "message": "Welcome to SureSoft AMS API",
+        "message": "Welcome to SureSoft SAMS API",
         "version": "1.0.0",
         "docs": "/docs",
         "health": "/health",

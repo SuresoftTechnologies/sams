@@ -1,7 +1,7 @@
 # Phase 9: 인증/인가 구현 완료 보고서
 
 ## 프로젝트 정보
-- **프로젝트**: SureSoft AMS Frontend
+- **프로젝트**: SureSoft SAMS Frontend
 - **Phase**: 9 - 인증/인가 (Authentication & Authorization)
 - **작업 일자**: 2025-10-30
 - **상태**: ✅ 완료
@@ -19,7 +19,7 @@ Phase 9에서는 JWT 기반 인증 시스템과 역할 기반 접근 제어(RBAC
 ### ✅ 9.1 인증 상태 관리
 
 #### 1. 토큰 저장소 (`/src/lib/auth-storage.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/lib/auth-storage.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/lib/auth-storage.ts`
 
 **주요 기능**:
 - localStorage 기반 토큰 관리
@@ -38,7 +38,7 @@ authStorage.getAuthorizationHeader()
 ```
 
 #### 2. Zustand Auth Store (`/src/stores/auth-store.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/stores/auth-store.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/stores/auth-store.ts`
 
 **주요 기능**:
 - 전역 사용자 상태 관리
@@ -55,7 +55,7 @@ useAuthLoading()
 ```
 
 #### 3. API Client 업데이트 (`/src/lib/api.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/lib/api.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/lib/api.ts`
 
 **주요 기능**:
 - Bearer token 자동 주입
@@ -73,7 +73,7 @@ useAuthLoading()
 ### ✅ 9.2 Protected Routes
 
 #### 1. ProtectedRoute 컴포넌트 (`/src/components/layout/ProtectedRoute.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/components/layout/ProtectedRoute.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/components/layout/ProtectedRoute.tsx`
 
 **주요 기능**:
 - 인증 여부 확인
@@ -90,7 +90,7 @@ useAuthLoading()
 ```
 
 #### 2. 라우트 설정 업데이트 (`/src/routes.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/routes.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/routes.tsx`
 
 **보호된 라우트**:
 - `/dashboard` - 모든 인증된 사용자
@@ -107,7 +107,7 @@ useAuthLoading()
 ### ✅ 9.3 권한 기반 UI
 
 #### 1. 역할 체크 훅 (`/src/hooks/useRole.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/hooks/useRole.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/hooks/useRole.ts`
 
 **제공 훅**:
 ```typescript
@@ -120,7 +120,7 @@ useCurrentRole() - 현재 역할 반환
 ```
 
 #### 2. RoleGuard 컴포넌트 (`/src/components/layout/RoleGuard.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/components/layout/RoleGuard.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/components/layout/RoleGuard.tsx`
 
 **사용 예시**:
 ```typescript
@@ -138,7 +138,7 @@ useCurrentRole() - 현재 역할 반환
 ```
 
 #### 3. Header 컴포넌트 업데이트 (`/src/components/layout/Header.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/components/layout/Header.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/components/layout/Header.tsx`
 
 **주요 변경사항**:
 - 실제 사용자 데이터 표시 (useUser 훅 사용)
@@ -147,7 +147,7 @@ useCurrentRole() - 현재 역할 반환
 - 로그아웃 중 상태 표시
 
 #### 4. Sidebar 컴포넌트 업데이트 (`/src/components/layout/Sidebar.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/components/layout/Sidebar.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/components/layout/Sidebar.tsx`
 
 **역할별 메뉴 구조**:
 
@@ -168,7 +168,7 @@ useCurrentRole() - 현재 역할 반환
 - Settings (준비 중)
 
 #### 5. AssetList 페이지 업데이트 (`/src/pages/AssetList.tsx`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/pages/AssetList.tsx`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/pages/AssetList.tsx`
 
 **변경사항**:
 - "New Asset" 버튼은 Manager/Admin만 표시
@@ -179,7 +179,7 @@ useCurrentRole() - 현재 역할 반환
 ### ✅ 9.4 인증 API 서비스
 
 #### 1. Auth Service (`/src/services/auth-service.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/services/auth-service.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/services/auth-service.ts`
 
 **제공 메서드**:
 ```typescript
@@ -192,7 +192,7 @@ authService.register(userData) - 회원가입 (선택적)
 ```
 
 #### 2. Auth Hooks 업데이트 (`/src/hooks/useAuth.ts`)
-**위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend/src/hooks/useAuth.ts`
+**위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend/src/hooks/useAuth.ts`
 
 **제공 훅**:
 ```typescript
@@ -428,4 +428,4 @@ Phase 9 인증/인가 구현이 완료되었습니다. 모든 Protected Routes�
 
 **작성자**: Claude (AI Assistant)
 **작성일**: 2025-10-30
-**프로젝트**: SureSoft AMS Frontend
+**프로젝트**: SureSoft SAMS Frontend

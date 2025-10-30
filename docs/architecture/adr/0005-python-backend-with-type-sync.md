@@ -152,7 +152,7 @@ async def export_openapi():
     with open("../../packages/api-client/openapi.json", "w") as f:
         json.dump(
             get_openapi(
-                title="SureSoft AMS API",
+                title="SureSoft SSAMS API",
                 version="1.0.0",
                 routes=app.routes,
             ),

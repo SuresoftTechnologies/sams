@@ -5,7 +5,7 @@
 
 ## Context
 
-자산관리 시스템(AMS)은 프론트엔드(React)와 백엔드(NestJS)로 구성됩니다. 두 애플리케이션 간에 다음과 같은 공유 요구사항이 있습니다:
+자산관리 시스템(SAMS)은 프론트엔드(React)와 백엔드(NestJS)로 구성됩니다. 두 애플리케이션 간에 다음과 같은 공유 요구사항이 있습니다:
 
 - **타입 정의**: API 요청/응답 타입, DTO, Enum 등
 - **유틸리티 함수**: 날짜 포맷, 유효성 검증, 상수 등
@@ -32,7 +32,7 @@
 ### Monorepo Structure
 
 ```
-suresoft-ams/
+suresoft-sams/
 ├── apps/
 │   ├── frontend/          # React 프론트엔드
 │   └── backend/           # NestJS 백엔드

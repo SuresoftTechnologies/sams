@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 import type { AssetFormData } from '@/lib/validators';
+import type { Asset, CreateAssetDto, UpdateAssetDto, AssetStatus } from '@sams/api-client';
+import type { PaginatedResponse } from '@sams/api-client';
 
 /**
  * Asset Management Hooks
@@ -12,131 +15,53 @@ import type { AssetFormData } from '@/lib/validators';
  * - useCreateAsset: Create new asset
  * - useUpdateAsset: Update existing asset
  * - useDeleteAsset: Delete asset
- *
- * TODO Phase 12: Connect to actual API endpoints using @sams/api-client
  */
 
-export interface Asset {
-  id: string;
-  name: string;
-  serialNumber?: string;
-  description?: string;
-  categoryId: string;
-  categoryName?: string;
-  locationId: string;
-  locationName?: string;
-  status: 'available' | 'in_use' | 'maintenance' | 'retired';
-  purchaseDate?: string;
-  purchasePrice?: number;
-  warrantyUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export Asset type from api-client
+export type { Asset } from '@sams/api-client';
 
-interface AssetsResponse {
-  data: Asset[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-// Mock data
-const mockAssets: Asset[] = [
-  {
-    id: '1',
-    name: 'MacBook Pro 16"',
-    serialNumber: 'MBP123456',
-    description: 'High-performance laptop for development',
-    categoryId: 'cat-1',
-    categoryName: 'Computer',
-    locationId: 'loc-1',
-    locationName: 'Office 1F',
-    status: 'available',
-    purchaseDate: '2024-01-15',
-    purchasePrice: 2500000,
-    warrantyUntil: '2027-01-15',
-    createdAt: '2024-01-15T00:00:00Z',
-    updatedAt: '2024-01-15T00:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Dell Monitor 27"',
-    serialNumber: 'MON987654',
-    categoryId: 'cat-2',
-    categoryName: 'Monitor',
-    locationId: 'loc-1',
-    locationName: 'Office 1F',
-    status: 'in_use',
-    purchaseDate: '2024-02-01',
-    purchasePrice: 450000,
-    createdAt: '2024-02-01T00:00:00Z',
-    updatedAt: '2024-02-01T00:00:00Z',
-  },
-];
-
-// Mock API calls
-const fetchAssets = async (): Promise<AssetsResponse> => {
-  await new Promise((resolve) => setTimeout(resolve, 800));
+// Helper to map form data to API DTOs
+const mapFormToCreateDto = (data: AssetFormData): CreateAssetDto => {
   return {
-    data: mockAssets,
-    total: mockAssets.length,
-    page: 1,
-    pageSize: 10,
-  };
-};
-
-const fetchAsset = async (id: string): Promise<Asset> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const asset = mockAssets.find((a) => a.id === id);
-  if (!asset) throw new Error('Asset not found');
-  return asset;
-};
-
-const createAsset = async (data: AssetFormData): Promise<Asset> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return {
-    id: String(Date.now()),
+    asset_tag: data.serialNumber || `ASSET-${Date.now()}`,
     name: data.name,
-    serialNumber: data.serialNumber,
-    description: data.description,
-    categoryId: data.categoryId,
-    categoryName: 'Computer',
-    locationId: data.locationId,
-    locationName: 'Office 1F',
-    status: 'available',
-    purchaseDate: data.purchaseDate,
-    purchasePrice: data.purchasePrice ?? undefined,
-    warrantyUntil: data.warrantyUntil,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    category_id: data.categoryId,
+    location_id: data.locationId,
+    status: 'available' as AssetStatus,
+    purchase_date: data.purchaseDate,
+    purchase_price: data.purchasePrice ?? undefined,
+    warranty_end: data.warrantyUntil,
+    notes: data.description,
   };
 };
 
-const updateAsset = async ({ id, data }: { id: string; data: AssetFormData }): Promise<Asset> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  const asset = mockAssets.find((a) => a.id === id);
-  if (!asset) throw new Error('Asset not found');
+const mapFormToUpdateDto = (data: AssetFormData): UpdateAssetDto => {
   return {
-    ...asset,
-    ...data,
-    purchasePrice: data.purchasePrice ?? undefined,
-    updatedAt: new Date().toISOString(),
+    name: data.name,
+    category_id: data.categoryId,
+    location_id: data.locationId,
+    purchase_date: data.purchaseDate,
+    purchase_price: data.purchasePrice ?? undefined,
+    warranty_end: data.warrantyUntil,
+    notes: data.description,
   };
 };
 
-const deleteAsset = async (id: string): Promise<void> => {
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  const index = mockAssets.findIndex((a) => a.id === id);
-  if (index === -1) throw new Error('Asset not found');
-};
 
 /**
- * Fetch all assets
+ * Fetch all assets with pagination and filtering
  */
-export function useGetAssets() {
+export function useGetAssets(params?: {
+  skip?: number;
+  limit?: number;
+  search?: string;
+  status?: AssetStatus;
+  category_id?: string;
+  location_id?: string;
+}) {
   return useQuery({
-    queryKey: ['assets'],
-    queryFn: fetchAssets,
+    queryKey: ['assets', params],
+    queryFn: () => api.assets.list(params),
     staleTime: 30 * 1000, // 30 seconds
   });
 }
@@ -147,7 +72,7 @@ export function useGetAssets() {
 export function useGetAsset(id: string) {
   return useQuery({
     queryKey: ['asset', id],
-    queryFn: () => fetchAsset(id),
+    queryFn: () => api.assets.get(id),
     enabled: !!id,
     staleTime: 60 * 1000, // 1 minute
   });
@@ -161,7 +86,10 @@ export function useCreateAsset() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createAsset,
+    mutationFn: (data: AssetFormData) => {
+      const createDto = mapFormToCreateDto(data);
+      return api.assets.create(createDto);
+    },
     onSuccess: (data) => {
       // Invalidate assets list to refetch
       queryClient.invalidateQueries({ queryKey: ['assets'] });
@@ -189,7 +117,10 @@ export function useUpdateAsset(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: AssetFormData) => updateAsset({ id, data }),
+    mutationFn: (data: AssetFormData) => {
+      const updateDto = mapFormToUpdateDto(data);
+      return api.assets.update(id, updateDto);
+    },
     onSuccess: (data) => {
       // Invalidate both list and detail queries
       queryClient.invalidateQueries({ queryKey: ['assets'] });
@@ -218,7 +149,7 @@ export function useDeleteAsset() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteAsset,
+    mutationFn: (id: string) => api.assets.delete(id),
     onSuccess: () => {
       // Invalidate assets list
       queryClient.invalidateQueries({ queryKey: ['assets'] });
@@ -233,5 +164,41 @@ export function useDeleteAsset() {
         description: error.message,
       });
     },
+  });
+}
+
+/**
+ * Change asset status
+ */
+export function useChangeAssetStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status, reason }: { id: string; status: AssetStatus; reason?: string }) =>
+      api.assets.changeStatus(id, status, reason),
+    onSuccess: (data) => {
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ['asset', data.id] });
+
+      toast.success('Asset status updated successfully');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to update asset status', {
+        description: error.message,
+      });
+    },
+  });
+}
+
+/**
+ * Get asset history
+ */
+export function useGetAssetHistory(id: string, params?: { skip?: number; limit?: number }) {
+  return useQuery({
+    queryKey: ['asset-history', id, params],
+    queryFn: () => api.assets.history(id, params),
+    enabled: !!id,
+    staleTime: 60 * 1000, // 1 minute
   });
 }

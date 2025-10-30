@@ -1,4 +1,4 @@
-### SureSoft AMS - Authentication API Examples
+### SureSoft SAMS - Authentication API Examples
 ### Base URL
 @baseUrl = http://localhost:8000/api/v1
 @email = admin@suresoft.com

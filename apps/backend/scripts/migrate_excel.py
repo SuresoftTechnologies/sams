@@ -462,7 +462,7 @@ def main():
 
     args = parser.parse_args()
 
-    # 프로젝트 루트로 이동 (apps/backend -> suresoft-ams)
+    # 프로젝트 루트로 이동 (apps/backend -> suresoft-sams)
     project_root = Path(__file__).parent.parent.parent.parent
     excel_path = project_root / args.file
 

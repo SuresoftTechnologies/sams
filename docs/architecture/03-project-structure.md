@@ -2,12 +2,12 @@
 
 ## 📋 Overview
 
-SureSoft AMS는 Turborepo 기반 모노레포 구조로 구성되어 있습니다. 프론트엔드와 백엔드가 단일 저장소에서 관리되며, 공유 코드는 별도의 패키지로 분리되어 있습니다.
+SureSoft SAMS는 Turborepo 기반 모노레포 구조로 구성되어 있습니다. 프론트엔드와 백엔드가 단일 저장소에서 관리되며, 공유 코드는 별도의 패키지로 분리되어 있습니다.
 
 ## 🏗️ Directory Structure
 
 ```
-suresoft-ams/
+suresoft-sams/
 ├── apps/                          # 애플리케이션
 │   ├── frontend/                  # React 프론트엔드
 │   │   ├── src/

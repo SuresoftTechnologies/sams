@@ -148,7 +148,7 @@ export default function Sidebar() {
         {/* Footer info */}
         <div className="p-4 border-t">
           <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-          <p className="text-xs text-muted-foreground">SureSoft AMS</p>
+          <p className="text-xs text-muted-foreground">SureSoft SAMS</p>
         </div>
       </div>
     </aside>

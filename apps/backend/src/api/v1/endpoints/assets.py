@@ -106,7 +106,7 @@ async def get_assets(
     assets = result.scalars().all()
 
     return PaginatedResponse(
-        items=[Asset.model_validate(asset) for asset in assets],
+        items=[Asset.model_validate(asset, from_attributes=True) for asset in assets],
         total=total,
         skip=skip,
         limit=limit,

@@ -4,7 +4,7 @@
 
 ```bash
 # 1. 프론트엔드 디렉토리로 이동
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 
 # 2. 의존성 설치
 pnpm install
@@ -26,7 +26,7 @@ pnpm dev
 ### 1. 프로젝트 구조 생성
 
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 
 # 기본 디렉토리 구조
 mkdir -p src/{components/{ui,layout},features/{assets,checkin,checkout,workflows,dashboard}/{api,components,schemas},lib,stores,types,styles}
@@ -35,7 +35,7 @@ mkdir -p src/{components/{ui,layout},features/{assets,checkin,checkout,workflows
 ### 2. package.json 복사
 
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json package.json
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-package.json package.json
 ```
 
 또는 수동으로 생성:
@@ -115,18 +115,18 @@ pnpm install
 
 #### vite.config.ts
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/vite.config.ts .
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/vite.config.ts .
 ```
 
 #### tsconfig.json
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/tsconfig.json .
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/tsconfig.node.json .
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/tsconfig.json .
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/tsconfig.node.json .
 ```
 
 #### tailwind.config.js
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/tailwind.config.js .
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/tailwind.config.js .
 ```
 
 #### postcss.config.js
@@ -170,19 +170,19 @@ npx shadcn-ui@latest add tabs
 ### 7. 스타일 파일 생성
 
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/globals.css src/styles/globals.css
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/globals.css src/styles/globals.css
 ```
 
 ### 8. 라이브러리 파일 생성
 
 #### Query Client
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/query-client.ts src/lib/query-client.ts
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/query-client.ts src/lib/query-client.ts
 ```
 
 #### API Client
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/api-client.ts src/lib/api-client.ts
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/api-client.ts src/lib/api-client.ts
 ```
 
 #### Utils
@@ -199,29 +199,29 @@ export function cn(...inputs: ClassValue[]) {
 
 #### Assets API Hooks
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/useAssets.ts src/features/assets/api/useAssets.ts
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/useAssets.ts src/features/assets/api/useAssets.ts
 ```
 
 #### Asset Table Component
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/AssetTable.tsx src/features/assets/components/AssetTable.tsx
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/AssetTable.tsx src/features/assets/components/AssetTable.tsx
 ```
 
 #### Asset Form Component
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/AssetForm.tsx src/features/assets/components/AssetForm.tsx
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/AssetForm.tsx src/features/assets/components/AssetForm.tsx
 ```
 
 ### 10. Routes 설정
 
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/routes.tsx src/routes.tsx
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/routes.tsx src/routes.tsx
 ```
 
 ### 11. App 컴포넌트
 
 ```bash
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-configs/App.tsx src/App.tsx
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-configs/App.tsx src/App.tsx
 ```
 
 ### 12. Entry Point (main.tsx)
@@ -270,13 +270,13 @@ echo 'VITE_API_URL=https://api.production.com' > .env.production
 
 ### 프론트엔드만 실행
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 pnpm dev
 ```
 
 ### 백엔드 + 프론트엔드 동시 실행
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams
+cd /Users/chsong/Documents/my-projects/suresoft-sams
 pnpm dev
 ```
 
@@ -400,7 +400,7 @@ export function RootLayout() {
         <div className=\"max-w-7xl mx-auto px-4 py-4\">
           <nav className=\"flex gap-6\">
             <Link to=\"/\" className=\"text-lg font-semibold\">
-              SureSoft AMS
+              SureSoft SAMS
             </Link>
             <Link to=\"/assets\" className=\"hover:text-blue-600\">
               자산 목록

@@ -253,7 +253,7 @@ Environment variables in `.env`:
 
 ```bash
 # Database
-DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/ams
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/sams
 
 # Redis
 REDIS_URL=redis://localhost:6379/0

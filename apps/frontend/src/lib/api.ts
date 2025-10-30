@@ -15,10 +15,9 @@
  */
 
 import {
-  apiFetch,
-  setApiConfig,
-  setAuthToken as setApiAuthToken,
-  getApiConfig,
+  apiClient,
+  getApiClient,
+  type ApiError as ApiClientError,
 } from '@sams/api-client';
 import { authStorage, type TokenResponse } from './auth-storage';
 import { toast } from 'sonner';
@@ -48,19 +47,10 @@ function onTokenRefreshed(token: string): void {
  * Initialize API client with stored token
  */
 export function initializeApiClient(): void {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-  setApiConfig({
-    baseUrl,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
   // Restore token from localStorage
   const token = authStorage.getAccessToken();
   if (token) {
-    setApiAuthToken(token);
+    apiClient.setAuthToken(token);
   }
 }
 
@@ -74,31 +64,18 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 
   try {
-    const config = getApiConfig();
-    const response = await fetch(`${config.baseUrl}/api/v1/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Token refresh failed');
-    }
-
-    const data: TokenResponse = await response.json();
+    const data = await apiClient.auth.refresh(refreshToken);
 
     // Store new tokens
     authStorage.setTokens(data);
-    setApiAuthToken(data.access_token);
+    apiClient.setAuthToken(data.access_token);
 
     return data.access_token;
   } catch (error) {
     console.error('Token refresh failed:', error);
     // Clear invalid tokens
     authStorage.clearTokens();
-    setApiAuthToken(null);
+    apiClient.setAuthToken(null);
     return null;
   }
 }
@@ -119,204 +96,243 @@ export class ApiError extends Error {
 }
 
 /**
- * Enhanced API fetch with error handling and automatic token refresh
+ * Handle API errors with retry logic for token refresh
  */
-async function fetchWithErrorHandling<TResponse>(
-  path: string,
-  options?: RequestInit
-): Promise<TResponse> {
-  try {
-    return await apiFetch<TResponse>(path, options);
-  } catch (error) {
-    // Handle 401 Unauthorized - try token refresh
-    if (error instanceof Response && error.status === 401) {
-      // Don't try to refresh if this is already a refresh request or login request
-      if (path.includes('/auth/refresh') || path.includes('/auth/login')) {
-        authStorage.clearTokens();
-        setApiAuthToken(null);
+async function handleApiError(error: unknown, retryCallback?: () => Promise<any>): Promise<any> {
+  // Check if it's an API error with status
+  const apiError = error as ApiClientError;
+
+  // Handle 401 Unauthorized - try token refresh
+  if (apiError?.status === 401) {
+    // Don't try to refresh if we're already refreshing
+    if (!isRefreshing) {
+      isRefreshing = true;
+
+      const newToken = await refreshAccessToken();
+
+      if (newToken) {
+        isRefreshing = false;
+        onTokenRefreshed(newToken);
+
+        // Retry original request if callback provided
+        if (retryCallback) {
+          return retryCallback();
+        }
+      } else {
+        // Refresh failed, redirect to login
+        isRefreshing = false;
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        throw new ApiError('Unauthorized. Please login again.', 401);
+        throw new ApiError('Session expired. Please login again.', 401);
       }
-
-      // Try to refresh token
-      if (!isRefreshing) {
-        isRefreshing = true;
-
-        const newToken = await refreshAccessToken();
-
-        if (newToken) {
-          isRefreshing = false;
-          onTokenRefreshed(newToken);
-
-          // Retry original request with new token
-          return await apiFetch<TResponse>(path, options);
-        } else {
-          // Refresh failed, redirect to login
-          isRefreshing = false;
-          if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-            window.location.href = '/login';
-          }
-          throw new ApiError('Session expired. Please login again.', 401);
-        }
-      } else {
-        // Wait for token refresh to complete
-        return new Promise<TResponse>((resolve, reject) => {
-          subscribeTokenRefresh(async () => {
-            try {
-              const result = await apiFetch<TResponse>(path, options);
+    } else {
+      // Wait for token refresh to complete
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh(async () => {
+          try {
+            if (retryCallback) {
+              const result = await retryCallback();
               resolve(result);
-            } catch (retryError) {
-              reject(retryError);
+            } else {
+              reject(new ApiError('No retry callback provided', 401));
             }
-          });
+          } catch (retryError) {
+            reject(retryError);
+          }
         });
-      }
-    }
-
-    // Handle 403 Forbidden
-    if (error instanceof Response && error.status === 403) {
-      const apiError = new ApiError('Forbidden. You do not have permission.', 403);
-      toast.error('Access Denied', {
-        description: 'You do not have permission to perform this action.',
       });
-      throw apiError;
     }
-
-    // Handle 404 Not Found
-    if (error instanceof Response && error.status === 404) {
-      const apiError = new ApiError('Resource not found', 404);
-      throw apiError;
-    }
-
-    // Handle 500+ Server Errors
-    if (error instanceof Response && error.status >= 500) {
-      const apiError = new ApiError('Server error. Please try again later.', error.status);
-      toast.error('Server Error', {
-        description: 'Something went wrong on our end. Please try again later.',
-      });
-      throw apiError;
-    }
-
-    // Handle network errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      const apiError = new ApiError('Network error. Please check your connection.');
-      toast.error('Connection Error', {
-        description: 'Unable to connect to the server. Please check your internet connection.',
-      });
-      throw apiError;
-    }
-
-    // Handle other errors
-    if (error instanceof Error) {
-      throw new ApiError(error.message);
-    }
-
-    throw new ApiError('An unexpected error occurred');
   }
+
+  // Handle 403 Forbidden
+  if (apiError?.status === 403) {
+    toast.error('Access Denied', {
+      description: 'You do not have permission to perform this action.',
+    });
+    throw new ApiError('Forbidden. You do not have permission.', 403);
+  }
+
+  // Handle 404 Not Found
+  if (apiError?.status === 404) {
+    throw new ApiError('Resource not found', 404);
+  }
+
+  // Handle 500+ Server Errors
+  if (apiError?.status && apiError.status >= 500) {
+    toast.error('Server Error', {
+      description: 'Something went wrong on our end. Please try again later.',
+    });
+    throw new ApiError('Server error. Please try again later.', apiError.status);
+  }
+
+  // Handle network errors
+  if (error instanceof TypeError && error.message.includes('fetch')) {
+    toast.error('Connection Error', {
+      description: 'Unable to connect to the server. Please check your internet connection.',
+    });
+    throw new ApiError('Network error. Please check your connection.');
+  }
+
+  // Handle other errors
+  if (error instanceof Error) {
+    throw new ApiError(error.message);
+  }
+
+  throw new ApiError('An unexpected error occurred');
 }
 
 /**
- * API client interface
+ * API client wrapper with error handling
  */
 export const api = {
   /**
-   * GET request
+   * Authentication methods
    */
-  async get<TResponse>(
-    path: string,
-    params?: Record<string, string | number | boolean>
-  ): Promise<TResponse> {
-    let url = path;
-    if (params) {
-      const searchParams = new URLSearchParams();
-      Object.entries(params).forEach(([key, value]) => {
-        searchParams.append(key, String(value));
-      });
-      url = `${path}?${searchParams.toString()}`;
-    }
-    return fetchWithErrorHandling<TResponse>(url, {
-      method: 'GET',
-    });
-  },
-
-  /**
-   * POST request
-   */
-  async post<TResponse, TBody = unknown>(path: string, body?: TBody): Promise<TResponse> {
-    return fetchWithErrorHandling<TResponse>(path, {
-      method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-  },
-
-  /**
-   * PUT request
-   */
-  async put<TResponse, TBody = unknown>(path: string, body?: TBody): Promise<TResponse> {
-    return fetchWithErrorHandling<TResponse>(path, {
-      method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-  },
-
-  /**
-   * PATCH request
-   */
-  async patch<TResponse, TBody = unknown>(path: string, body?: TBody): Promise<TResponse> {
-    return fetchWithErrorHandling<TResponse>(path, {
-      method: 'PATCH',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-  },
-
-  /**
-   * DELETE request
-   */
-  async delete<TResponse>(path: string): Promise<TResponse> {
-    return fetchWithErrorHandling<TResponse>(path, {
-      method: 'DELETE',
-    });
-  },
-
-  /**
-   * Upload file with multipart/form-data
-   */
-  async upload<TResponse>(path: string, formData: FormData): Promise<TResponse> {
-    const config = getApiConfig();
-    const url = `${config.baseUrl}${path}`;
-
-    const token = authStorage.getAccessToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers,
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({
-          detail: response.statusText,
-        }));
-        throw new ApiError(error.detail || 'Upload failed', response.status, error);
+  auth: {
+    async login(credentials: { email: string; password: string }) {
+      try {
+        const response = await apiClient.auth.login(credentials);
+        // Store tokens
+        authStorage.setTokens(response);
+        apiClient.setAuthToken(response.access_token);
+        return response;
+      } catch (error) {
+        return handleApiError(error);
       }
+    },
 
-      return response.json();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
+    async me() {
+      try {
+        return await apiClient.auth.me();
+      } catch (error) {
+        return handleApiError(error, () => apiClient.auth.me());
       }
-      if (error instanceof Error) {
-        throw new ApiError(error.message);
+    },
+
+    async logout() {
+      try {
+        await apiClient.auth.logout();
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        authStorage.clearTokens();
+        apiClient.setAuthToken(null);
       }
-      throw new ApiError('Upload failed');
-    }
+    },
+  },
+
+  /**
+   * Asset methods
+   */
+  assets: {
+    async list(params?: Parameters<typeof apiClient.assets.list>[0]) {
+      try {
+        return await apiClient.assets.list(params);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.list(params));
+      }
+    },
+
+    async get(id: string) {
+      try {
+        return await apiClient.assets.get(id);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.get(id));
+      }
+    },
+
+    async create(data: Parameters<typeof apiClient.assets.create>[0]) {
+      try {
+        return await apiClient.assets.create(data);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.create(data));
+      }
+    },
+
+    async update(id: string, data: Parameters<typeof apiClient.assets.update>[1]) {
+      try {
+        return await apiClient.assets.update(id, data);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.update(id, data));
+      }
+    },
+
+    async delete(id: string) {
+      try {
+        return await apiClient.assets.delete(id);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.delete(id));
+      }
+    },
+
+    async changeStatus(id: string, status: Parameters<typeof apiClient.assets.changeStatus>[1], reason?: string) {
+      try {
+        return await apiClient.assets.changeStatus(id, status, reason);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.changeStatus(id, status, reason));
+      }
+    },
+
+    async history(id: string, params?: Parameters<typeof apiClient.assets.history>[1]) {
+      try {
+        return await apiClient.assets.history(id, params);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.assets.history(id, params));
+      }
+    },
+  },
+
+  /**
+   * Category methods
+   */
+  categories: {
+    async list() {
+      try {
+        return await apiClient.categories.list();
+      } catch (error) {
+        return handleApiError(error, () => apiClient.categories.list());
+      }
+    },
+  },
+
+  /**
+   * Location methods
+   */
+  locations: {
+    async list() {
+      try {
+        return await apiClient.locations.list();
+      } catch (error) {
+        return handleApiError(error, () => apiClient.locations.list());
+      }
+    },
+  },
+
+  /**
+   * User methods
+   */
+  users: {
+    async list(params?: Parameters<typeof apiClient.users.list>[0]) {
+      try {
+        return await apiClient.users.list(params);
+      } catch (error) {
+        return handleApiError(error, () => apiClient.users.list(params));
+      }
+    },
+  },
+
+  /**
+   * Statistics methods
+   */
+  statistics: {
+    async dashboard() {
+      try {
+        return await apiClient.statistics.dashboard();
+      } catch (error) {
+        return handleApiError(error, () => apiClient.statistics.dashboard());
+      }
+    },
   },
 };
 
@@ -328,14 +344,14 @@ export function isAuthenticated(): boolean {
 }
 
 /**
- * Get current API configuration
- */
-export { getApiConfig };
-
-/**
  * Re-export auth storage for convenience
  */
 export { authStorage };
+
+/**
+ * Export API client for direct use if needed
+ */
+export { apiClient, getApiClient };
 
 // Initialize on module load
 initializeApiClient();

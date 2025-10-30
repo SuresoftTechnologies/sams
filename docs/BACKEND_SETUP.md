@@ -1,6 +1,6 @@
 # Backend Setup Guide - FastAPI + Python
 
-Complete guide to setting up and running the SureSoft AMS backend.
+Complete guide to setting up and running the SureSoft SAMS backend.
 
 ## 📋 Prerequisites
 
@@ -91,13 +91,13 @@ python -c "import fastapi; print(fastapi.__version__)"
 psql -U postgres
 
 # In psql prompt:
-CREATE DATABASE ams;
-CREATE USER ams WITH PASSWORD 'ams';
+CREATE DATABASE sams;
+CREATE USER sams WITH PASSWORD 'ams';
 GRANT ALL PRIVILEGES ON DATABASE ams TO ams;
 \q
 
 # Test connection
-psql -U ams -d ams -h localhost
+psql -U sams -d ams -h localhost
 ```
 
 ### 4. Configure Environment
@@ -289,7 +289,7 @@ pnpm db:seed
 
 ```bash
 # Open PostgreSQL shell
-psql -U ams -d ams -h localhost
+psql -U sams -d ams -h localhost
 
 # List tables
 \dt
@@ -398,8 +398,8 @@ psql -U postgres -c "\du"
 
 # Recreate user
 psql -U postgres
-DROP USER IF EXISTS ams;
-CREATE USER ams WITH PASSWORD 'ams';
+DROP USER IF EXISTS sams;
+CREATE USER sams WITH PASSWORD 'ams';
 ```
 
 ### Redis Connection Errors

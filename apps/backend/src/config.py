@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     APP_PORT: int = 8000
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://ams:ams@localhost:5432/ams"
+    DATABASE_URL: str = "postgresql+asyncpg://sams:sams@localhost:5432/sams"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

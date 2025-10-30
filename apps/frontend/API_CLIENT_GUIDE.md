@@ -1,6 +1,6 @@
 # API Client Integration Guide
 
-이 문서는 SureSoft AMS 프론트엔드의 API Client 통합 사용법을 설명합니다.
+이 문서는 SureSoft SAMS 프론트엔드의 API Client 통합 사용법을 설명합니다.
 
 ## 목차
 
@@ -58,7 +58,7 @@ VITE_ENABLE_DEVTOOLS=true
 **프로덕션 환경:**
 ```bash
 # .env.production
-VITE_API_URL=https://api.suresoft-ams.com
+VITE_API_URL=https://api.suresoft-sams.com
 VITE_ENV=production
 VITE_ENABLE_DEVTOOLS=false
 ```
@@ -509,5 +509,5 @@ setApiConfig({
 ---
 
 **생성일**: 2025-10-30
-**작성자**: SureSoft AMS Team
+**작성자**: SureSoft SAMS Team
 **버전**: 1.0.0

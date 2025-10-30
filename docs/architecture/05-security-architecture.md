@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-이 문서는 자산관리 시스템(AMS)의 보안 아키텍처를 설명합니다. 인증/인가, 데이터 보호, 네트워크 보안, 감사 로그, 위협 모델링을 다룹니다.
+이 문서는 자산관리 시스템(SAMS)의 보안 아키텍처를 설명합니다. 인증/인가, 데이터 보호, 네트워크 보안, 감사 로그, 위협 모델링을 다룹니다.
 
 ## 🔐 Authentication & Authorization
 
@@ -423,7 +423,7 @@ app.post('/auth/login', loginLimiter, authController.login);
 # .env.example
 JWT_ACCESS_SECRET=<generate-random-256-bit-secret>
 JWT_REFRESH_SECRET=<generate-random-256-bit-secret>
-DATABASE_URL=postgresql://user:password@localhost:5432/ams
+DATABASE_URL=postgresql://user:password@localhost:5432/sams
 REDIS_URL=redis://localhost:6379
 ENCRYPTION_KEY=<generate-random-256-bit-key>
 ```

@@ -15,7 +15,7 @@ This is a monorepo project using Turborepo, containing:
 - **Shared Packages**: Type-safe API client and shared TypeScript types
 
 ```
-suresoft-ams/
+suresoft-sams/
 ├── apps/
 │   ├── backend/          # FastAPI backend
 │   └── frontend/         # React frontend
@@ -41,7 +41,7 @@ suresoft-ams/
 ```bash
 # Clone repository
 git clone <repository-url>
-cd suresoft-ams
+cd suresoft-sams
 
 # Install dependencies
 pnpm install

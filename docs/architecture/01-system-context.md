@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-이 문서는 C4 모델의 레벨 1인 시스템 컨텍스트를 설명합니다. 자산관리 시스템(AMS)과 외부 시스템, 사용자 간의 상호작용을 고수준에서 보여줍니다.
+이 문서는 C4 모델의 레벨 1인 시스템 컨텍스트를 설명합니다. 자산관리 시스템(SAMS)과 외부 시스템, 사용자 간의 상호작용을 고수준에서 보여줍니다.
 
 ## 🎭 Actors (사용자 및 외부 시스템)
 
@@ -54,7 +54,7 @@
   - 직원 기본 정보 (이름, 부서, 직급)
   - 입사/퇴사 정보
   - 조직도 정보
-- **연동 방식**: REST API (단방향: HR → AMS)
+- **연동 방식**: REST API (단방향: HR → SAMS)
 - **연동 주기**: 일 1회 배치 + 실시간 이벤트
 
 #### 2. 구매 시스템 (Procurement System)
@@ -64,7 +64,7 @@
   - 세금계산서 정보
   - 공급업체 정보
   - 구매 금액 및 날짜
-- **연동 방식**: REST API (단방향: 구매 → AMS)
+- **연동 방식**: REST API (단방향: 구매 → SAMS)
 - **연동 주기**: 실시간 또는 일 1회
 
 #### 3. Email 시스템 (SMTP Server)
@@ -113,25 +113,25 @@ graph TB
         MOBILE[모바일 디바이스<br/>Mobile Device]
     end
 
-    subgraph "SureSoft AMS"
-        AMS[Asset Management<br/>System<br/>자산관리 시스템]
+    subgraph "SureSoft SAMS"
+        SAMS[Asset Management<br/>System<br/>자산관리 시스템]
     end
 
-    EMP -->|자산 조회, 반출/반납 요청| AMS
-    MGR -->|자산 관리, 승인 처리| AMS
-    ADMIN -->|시스템 관리, 권한 설정| AMS
-    MOBILE -->|QR 스캔, 모바일 접근| AMS
+    EMP -->|자산 조회, 반출/반납 요청| SAMS
+    MGR -->|자산 관리, 승인 처리| SAMS
+    ADMIN -->|시스템 관리, 권한 설정| SAMS
+    MOBILE -->|QR 스캔, 모바일 접근| SAMS
 
-    HR -->|직원 정보 동기화| AMS
-    PROC -->|구매 정보 전송| AMS
-    AMS -->|알림 이메일 발송| EMAIL
-    SSO -.->|인증 위임<br/>(Optional)| AMS
+    HR -->|직원 정보 동기화| SAMS
+    PROC -->|구매 정보 전송| SAMS
+    SAMS -->|알림 이메일 발송| EMAIL
+    SSO -.->|인증 위임<br/>(Optional)| SAMS
 
     classDef systemStyle fill:#1168bd,stroke:#0b4884,color:#ffffff
     classDef userStyle fill:#08427b,stroke:#052e56,color:#ffffff
     classDef externalStyle fill:#999999,stroke:#6b6b6b,color:#ffffff
 
-    class AMS systemStyle
+    class SAMS systemStyle
     class EMP,MGR,ADMIN,MOBILE userStyle
     class HR,PROC,EMAIL,SSO externalStyle
 ```
@@ -142,37 +142,37 @@ graph TB
 ```mermaid
 sequenceDiagram
     actor Employee as 직원
-    participant AMS as AMS 시스템
+    participant SAMS as SAMS 시스템
     participant DB as Database
 
     Employee->>AMS: 로그인
-    AMS->>DB: 사용자 인증
+    SAMS->>DB: 사용자 인증
     DB-->>AMS: 인증 성공
-    AMS-->>Employee: 대시보드 표시
+    SAMS-->>Employee: 대시보드 표시
 
     Employee->>AMS: 내 자산 조회
-    AMS->>DB: 자산 목록 조회
+    SAMS->>DB: 자산 목록 조회
     DB-->>AMS: 자산 데이터
-    AMS-->>Employee: 자산 목록 표시
+    SAMS-->>Employee: 자산 목록 표시
 ```
 
 ### 2. 자산 반출 요청 프로세스
 ```mermaid
 sequenceDiagram
     actor Employee as 직원
-    participant AMS as AMS 시스템
+    participant SAMS as SAMS 시스템
     participant Manager as 자산 담당자
     participant Email as Email 서버
 
     Employee->>AMS: 자산 반출 요청
-    AMS->>AMS: 요청 저장 (대기 상태)
-    AMS->>Email: 담당자에게 알림 이메일
+    SAMS->>AMS: 요청 저장 (대기 상태)
+    SAMS->>Email: 담당자에게 알림 이메일
     Email-->>Manager: 승인 요청 이메일
 
     Manager->>AMS: 로그인 및 요청 확인
     Manager->>AMS: 승인 또는 거부
-    AMS->>AMS: 상태 업데이트
-    AMS->>Email: 결과 알림 이메일
+    SAMS->>AMS: 상태 업데이트
+    SAMS->>Email: 결과 알림 이메일
     Email-->>Employee: 승인/거부 통지
 ```
 
@@ -180,19 +180,19 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant HR as HR 시스템
-    participant AMS as AMS 시스템
+    participant SAMS as SAMS 시스템
     participant DB as Database
 
     Note over HR,AMS: 일 1회 배치 또는 실시간 이벤트
 
     HR->>AMS: 직원 정보 동기화 요청
-    AMS->>AMS: 데이터 검증
-    AMS->>DB: 직원 정보 업데이트
+    SAMS->>AMS: 데이터 검증
+    SAMS->>DB: 직원 정보 업데이트
     DB-->>AMS: 업데이트 성공
-    AMS-->>HR: 동기화 완료 응답
+    SAMS-->>HR: 동기화 완료 응답
 
-    Note over AMS: 신규 입사자 감지 시
-    AMS->>AMS: 신규 사용자 계정 생성
+    Note over SAMS: 신규 입사자 감지 시
+    SAMS->>AMS: 신규 사용자 계정 생성
 ```
 
 ### 4. QR코드 스캔 프로세스 (모바일 - MVP)
@@ -201,23 +201,23 @@ sequenceDiagram
 sequenceDiagram
     actor User as 사용자
     participant Mobile as 모바일 앱
-    participant AMS as AMS 시스템
+    participant SAMS as SAMS 시스템
     participant DB as Database
 
     User->>Mobile: QR코드 스캔 (대여/반납용)
     Mobile->>Mobile: QR 디코딩
     Note over Mobile: 결과: "14-2022-23"
     Mobile->>AMS: GET /api/assets/by-number/14-2022-23
-    AMS->>DB: asset_number로 자산 조회
+    SAMS->>DB: asset_number로 자산 조회
     DB-->>AMS: 자산 상세 정보
-    AMS-->>Mobile: 자산 정보 반환
+    SAMS-->>Mobile: 자산 정보 반환
     Mobile-->>User: 대여/반납 화면 표시
     
     User->>Mobile: "대여" 버튼 클릭
     Mobile->>AMS: POST /api/workflows/checkout
-    AMS->>DB: 대여 요청 생성
+    SAMS->>DB: 대여 요청 생성
     DB-->>AMS: 성공
-    AMS-->>Mobile: 요청 완료
+    SAMS-->>Mobile: 요청 완료
     Mobile-->>User: "대여 요청이 제출되었습니다"
 ```
 
@@ -263,8 +263,8 @@ sequenceDiagram
 ### Level 3: Application Zone
 - 내부 네트워크, 애플리케이션 서버 영역
 - **포함 요소**:
-  - AMS 웹 서버
-  - AMS API 서버
+  - SAMS 웹 서버
+  - SAMS API 서버
   - Redis 캐시
 
 ### Level 4: Data Zone

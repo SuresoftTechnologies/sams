@@ -34,33 +34,8 @@ class Asset(BaseModel):
     Asset model - matches @sams/shared-types Asset interface.
     """
 
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str = Field(..., description="Unique asset ID (UUID)")
-    asset_tag: str = Field(..., description="Asset tag (e.g., SRS-11-2024-0001)")
-    name: str = Field(..., description="Asset name")
-    status: AssetStatus = Field(default=AssetStatus.AVAILABLE, description="Current status")
-
-    # Relations
-    category_id: str = Field(..., description="Category ID")
-    location_id: str | None = Field(None, description="Location ID")
-    assigned_to: str | None = Field(None, description="User ID of assignee")
-
-    # Purchase info
-    purchase_date: datetime | None = Field(None, description="Purchase date")
-    purchase_price: Decimal | None = Field(None, description="Purchase price")
-    warranty_end: datetime | None = Field(None, description="Warranty end date")
-
-    # Metadata
-    grade: AssetGrade | None = Field(None, description="Asset grade (A/B/C)")
-    notes: str | None = Field(None, description="Additional notes")
-    qr_code_url: str | None = Field(None, description="QR code image URL")
-
-    # Timestamps
-    created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
-
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             "example": {
                 "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -78,6 +53,38 @@ class Asset(BaseModel):
             }
         }
     )
+
+    id: str = Field(..., description="Unique asset ID (UUID)")
+    asset_tag: str = Field(..., description="Asset tag (e.g., SRS-11-2024-0001)")
+    name: str = Field(..., description="Asset name")
+    model: str | None = Field(None, description="Asset model")
+    serial_number: str | None = Field(None, description="Serial number")
+    manufacturer: str | None = Field(None, description="Manufacturer")
+    status: AssetStatus = Field(default=AssetStatus.AVAILABLE, description="Current status")
+
+    # Relations
+    category_id: str = Field(..., description="Category ID")
+    location_id: str | None = Field(None, description="Location ID")
+    assigned_to: str | None = Field(None, description="User ID of assignee")
+
+    # Purchase info
+    purchase_date: datetime | None = Field(None, description="Purchase date")
+    purchase_price: Decimal | None = Field(None, description="Purchase price")
+    supplier: str | None = Field(None, description="Supplier")
+    warranty_end: datetime | None = Field(None, description="Warranty end date")
+
+    # QR Code
+    qr_code: str | None = Field(None, description="QR code URL or Base64")
+
+    # Metadata
+    grade: AssetGrade | None = Field(None, description="Asset grade (A/B/C)")
+    description: str | None = Field(None, description="Asset description")
+    notes: str | None = Field(None, description="Additional notes")
+    specifications: str | None = Field(None, description="Technical specifications (JSON)")
+
+    # Timestamps
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
 
 
 class CreateAssetRequest(BaseModel):

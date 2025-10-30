@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-이 문서는 SureSoft AMS 프로젝트의 문서화 자동화 및 유지보수 절차를 설명합니다.
+이 문서는 SureSoft SAMS 프로젝트의 문서화 자동화 및 유지보수 절차를 설명합니다.
 
 ## 🎯 Documentation Strategy
 
@@ -31,7 +31,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('SureSoft AMS API')
+    .setTitle('SureSoft SSAMS API')
     .setDescription('Asset Management System API Documentation')
     .setVersion('1.0')
     .addBearerAuth()

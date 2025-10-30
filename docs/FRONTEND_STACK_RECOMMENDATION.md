@@ -560,7 +560,7 @@ apps/frontend/
 
 ### 1. 프론트엔드 앱 생성
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 
 # Vite 프로젝트 초기화 (이미 있다면 스킵)
 pnpm create vite . --template react-ts
@@ -643,7 +643,7 @@ export const apiClient = {
 
 ### 1. 백엔드 OpenAPI 생성
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams
+cd /Users/chsong/Documents/my-projects/suresoft-sams
 pnpm --filter @sams/backend generate:openapi
 ```
 

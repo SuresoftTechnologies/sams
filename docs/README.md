@@ -166,10 +166,10 @@ clsx + tailwind-merge
 
 ```bash
 # 1. 프론트엔드 디렉토리로 이동
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 
 # 2. package.json 복사
-cp /Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json package.json
+cp /Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-package.json package.json
 
 # 3. 의존성 설치
 pnpm install
@@ -237,7 +237,7 @@ Total: ~250KB (gzipped)
 
 ### 1. 백엔드 API 먼저 개발
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/backend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/backend
 pnpm dev
 ```
 

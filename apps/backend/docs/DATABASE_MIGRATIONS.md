@@ -1,6 +1,6 @@
 # Database Migrations Guide
 
-This guide explains how to manage database schema changes using Alembic in the SureSoft AMS backend.
+This guide explains how to manage database schema changes using Alembic in the SureSoft SAMS backend.
 
 ## Table of Contents
 
@@ -28,7 +28,7 @@ The project uses Alembic for database migrations with async SQLAlchemy support. 
 Ensure your `.env` file has the correct database URL:
 
 ```bash
-DATABASE_URL=postgresql+asyncpg://ams:ams@localhost:5432/ams
+DATABASE_URL=postgresql+asyncpg://sams:sams@localhost:5432/sams
 ```
 
 ### 2. Install Dependencies

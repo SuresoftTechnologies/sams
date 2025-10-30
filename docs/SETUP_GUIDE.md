@@ -1,4 +1,4 @@
-# SureSoft AMS - Setup Guide
+# SureSoft SAMS - Setup Guide
 
 ## 📋 Overview
 
@@ -15,7 +15,7 @@ npx create-turbo@latest
 ```
 
 프롬프트에서:
-- **Project name**: `suresoft-ams`
+- **Project name**: `suresoft-sams`
 - **Package manager**: `pnpm`
 
 ### Option 2: 기존 프로젝트를 Turborepo로 변환
@@ -245,7 +245,7 @@ mkdir -p packages/database/prisma
 
 ```toml
 [project]
-name = "ams-backend"
+name = "sams-backend"
 version = "1.0.0"
 requires-python = ">=3.12"
 dependencies = [

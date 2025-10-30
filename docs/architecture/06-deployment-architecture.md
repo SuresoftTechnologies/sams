@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-이 문서는 자산관리 시스템(AMS)의 배포 아키텍처를 설명합니다. 개발, 스테이징, 프로덕션 환경의 인프라, CI/CD 파이프라인, 모니터링 전략을 다룹니다.
+이 문서는 자산관리 시스템(SAMS)의 배포 아키텍처를 설명합니다. 개발, 스테이징, 프로덕션 환경의 인프라, CI/CD 파이프라인, 모니터링 전략을 다룹니다.
 
 ## 🏗️ Environment Strategy
 
@@ -48,7 +48,7 @@ services:
       - "4000:4000"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://ams:password@postgres:5432/ams
+      - DATABASE_URL=postgresql://ams:password@postgres:5432/sams
       - REDIS_URL=redis://redis:6379
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
@@ -67,7 +67,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://ams:password@postgres:5432/ams
+      - DATABASE_URL=postgresql://ams:password@postgres:5432/sams
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
@@ -80,9 +80,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=ams
+      - POSTGRES_USER=sams
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=ams
+      - POSTGRES_DB=sams
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -253,21 +253,21 @@ graph TB
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ams-api
-  namespace: ams
+  name: sams-api
+  namespace: sams
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: ams-api
+      app: sams-api
   template:
     metadata:
       labels:
-        app: ams-api
+        app: sams-api
     spec:
       containers:
       - name: api
-        image: ams-api:latest
+        image: sams-api:latest
         ports:
         - containerPort: 4000
         env:
@@ -276,17 +276,17 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: ams-secrets
+              name: sams-secrets
               key: database-url
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
-              name: ams-secrets
+              name: sams-secrets
               key: redis-url
         - name: JWT_ACCESS_SECRET
           valueFrom:
             secretKeyRef:
-              name: ams-secrets
+              name: sams-secrets
               key: jwt-access-secret
         resources:
           requests:
@@ -311,11 +311,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ams-api-service
-  namespace: ams
+  name: ssams-api-service
+  namespace: sams
 spec:
   selector:
-    app: ams-api
+    app: sams-api
   ports:
   - protocol: TCP
     port: 4000
@@ -330,7 +330,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: ams
+  namespace: sams
 spec:
   serviceName: postgres
   replicas: 3
@@ -387,8 +387,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ams-ingress
-  namespace: ams
+  name: sams-ingress
+  namespace: sams
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -397,24 +397,24 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - ams.suresoft.com
-    secretName: ams-tls
+    - sams.suresoft.com
+    secretName: sams-tls
   rules:
-  - host: ams.suresoft.com
+  - host: sams.suresoft.com
     http:
       paths:
       - path: /api
         pathType: Prefix
         backend:
           service:
-            name: ams-api-service
+            name: ssams-api-service
             port:
               number: 4000
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: ams-web-service
+            name: ssams-web-service
             port:
               number: 80
 ```
@@ -425,13 +425,13 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: ams-api-hpa
-  namespace: ams
+  name: ssams-api-hpa
+  namespace: sams
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: ams-api
+    name: sams-api
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -526,8 +526,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ghcr.io/suresoft/ams-api:latest
-            ghcr.io/suresoft/ams-api:${{ github.sha }}
+            ghcr.io/suresoft/sams-api:latest
+            ghcr.io/suresoft/sams-api:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -537,8 +537,8 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ghcr.io/suresoft/ams-web:latest
-            ghcr.io/suresoft/ams-web:${{ github.sha }}
+            ghcr.io/suresoft/sams-web:latest
+            ghcr.io/suresoft/sams-web:${{ github.sha }}
 
   # Kubernetes 배포
   deploy:
@@ -558,21 +558,21 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/ams-api \
-            api=ghcr.io/suresoft/ams-api:${{ github.sha }} \
-            -n ams
-          kubectl set image deployment/ams-web \
-            web=ghcr.io/suresoft/ams-web:${{ github.sha }} \
-            -n ams
+          kubectl set image deployment/sams-api \
+            api=ghcr.io/suresoft/sams-api:${{ github.sha }} \
+            -n sams
+          kubectl set image deployment/sams-web \
+            web=ghcr.io/suresoft/sams-web:${{ github.sha }} \
+            -n sams
 
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/ams-api -n ams
-          kubectl rollout status deployment/ams-web -n ams
+          kubectl rollout status deployment/sams-api -n sams
+          kubectl rollout status deployment/sams-web -n sams
 
       - name: Run smoke tests
         run: |
-          curl -f https://ams.suresoft.com/health || exit 1
+          curl -f https://sams.suresoft.com/health || exit 1
 ```
 
 ### Deployment Strategy
@@ -580,16 +580,16 @@ jobs:
 #### Blue-Green Deployment
 ```yaml
 # 현재 프로덕션 (Green)
-kubectl get svc ams-api-service -o yaml
+kubectl get svc ssams-api-service -o yaml
 
 # 새 버전 배포 (Blue)
-kubectl apply -f ams-api-blue-deployment.yaml
+kubectl apply -f ssams-api-blue-deployment.yaml
 
 # 트래픽 전환
-kubectl patch svc ams-api-service -p '{"spec":{"selector":{"version":"blue"}}}'
+kubectl patch svc ssams-api-service -p '{"spec":{"selector":{"version":"blue"}}}'
 
 # 이전 버전 (Green) 삭제
-kubectl delete deployment ams-api-green
+kubectl delete deployment ssams-api-green
 ```
 
 #### Canary Deployment
@@ -598,10 +598,10 @@ kubectl delete deployment ams-api-green
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: ams-api
+  name: sams-api
 spec:
   hosts:
-  - ams-api-service
+  - ssams-api-service
   http:
   - match:
     - headers:
@@ -609,15 +609,15 @@ spec:
           exact: "true"
     route:
     - destination:
-        host: ams-api-service
+        host: ssams-api-service
         subset: v2
   - route:
     - destination:
-        host: ams-api-service
+        host: ssams-api-service
         subset: v1
       weight: 90
     - destination:
-        host: ams-api-service
+        host: ssams-api-service
         subset: v2
       weight: 10
 ```
@@ -739,14 +739,14 @@ groups:
 
 ```bash
 # Create secrets
-kubectl create secret generic ams-secrets \
+kubectl create secret generic sams-secrets \
   --from-literal=database-url='postgresql://...' \
   --from-literal=redis-url='redis://...' \
   --from-literal=jwt-access-secret='...' \
-  -n ams
+  -n sams
 
 # Seal secrets (for GitOps)
-kubeseal --format=yaml < ams-secrets.yaml > ams-sealed-secrets.yaml
+kubeseal --format=yaml < sams-secrets.yaml > sams-sealed-secrets.yaml
 ```
 
 ### External Secrets Operator (Recommended)
@@ -755,22 +755,22 @@ kubeseal --format=yaml < ams-secrets.yaml > ams-sealed-secrets.yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: ams-secrets
-  namespace: ams
+  name: sams-secrets
+  namespace: sams
 spec:
   refreshInterval: 1h
   secretStoreRef:
     name: vault-backend
     kind: SecretStore
   target:
-    name: ams-secrets
+    name: sams-secrets
   data:
   - secretKey: database-url
     remoteRef:
-      key: ams/production/database-url
+      key: sams/production/database-url
   - secretKey: jwt-access-secret
     remoteRef:
-      key: ams/production/jwt-access-secret
+      key: sams/production/jwt-access-secret
 ```
 
 ## 📈 Scaling Strategy

@@ -103,7 +103,7 @@ Total: ~250KB (gzipped)
 
 ### 1. 의존성 설치
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend
 pnpm install
 ```
 
@@ -241,6 +241,6 @@ shadcn/ui는 Radix UI 기반이므로 다음이 자동으로 보장됩니다:
 
 ---
 
-**상세 문서**: `/Users/chsong/Documents/my-projects/suresoft-ams/docs/FRONTEND_STACK_RECOMMENDATION.md`
+**상세 문서**: `/Users/chsong/Documents/my-projects/suresoft-sams/docs/FRONTEND_STACK_RECOMMENDATION.md`
 
-**package.json**: `/Users/chsong/Documents/my-projects/suresoft-ams/docs/frontend-package.json`
+**package.json**: `/Users/chsong/Documents/my-projects/suresoft-sams/docs/frontend-package.json`

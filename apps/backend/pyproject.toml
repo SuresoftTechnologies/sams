@@ -1,5 +1,5 @@
 [project]
-name = "ams-backend"
+name = "sams-backend"
 version = "1.0.0"
 description = "SureSoft Asset Management System - Backend API"
 readme = "README.md"

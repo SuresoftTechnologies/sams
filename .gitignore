@@ -106,7 +106,10 @@ openapi.yaml
 # Cache
 .cache/
 .parcel-cache/
-.next/
+.turbo/
+.claude/
+.DS_Store
+.serena/
 out/
 
 # Lock files (keep pnpm-lock.yaml, ignore others)

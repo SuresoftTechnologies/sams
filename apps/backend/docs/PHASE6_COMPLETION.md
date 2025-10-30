@@ -2,7 +2,7 @@
 
 ## 개요
 
-SureSoft AMS 백엔드의 Phase 6 인증 및 보안 기능이 성공적으로 구현되었습니다.
+SureSoft SAMS 백엔드의 Phase 6 인증 및 보안 기능이 성공적으로 구현되었습니다.
 
 **완료일**: 2025-10-30
 **구현 범위**: JWT 기반 인증, 비밀번호 보안, 역할 기반 접근 제어 (RBAC)
@@ -212,7 +212,7 @@ python scripts/create_test_user.py
 
 ### 1. 테스트 사용자 생성
 ```bash
-cd /Users/chsong/Documents/my-projects/suresoft-ams/apps/backend
+cd /Users/chsong/Documents/my-projects/suresoft-sams/apps/backend
 python scripts/create_test_user.py
 ```
 

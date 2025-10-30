@@ -14,7 +14,7 @@ Successfully completed Phase 10 (데이터베이스 마이그레이션) of the B
    - Configured file naming template with timestamps: `YYYYMMDD_HHMM-{rev}_{slug}`
    - Disabled hardcoded database URL (uses environment variables)
    - Added Ruff post-write hook for automatic formatting
-   - Location: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/backend/alembic.ini`
+   - Location: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/backend/alembic.ini`
 
 2. **`alembic/env.py`** - Environment configuration
    - Async SQLAlchemy support using `async_engine_from_config`
@@ -22,7 +22,7 @@ Successfully completed Phase 10 (데이터베이스 마이그레이션) of the B
    - Database URL from `src.config.settings`
    - Type and server default comparison enabled
    - Both online and offline migration modes supported
-   - Location: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/backend/alembic/env.py`
+   - Location: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/backend/alembic/env.py`
 
 #### Key Features
 
@@ -322,9 +322,9 @@ To actually apply these migrations and test the seeding:
 
 2. **Create Database** (if not exists):
    ```bash
-   createdb ams
+   createdb sams
    # or
-   psql -U postgres -c "CREATE DATABASE ams;"
+   psql -U postgres -c "CREATE DATABASE sams;"
    ```
 
 3. **Apply Migrations**:
@@ -340,7 +340,7 @@ To actually apply these migrations and test the seeding:
 5. **Verify**:
    ```bash
    # Connect to database
-   psql -U ams -d ams
+   psql -U sams -d ams
 
    # Check tables
    \dt
@@ -370,8 +370,8 @@ To actually apply these migrations and test the seeding:
 ### Database Connection Issues
 If you encounter connection errors, ensure:
 - PostgreSQL is running
-- Database `ams` exists
-- User `ams` has proper permissions
+- Database `sams` exists
+- User `sams` has proper permissions
 - DATABASE_URL in `.env` is correct
 
 ### CORS_ORIGINS Error

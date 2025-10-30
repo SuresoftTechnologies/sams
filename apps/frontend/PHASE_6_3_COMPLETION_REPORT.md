@@ -1,7 +1,7 @@
 # Phase 6.3: API Client 통합 - 완료 보고서
 
 **작업 일시**: 2025-10-30
-**작업 위치**: `/Users/chsong/Documents/my-projects/suresoft-ams/apps/frontend`
+**작업 위치**: `/Users/chsong/Documents/my-projects/suresoft-sams/apps/frontend`
 **작업자**: Frontend Developer
 
 ---
@@ -473,5 +473,5 @@ Phase 6.3 (API Client 통합) 작업이 **100% 완료**되었습니다.
 ---
 
 **작성일**: 2025-10-30
-**프로젝트**: SureSoft AMS (Asset Management System)
+**프로젝트**: SureSoft SSAMS (Suresoft Asset Management System)
 **Phase**: 6.3 - API Client Integration ✅

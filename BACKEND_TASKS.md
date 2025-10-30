@@ -1,4 +1,4 @@
-# Backend Setup Tasks - SureSoft AMS
+# Backend Setup Tasks - SureSoft SAMS
 
 백엔드 앱 생성 및 설정 작업 목록
 
@@ -20,7 +20,7 @@
 ### 1.2 pyproject.toml 설정
 - [x] pyproject.toml 생성
 - [x] 프로젝트 메타데이터 설정
-  - [x] name: "ams-backend"
+  - [x] name: "sams-backend"
   - [x] version: "1.0.0"
   - [x] requires-python: ">=3.12"
 - [x] 핵심 의존성 추가
@@ -218,7 +218,7 @@ apps/backend/
 - [x] .env.example 파일 생성
   ```bash
   # Application
-  APP_NAME=SureSoft AMS
+  APP_NAME=SureSoft SAMS
   APP_VERSION=1.0.0
   APP_DEBUG=true
   APP_ENVIRONMENT=development
@@ -229,7 +229,7 @@ apps/backend/
   PORT=8000
 
   # Database
-  DATABASE_URL=postgresql://ams:ams@localhost:5432/ams
+  DATABASE_URL=postgresql://sams:sams@localhost:5432/sams
 
   # Redis
   REDIS_URL=redis://localhost:6379/0
@@ -255,7 +255,7 @@ apps/backend/
   MINIO_URL=http://localhost:9000
   MINIO_ACCESS_KEY=minioadmin
   MINIO_SECRET_KEY=minioadmin
-  MINIO_BUCKET=ams-assets
+  MINIO_BUCKET=sams-assets
   ```
 
 ---
@@ -270,7 +270,7 @@ apps/backend/
   from pydantic_settings import BaseSettings
 
   class Settings(BaseSettings):
-      app_name: str = "SureSoft AMS"
+      app_name: str = "SureSoft SAMS"
       app_version: str = "1.0.0"
       debug: bool = False
 
@@ -913,7 +913,7 @@ apps/backend/
       ports:
         - "8000:8000"
       environment:
-        - DATABASE_URL=postgresql://ams:ams@postgres:5432/ams
+        - DATABASE_URL=postgresql://sams:sams@postgres:5432/sams
         - REDIS_URL=redis://redis:6379/0
       depends_on:
         - postgres
@@ -922,9 +922,9 @@ apps/backend/
     postgres:
       image: postgres:15
       environment:
-        POSTGRES_USER: ams
-        POSTGRES_PASSWORD: ams
-        POSTGRES_DB: ams
+        POSTGRES_USER: sams
+        POSTGRES_PASSWORD: sams
+        POSTGRES_DB: sams
       ports:
         - "5432:5432"
       volumes:
@@ -1077,5 +1077,5 @@ apps/backend/
 **우선순위**: Phase 1-8 필수, Phase 9-17 단계적 진행
 
 **생성일**: 2025-10-29
-**프로젝트**: SureSoft AMS (슈커톤 해커톤)
+**프로젝트**: SureSoft SAMS (슈커톤 해커톤)
 **기술 스택**: Python 3.12 + FastAPI + PostgreSQL + Redis + SQLAlchemy + uv

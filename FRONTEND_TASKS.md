@@ -1,4 +1,4 @@
-# Frontend Setup Tasks - SureSoft AMS
+# Frontend Setup Tasks - SureSoft SAMS
 
 프론트엔드 앱 생성 및 설정 작업 목록
 
@@ -415,4 +415,4 @@ src/
 **우선순위**: Phase 1-7 필수, Phase 8-13 단계적 진행
 
 **생성일**: 2025-10-29
-**프로젝트**: SureSoft AMS (슈커톤 해커톤)
+**프로젝트**: SureSoft SAMS (슈커톤 해커톤)

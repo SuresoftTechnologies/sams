@@ -1,6 +1,6 @@
 # Backend Setup Guide - FastAPI + Python (uv)
 
-Complete guide to setting up the SureSoft AMS backend with **uv** - the blazing fast Python package manager.
+Complete guide to setting up the SureSoft SAMS backend with **uv** - the blazing fast Python package manager.
 
 ## 📋 Prerequisites
 
@@ -84,8 +84,8 @@ uv sync
 psql -U postgres
 
 # In psql prompt:
-CREATE DATABASE ams;
-CREATE USER ams WITH PASSWORD 'ams';
+CREATE DATABASE sams;
+CREATE USER sams WITH PASSWORD 'ams';
 GRANT ALL PRIVILEGES ON DATABASE ams TO ams;
 \q
 ```
@@ -312,7 +312,7 @@ apps/backend/
 
 ```toml
 [project]
-name = "ams-backend"
+name = "sams-backend"
 version = "1.0.0"
 requires-python = ">=3.12"
 dependencies = [

@@ -72,7 +72,7 @@ export default function Header() {
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <img src="/logo.png" alt="SureSoft" className="h-6 w-auto" />
-                <span>AMS</span>
+                <span>SAMS</span>
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-3 mt-6">

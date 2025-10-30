@@ -1,6 +1,6 @@
 # Authentication & Security Implementation
 
-This document describes the authentication and security implementation for SureSoft AMS Backend.
+This document describes the authentication and security implementation for SureSoft SAMS Backend.
 
 ## Overview
 
