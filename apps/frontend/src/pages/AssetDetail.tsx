@@ -234,7 +234,7 @@ export default function AssetDetail() {
                     <p className="text-sm font-medium text-muted-foreground">현 사용자</p>
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-base">{asset.assigned_to || '미지정'}</p>
+                      <p className="text-base">{asset.assigned_user_name || '미지정'}</p>
                     </div>
                   </div>
                 </div>

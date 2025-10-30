@@ -10,7 +10,8 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  FileText
+  FileText,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,11 +50,14 @@ const statusIcons = {
   completed: <CheckCircle className="h-4 w-4" />,
 };
 
-const typeLabels = {
-  checkout: '대여',
-  checkin: '반납',
+const typeLabels: Record<string, string> = {
+  checkout: '반출',
+  checkin: '반입',
   transfer: '이관',
   maintenance: '유지보수',
+  rental: '대여',
+  return: '반납',
+  disposal: '불용처리',
 };
 
 export default function RequestsPage() {
@@ -135,6 +139,10 @@ export default function RequestsPage() {
           <Badge variant="secondary">
             전체 {pagination.total}건
           </Badge>
+          <Button onClick={() => navigate('/requests/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            신청하기
+          </Button>
         </div>
       </div>
 

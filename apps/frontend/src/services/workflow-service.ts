@@ -40,7 +40,7 @@ export interface WorkflowPaginatedResponse<T> {
   limit: number;
 }
 
-export type WorkflowType = 'checkout' | 'checkin' | 'transfer' | 'maintenance';
+export type WorkflowType = 'checkout' | 'checkin' | 'transfer' | 'maintenance' | 'rental' | 'return' | 'disposal';
 export type WorkflowStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'completed';
 
 export interface User {
@@ -105,6 +105,25 @@ interface WorkflowFilters {
   limit?: number;
   workflow_type?: WorkflowType;
   status?: WorkflowStatus;
+}
+
+export interface CreateWorkflowRequest {
+  type: WorkflowType;
+  asset_id: string;
+  reason?: string;
+  expected_return_date?: string;
+}
+
+export interface CreateCheckoutRequest {
+  asset_id: string;
+  assignee_id?: string;
+  reason?: string;
+  expected_return_date?: string;
+}
+
+export interface CreateCheckinRequest {
+  asset_id: string;
+  reason?: string;
 }
 
 class WorkflowService {
@@ -214,6 +233,36 @@ class WorkflowService {
   async cancelWorkflow(workflowId: string): Promise<Workflow> {
     return fetchWithAuth(`/api/v1/workflows/${workflowId}/cancel`, {
       method: 'POST',
+    });
+  }
+
+  /**
+   * Create a new workflow request
+   */
+  async createWorkflow(data: CreateWorkflowRequest): Promise<Workflow> {
+    return fetchWithAuth('/api/v1/workflows', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Create a checkout workflow
+   */
+  async createCheckout(data: CreateCheckoutRequest): Promise<Workflow> {
+    return fetchWithAuth('/api/v1/workflows/checkout', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  /**
+   * Create a checkin workflow
+   */
+  async createCheckin(data: CreateCheckinRequest): Promise<Workflow> {
+    return fetchWithAuth('/api/v1/workflows/checkin', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 }

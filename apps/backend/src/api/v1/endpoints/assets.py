@@ -67,9 +67,15 @@ async def get_assets(
     """
     # Build query with joins - exclude soft-deleted assets
     query = (
-        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        select(
+            AssetModel,
+            Category.name.label("category_name"),
+            Location.name.label("location_name"),
+            UserModel.name.label("assigned_user_name"),
+        )
         .outerjoin(Category, AssetModel.category_id == Category.id)
         .outerjoin(Location, AssetModel.location_id == Location.id)
+        .outerjoin(UserModel, AssetModel.assigned_to == UserModel.id)
         .where(AssetModel.deleted_at.is_(None))
     )
 
@@ -135,10 +141,12 @@ async def get_assets(
         asset_model = row[0]
         category_name = row[1]
         location_name = row[2]
+        assigned_user_name = row[3]
 
         asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
         asset_dict["category_name"] = category_name
         asset_dict["location_name"] = location_name
+        asset_dict["assigned_user_name"] = assigned_user_name
         items.append(Asset(**asset_dict))
 
     return PaginatedResponse(
@@ -177,9 +185,15 @@ async def get_asset_by_number(
         GET /api/v1/assets/by-number/14-2022-23
     """
     result = await db.execute(
-        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        select(
+            AssetModel,
+            Category.name.label("category_name"),
+            Location.name.label("location_name"),
+            UserModel.name.label("assigned_user_name"),
+        )
         .outerjoin(Category, AssetModel.category_id == Category.id)
         .outerjoin(Location, AssetModel.location_id == Location.id)
+        .outerjoin(UserModel, AssetModel.assigned_to == UserModel.id)
         .where(
             and_(
                 AssetModel.asset_tag == asset_number,
@@ -199,10 +213,12 @@ async def get_asset_by_number(
     asset_model = row[0]
     category_name = row[1]
     location_name = row[2]
+    assigned_user_name = row[3]
 
     asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
     asset_dict["category_name"] = category_name
     asset_dict["location_name"] = location_name
+    asset_dict["assigned_user_name"] = assigned_user_name
 
     return Asset(**asset_dict)
 
@@ -228,9 +244,15 @@ async def get_asset(
         HTTPException: 404 if asset not found
     """
     result = await db.execute(
-        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        select(
+            AssetModel,
+            Category.name.label("category_name"),
+            Location.name.label("location_name"),
+            UserModel.name.label("assigned_user_name"),
+        )
         .outerjoin(Category, AssetModel.category_id == Category.id)
         .outerjoin(Location, AssetModel.location_id == Location.id)
+        .outerjoin(UserModel, AssetModel.assigned_to == UserModel.id)
         .where(
             and_(
                 AssetModel.id == asset_id,
@@ -250,10 +272,12 @@ async def get_asset(
     asset_model = row[0]
     category_name = row[1]
     location_name = row[2]
+    assigned_user_name = row[3]
 
     asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
     asset_dict["category_name"] = category_name
     asset_dict["location_name"] = location_name
+    asset_dict["assigned_user_name"] = assigned_user_name
 
     return Asset(**asset_dict)
 

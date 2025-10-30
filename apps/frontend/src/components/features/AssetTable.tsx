@@ -340,9 +340,9 @@ export function AssetTable({
                       {getStatusLabel(asset.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="max-w-0 truncate" title={asset.assigned_to || undefined}>
-                    {asset.assigned_to ? (
-                      <span className="text-sm">{asset.assigned_to}</span>
+                  <TableCell className="max-w-0 truncate" title={asset.assigned_user_name || undefined}>
+                    {asset.assigned_user_name ? (
+                      <span className="text-sm">{asset.assigned_user_name}</span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}

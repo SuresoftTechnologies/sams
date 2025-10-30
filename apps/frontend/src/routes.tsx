@@ -10,6 +10,8 @@ import AssetForm from './pages/AssetForm';
 import Profile from './pages/Profile';
 import RequestsPage from './pages/RequestsPage';
 import RequestDetailPage from './pages/RequestDetailPage';
+import RequestFormPage from './pages/RequestFormPage';
+import WorkflowApprovalsPage from './pages/WorkflowApprovalsPage';
 import { ProtectedRoute, ManagerRoute } from './components/layout/ProtectedRoute';
 
 /**
@@ -103,6 +105,14 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: 'new',
+            element: (
+              <ProtectedRoute>
+                <RequestFormPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
             path: ':id',
             element: (
               <ProtectedRoute>
@@ -111,6 +121,14 @@ export const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      {
+        path: 'workflows',
+        element: (
+          <ManagerRoute>
+            <WorkflowApprovalsPage />
+          </ManagerRoute>
+        ),
       },
       {
         path: 'profile',

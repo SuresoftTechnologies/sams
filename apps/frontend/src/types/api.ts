@@ -29,6 +29,10 @@ export interface Asset {
   category_name?: string;
   location_name?: string;
   assigned_user_name?: string;
+  // User history fields (stored as strings in DB)
+  previous_user_1?: string | null;
+  previous_user_2?: string | null;
+  first_user?: string | null;
 }
 
 export interface AssetCreate {

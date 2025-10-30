@@ -67,6 +67,12 @@ class Asset(BaseModel):
     # Computed fields (joined from relations)
     category_name: str | None = Field(None, description="Category name (from join)")
     location_name: str | None = Field(None, description="Location name (from join)")
+    assigned_user_name: str | None = Field(None, description="Assigned user name (from join)")
+
+    # User history (stored as strings in DB)
+    previous_user_1: str | None = Field(None, description="Previous user 1")
+    previous_user_2: str | None = Field(None, description="Previous user 2")
+    first_user: str | None = Field(None, description="First user")
 
     # Purchase info
     purchase_date: datetime | None = Field(None, description="Purchase date (구매연일)")

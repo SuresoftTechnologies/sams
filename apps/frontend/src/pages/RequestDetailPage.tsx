@@ -45,11 +45,14 @@ const statusIcons = {
   completed: <CheckCircle className="h-5 w-5" />,
 };
 
-const typeLabels = {
-  checkout: '대여',
-  checkin: '반납',
+const typeLabels: Record<string, string> = {
+  checkout: '반출',
+  checkin: '반입',
   transfer: '이관',
   maintenance: '유지보수',
+  rental: '대여',
+  return: '반납',
+  disposal: '불용처리',
 };
 
 export default function RequestDetailPage() {

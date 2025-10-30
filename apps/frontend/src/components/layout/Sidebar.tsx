@@ -54,10 +54,10 @@ const navItems: NavItem[] = [
     requiredRoles: ['employee'],
   },
   {
-    title: 'Workflows',
+    title: '신청 관리',
     href: '/workflows',
     icon: GitPullRequest,
-    disabled: true, // TODO: Implement in Phase 10+
+    disabled: false,
     requiredRoles: ['admin', 'manager'],
   },
   {
