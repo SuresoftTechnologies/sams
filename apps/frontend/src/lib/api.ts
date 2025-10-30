@@ -21,6 +21,7 @@ import {
   getApiConfig,
 } from '@ams/api-client';
 import { authStorage, type TokenResponse } from './auth-storage';
+import { toast } from 'sonner';
 
 /**
  * Flag to prevent infinite token refresh loop
@@ -176,7 +177,35 @@ async function fetchWithErrorHandling<TResponse>(
 
     // Handle 403 Forbidden
     if (error instanceof Response && error.status === 403) {
-      throw new ApiError('Forbidden. You do not have permission.', 403);
+      const apiError = new ApiError('Forbidden. You do not have permission.', 403);
+      toast.error('Access Denied', {
+        description: 'You do not have permission to perform this action.',
+      });
+      throw apiError;
+    }
+
+    // Handle 404 Not Found
+    if (error instanceof Response && error.status === 404) {
+      const apiError = new ApiError('Resource not found', 404);
+      throw apiError;
+    }
+
+    // Handle 500+ Server Errors
+    if (error instanceof Response && error.status >= 500) {
+      const apiError = new ApiError('Server error. Please try again later.', error.status);
+      toast.error('Server Error', {
+        description: 'Something went wrong on our end. Please try again later.',
+      });
+      throw apiError;
+    }
+
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      const apiError = new ApiError('Network error. Please check your connection.');
+      toast.error('Connection Error', {
+        description: 'Unable to connect to the server. Please check your internet connection.',
+      });
+      throw apiError;
     }
 
     // Handle other errors

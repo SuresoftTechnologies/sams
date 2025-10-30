@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import Root from './root';
 import NotFound from './pages/NotFound';
+import ErrorPage from './pages/ErrorPage';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AssetList from './pages/AssetList';
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
-    errorElement: <NotFound />,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
