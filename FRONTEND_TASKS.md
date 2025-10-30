@@ -302,6 +302,14 @@ src/
 
 ## 🎨 Phase 10: 스타일링 & UX
 
+### 10.0 브랜딩 ✅
+- [x] 회사 로고 파일 추가 (public/logo.png)
+- [x] Favicon 추가 (public/favicon.ico)
+- [x] index.html에 favicon 적용
+- [x] Header에 로고 적용 (가로 비율 고려)
+- [x] Login 페이지에 로고 적용
+- [x] 데모 계정 정보 수정 (실제 seed 계정과 일치)
+
 ### 10.1 다크 모드 (선택적)
 - [ ] ThemeProvider 구현
 - [ ] 토글 버튼
