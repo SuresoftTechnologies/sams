@@ -51,13 +51,22 @@ export default function ErrorPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-lg">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
+          {/* Error Illustration */}
+          <div className="flex justify-center mb-4">
+            <img
+              src="/error-illustration.png"
+              alt="Error Illustration"
+              className="w-64 h-auto"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 mb-2 justify-center">
             <div className="p-3 rounded-full bg-destructive/10">
               <AlertTriangle className="h-8 w-8 text-destructive" />
             </div>
-            <div>
+            <div className="text-center">
               {statusCode && (
                 <p className="text-sm font-medium text-muted-foreground mb-1">
                   오류 {statusCode}
@@ -66,7 +75,7 @@ export default function ErrorPage() {
               <CardTitle className="text-2xl">{title}</CardTitle>
             </div>
           </div>
-          <CardDescription className="text-base">{message}</CardDescription>
+          <CardDescription className="text-base text-center">{message}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Error details in dev mode */}
