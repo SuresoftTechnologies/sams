@@ -17,8 +17,8 @@ export const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
         if (error instanceof Error && 'status' in error) {
-          const status = (error as any).status;
-          if (status >= 400 && status < 500) {
+          const status = (error as { status?: number }).status;
+          if (status && status >= 400 && status < 500) {
             return false;
           }
         }
@@ -35,8 +35,8 @@ export const queryClient = new QueryClient({
       // Retry failed mutations once (except for 4xx errors)
       retry: (failureCount, error) => {
         if (error instanceof Error && 'status' in error) {
-          const status = (error as any).status;
-          if (status >= 400 && status < 500) {
+          const status = (error as { status?: number }).status;
+          if (status && status >= 400 && status < 500) {
             return false;
           }
         }

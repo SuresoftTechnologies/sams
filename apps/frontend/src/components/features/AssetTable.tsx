@@ -64,8 +64,8 @@ export function AssetTable({
 
   // Sort assets
   const sortedAssets = [...assets].sort((a, b) => {
-    let aValue: any = a[sortField];
-    let bValue: any = b[sortField];
+    let aValue: string | number | null | undefined = a[sortField];
+    let bValue: string | number | null | undefined = b[sortField];
 
     if (sortField === 'purchaseDate') {
       aValue = a.purchaseDate ? new Date(a.purchaseDate).getTime() : 0;
@@ -75,7 +75,7 @@ export function AssetTable({
     if (aValue === undefined || aValue === null) return 1;
     if (bValue === undefined || bValue === null) return -1;
 
-    if (typeof aValue === 'string') {
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
       aValue = aValue.toLowerCase();
       bValue = bValue.toLowerCase();
     }

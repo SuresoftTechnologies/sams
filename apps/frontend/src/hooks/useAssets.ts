@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import type { AssetFormData } from '@/lib/validators';
-import type { Asset, CreateAssetDto, UpdateAssetDto, AssetStatus } from '@sams/api-client';
-import type { PaginatedResponse } from '@sams/api-client';
+import type { CreateAssetDto, UpdateAssetDto, AssetStatus } from '@sams/api-client';
 
 /**
  * Asset Management Hooks

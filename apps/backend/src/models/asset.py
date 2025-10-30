@@ -90,9 +90,11 @@ class Asset(Base):
     )
 
     # Relationships
-    category: Mapped["Category"] = relationship("Category", lazy="joined")
-    location: Mapped["Location"] = relationship("Location", lazy="joined")
-    assigned_user: Mapped["User"] = relationship("User", lazy="joined")
+    # lazy="select": 기본 lazy loading, API에서 명시적으로 JOIN 제어
+    # 이렇게 하면 불필요한 조인을 방지하고 성능 최적화 가능
+    category: Mapped["Category"] = relationship("Category", lazy="select")
+    location: Mapped["Location"] = relationship("Location", lazy="select")
+    assigned_user: Mapped["User"] = relationship("User", lazy="select")
     # history: Mapped[list["AssetHistory"]] = relationship("AssetHistory", back_populates="asset")
 
     @property

@@ -17,7 +17,6 @@ import { User, Mail, Shield, Save } from 'lucide-react';
 export default function Profile() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Profile update submitted');
     // TODO: Implement profile update logic
   };
 

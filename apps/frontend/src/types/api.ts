@@ -68,8 +68,8 @@ export interface AssetHistory {
   to_user_id?: string | null;
   from_location_id?: string | null;
   to_location_id?: string | null;
-  old_values?: Record<string, any> | null;
-  new_values?: Record<string, any> | null;
+  old_values?: Record<string, unknown> | null;
+  new_values?: Record<string, unknown> | null;
   created_by: string;
   created_at: string;
 }
@@ -121,7 +121,7 @@ export interface TokenResponse {
 /**
  * API Response Types
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
   success: boolean;

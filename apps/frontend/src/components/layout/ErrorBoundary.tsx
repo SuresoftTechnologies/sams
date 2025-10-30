@@ -20,15 +20,17 @@ interface ErrorBoundaryState {
 }
 
 /**
- * Default Error Fallback Component
+ * Default Error Fallback Component Props
  */
-function DefaultErrorFallback({
-  error,
-  resetError,
-}: {
+interface DefaultErrorFallbackProps {
   error: Error;
   resetError: () => void;
-}) {
+}
+
+/**
+ * Default Error Fallback Component
+ */
+function DefaultErrorFallback({ error, resetError }: DefaultErrorFallbackProps) {
   const handleGoHome = () => {
     window.location.href = '/';
   };

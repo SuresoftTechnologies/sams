@@ -60,8 +60,9 @@ export const authService = {
 
   /**
    * Refresh access token using refresh token
+   * Note: This is handled internally by the API client
    */
-  async refreshToken(refreshToken: string): Promise<TokenResponse> {
+  async refreshToken(_refreshToken: string): Promise<TokenResponse> {
     // This is handled internally by api.auth
     // but kept for compatibility
     const response = await api.auth.login({ email: '', password: '' });
@@ -79,16 +80,16 @@ export const authService = {
   /**
    * Change password for current user
    */
-  async changePassword(data: ChangePasswordRequest): Promise<void> {
+  async changePassword(_data: ChangePasswordRequest): Promise<void> {
     // The API client handles this internally
     // We'll need to add this to the api wrapper if needed
-    console.warn('Change password not implemented in API client yet');
+    throw new Error('Change password not implemented in API client yet');
   },
 
   /**
    * Register new user (if registration is enabled)
    */
-  async register(userData: {
+  async register(_userData: {
     email: string;
     password: string;
     full_name: string;

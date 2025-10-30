@@ -19,7 +19,7 @@ import {
   getApiClient,
   type ApiError as ApiClientError,
 } from '@sams/api-client';
-import { authStorage, type TokenResponse } from './auth-storage';
+import { authStorage } from './auth-storage';
 import { toast } from 'sonner';
 
 /**
@@ -98,7 +98,7 @@ export class ApiError extends Error {
 /**
  * Handle API errors with retry logic for token refresh
  */
-async function handleApiError(error: unknown, retryCallback?: () => Promise<any>): Promise<any> {
+async function handleApiError<T>(error: unknown, retryCallback?: () => Promise<T>): Promise<T> {
   // Check if it's an API error with status
   const apiError = error as ApiClientError;
 
