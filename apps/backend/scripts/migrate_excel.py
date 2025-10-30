@@ -278,12 +278,20 @@ async def migrate_sheet(
                 stats.add_skip(f"행 {idx}: 자산번호 중복 ({asset_tag})")
                 continue
 
-            # 데이터 추출
+            # 데이터 추출 - 모든 엑셀 컬럼
             current_user_name = clean_string(row[1])  # 현 사용자
+            checkout_date_str = row[2]  # 반출날짜
+            return_date_str = row[3]  # 반납날짜
             status_str = clean_string(row[4])  # 상태
+            previous_user_1 = clean_string(row[5])  # 이전 사용자 1
+            previous_user_2 = clean_string(row[6])  # 이전 사용자 2
+            first_user = clean_string(row[7])  # 최초 사용자
             location_main = clean_string(row[8])  # 위치 (판교, 대전)
             location_detail = clean_string(row[9])  # 위치 상세
             serial_number = clean_string(row[10])  # MAC 또는 시리얼넘버
+            qr_code_exists = clean_string(row[11])  # QR코드 유무
+            old_asset_number = clean_string(row[12])  # 기존번호
+            purchase_request = clean_string(row[13])  # 구매 품의
 
             # 시리얼넘버 placeholder 값 처리 (unique 제약 위반 방지)
             original_serial = serial_number
@@ -297,23 +305,27 @@ async def migrate_sheet(
                 )
                 if duplicate_check.scalar_one_or_none():
                     # 중복 시리얼넘버는 notes에 기록하고 NULL로 설정
-                    notes_list = [f"시리얼넘버 중복: {serial_number}"]
-                    if clean_string(row[21]):
-                        notes_list.append(clean_string(row[21]))
-                    notes = " | ".join(notes_list)
+                    if notes:
+                        notes = f"시리얼넘버 중복: {serial_number} | {notes}"
+                    else:
+                        notes = f"시리얼넘버 중복: {serial_number}"
                     serial_number = None
-                else:
-                    notes = clean_string(row[21])
-            else:
-                notes = clean_string(row[21])
 
             purchase_date_str = row[14]  # 구매연일
+            tax_invoice_date_str = row[15]  # 세금계산서 발행일
+            furniture_category = clean_string(row[16])  # 집기품목
+            detailed_category = clean_string(row[17])  # 상세품목
             model = clean_string(row[18])  # 규격/모델명
             price = parse_price(row[19])  # 구매가
             supplier = clean_string(row[20])  # 구매처
+            notes = clean_string(row[21])  # 비고
+            special_notes = clean_string(row[22])  # 특이사항
 
             # 날짜 파싱
             purchase_date = parse_date(purchase_date_str)
+            checkout_date = parse_date(checkout_date_str)
+            return_date = parse_date(return_date_str)
+            tax_invoice_date = parse_date(tax_invoice_date_str)
 
             # 등급 자동 계산
             grade = determine_grade(purchase_date)
@@ -368,11 +380,28 @@ async def migrate_sheet(
                 grade=grade,
                 location_id=location.id if location else None,
                 assigned_to=current_user.id if current_user else None,
+                # Purchase information
                 purchase_price=price,
                 purchase_date=purchase_date,
+                purchase_request=truncate_string(purchase_request, 100),
+                tax_invoice_date=tax_invoice_date,
                 supplier=truncate_string(supplier, 100),
+                # Category information
+                furniture_category=truncate_string(furniture_category, 50),
+                detailed_category=truncate_string(detailed_category, 50),
+                # Usage history
+                checkout_date=checkout_date,
+                return_date=return_date,
+                previous_user_1=truncate_string(previous_user_1, 100),
+                previous_user_2=truncate_string(previous_user_2, 100),
+                first_user=truncate_string(first_user, 100),
+                # Additional identification
+                old_asset_number=truncate_string(old_asset_number, 50),
+                qr_code_exists=truncate_string(qr_code_exists, 10),
+                # Notes
                 description=description,
                 notes=notes,
+                special_notes=special_notes,
             )
 
             if not dry_run:

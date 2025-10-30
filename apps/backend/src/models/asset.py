@@ -69,14 +69,32 @@ class Asset(Base):
     purchase_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     purchase_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
     supplier: Mapped[str | None] = mapped_column(String(100))
+    purchase_request: Mapped[str | None] = mapped_column(String(100))  # 구매 품의
+    tax_invoice_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 세금계산서 발행일
     warranty_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    
+    # Excel columns: furniture/detailed category
+    furniture_category: Mapped[str | None] = mapped_column(String(50))  # 집기품목
+    detailed_category: Mapped[str | None] = mapped_column(String(50))  # 상세품목
+    
+    # Asset usage history (from Excel)
+    checkout_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 반출날짜
+    return_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 반납날짜
+    previous_user_1: Mapped[str | None] = mapped_column(String(100))  # 이전 사용자 1
+    previous_user_2: Mapped[str | None] = mapped_column(String(100))  # 이전 사용자 2
+    first_user: Mapped[str | None] = mapped_column(String(100))  # 최초 사용자
+    
+    # Asset identification (additional)
+    old_asset_number: Mapped[str | None] = mapped_column(String(50))  # 기존번호
+    qr_code_exists: Mapped[str | None] = mapped_column(String(10))  # QR코드 유무
 
     # QR Code
     qr_code: Mapped[str | None] = mapped_column(String(255))  # URL or Base64 encoded image
 
     # Additional info
     description: Mapped[str | None] = mapped_column(Text)
-    notes: Mapped[str | None] = mapped_column(Text)
+    notes: Mapped[str | None] = mapped_column(Text)  # 비고
+    special_notes: Mapped[str | None] = mapped_column(Text)  # 특이사항
     specifications: Mapped[str | None] = mapped_column(Text)  # JSON string
 
     # Soft delete

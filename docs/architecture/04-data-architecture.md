@@ -41,22 +41,32 @@ erDiagram
 
     assets {
         uuid id PK
-        string asset_number UK "자산번호"
+        string asset_tag UK "자산번호"
         string name "자산명"
         uuid category_id FK
         string model "모델명"
-        string serial_number UK "시리얼번호"
-        string mac_address "MAC 주소"
-        enum status "상태: 지급/대여/대기/불용"
+        string serial_number UK "시리얼넘버"
+        enum status "상태: issued/loaned/general/stock/server_room/disposed"
         enum grade "등급: A/B/C"
-        uuid current_user_id FK
+        uuid assigned_to FK "현 사용자"
         uuid location_id FK
         decimal purchase_price "구매가"
         date purchase_date "구매일"
-        string purchase_order "품의서"
+        string purchase_request "구매 품의"
+        date tax_invoice_date "세금계산서 발행일"
         string supplier "공급업체"
+        string furniture_category "집기품목"
+        string detailed_category "상세품목"
+        date checkout_date "반출날짜"
+        date return_date "반납날짜"
+        string previous_user_1 "이전 사용자 1"
+        string previous_user_2 "이전 사용자 2"
+        string first_user "최초 사용자"
+        string old_asset_number "기존번호"
+        string qr_code_exists "QR코드 유무"
         text notes "비고"
-        
+        text special_notes "특이사항"
+
         timestamp created_at
         timestamp updated_at
         timestamp deleted_at "소프트 삭제"
@@ -194,51 +204,93 @@ CREATE INDEX idx_users_role ON users(role);
 IT 자산의 기본 정보를 저장합니다.
 
 ```sql
-CREATE TYPE asset_status AS ENUM ('assigned', 'available', 'in_transit', 'maintenance', 'disposed');
+CREATE TYPE asset_status AS ENUM (
+    'issued',       -- [지급장비] 직원에게 지급된 장비
+    'loaned',       -- [대여용] 대여 가능한 장비
+    'general',      -- [일반장비] 일반 사용 장비
+    'stock',        -- [재고] 재고/보관 중
+    'server_room',  -- [서버실] 서버실 장비
+    'disposed'      -- [불용] 폐기/불용 처리
+);
+
 CREATE TYPE asset_grade AS ENUM ('A', 'B', 'C');
 
 CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    asset_number VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(200) NOT NULL,
+    asset_tag VARCHAR(50) NOT NULL UNIQUE,  -- 자산번호 (예: SRS-11-2024-0001)
+    name VARCHAR(200) NOT NULL,  -- 자산명
     category_id UUID NOT NULL REFERENCES categories(id),
-    model VARCHAR(200),
-    serial_number VARCHAR(100) UNIQUE,
-    mac_address VARCHAR(17),
-    status asset_status DEFAULT 'available',
+    model VARCHAR(200),  -- 규격/모델명
+    serial_number VARCHAR(100) UNIQUE,  -- MAC 또는 시리얼넘버
+    status asset_status DEFAULT 'stock',
     grade asset_grade,
-    current_user_id UUID REFERENCES users(id),
+    assigned_to UUID REFERENCES users(id),  -- 현 사용자
     location_id UUID REFERENCES locations(id),
-    purchase_price DECIMAL(12, 2),
-    purchase_date DATE,
-    purchase_order VARCHAR(100),
-    invoice_number VARCHAR(100),
-    supplier VARCHAR(200),
-    warranty_until DATE,
-    notes TEXT,
+    
+    -- 구매 정보
+    purchase_price DECIMAL(12, 2),  -- 구매가
+    purchase_date DATE,  -- 구매연일
+    purchase_request VARCHAR(100),  -- 구매 품의
+    tax_invoice_date DATE,  -- 세금계산서 발행일
+    supplier VARCHAR(200),  -- 구매처
+    
+    -- 분류 정보
+    furniture_category VARCHAR(50),  -- 집기품목
+    detailed_category VARCHAR(50),  -- 상세품목
+    
+    -- 반출/반납 정보
+    checkout_date DATE,  -- 반출날짜
+    return_date DATE,  -- 반납날짜
+    
+    -- 사용자 이력
+    previous_user_1 VARCHAR(100),  -- 이전 사용자 1
+    previous_user_2 VARCHAR(100),  -- 이전 사용자 2
+    first_user VARCHAR(100),  -- 최초 사용자
+    
+    -- 기타 정보
+    old_asset_number VARCHAR(50),  -- 기존번호
+    qr_code_exists VARCHAR(10),  -- QR코드 유무
+    notes TEXT,  -- 비고
+    special_notes TEXT,  -- 특이사항
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP  -- 소프트 삭제
 );
 
-CREATE INDEX idx_assets_number ON assets(asset_number);
+CREATE INDEX idx_assets_tag ON assets(asset_tag);
 CREATE INDEX idx_assets_category ON assets(category_id);
 CREATE INDEX idx_assets_status ON assets(status);
-CREATE INDEX idx_assets_current_user ON assets(current_user_id);
+CREATE INDEX idx_assets_assigned_to ON assets(assigned_to);
 CREATE INDEX idx_assets_location ON assets(location_id);
 CREATE INDEX idx_assets_serial ON assets(serial_number);
 CREATE INDEX idx_assets_deleted ON assets(deleted_at) WHERE deleted_at IS NULL;
 ```
 
 **Business Rules**:
-- `asset_number`: 자동 생성 (형식: `YY-CATEGORY-SEQ`, 예: `25-11-0001`)
+
+- **자산번호 (asset_tag)**: 형식: `SRS-{CATEGORY}-{YEAR}-{SEQ}` (예: `SRS-11-2024-0001`)
   - 기존 QR코드에 이미 인코딩되어 있음
-  - QR 스캔 시 이 값으로 자산 조회 (MVP: 대여/반납용)
-- `grade`: 구매 연도 기반 자동 계산
-  - A급: 2022~2025년
-  - B급: 2018~2021년
-  - C급: ~2017년
+  - QR 스캔 시 이 값으로 자산 조회
+
+- **상태 (status)**: 6가지 실제 상태
+  - `issued` [지급장비]: 직원에게 지급된 장비 (1,053건)
+  - `loaned` [대여용]: 대여 가능한 장비 (769건)
+  - `disposed` [불용]: 폐기/불용 처리 (211건)
+  - `general` [일반장비]: 일반 사용 장비 (129건)
+  - `server_room` [서버실]: 서버실 장비 (32건)
+  - `stock` [재고]: 재고/보관 중 (29건)
+
+- **등급 (grade)**: 구매 연도 기반 자동 계산
+  - A급: 2022년 이후 구매
+  - B급: 2018~2021년 구매
+  - C급: 2017년 이전 구매
+
+- **Excel 마이그레이션**: 모든 23개 컬럼 보존
+  - 원본 데이터 무손실 마이그레이션 완료 (2,223건)
+  - 데스크탑(11): 497건
+  - 노트북(12): 700건
+  - 모니터(14): 1,026건
 
 ---
 
@@ -333,13 +385,13 @@ CREATE INDEX idx_history_user ON asset_history(to_user_id);
 ```json
 {
   "old_values": {
-    "status": "available",
+    "status": "stock",
     "location_id": "uuid-1"
   },
   "new_values": {
-    "status": "assigned",
+    "status": "issued",
     "location_id": "uuid-2",
-    "current_user_id": "uuid-3"
+    "assigned_to": "uuid-3"
   }
 }
 ```
@@ -450,56 +502,81 @@ CREATE INDEX idx_attachments_uploader ON asset_attachments(uploaded_by);
 
 ## 🔄 Data Migration Strategy
 
-### Phase 1: Excel Data Import
+### Phase 1: Excel Data Import (완료)
 
-Excel 파일(`자산관리 데이터(슈커톤).xlsx`)에서 PostgreSQL로 데이터를 마이그레이션합니다.
+Excel 파일(`자산관리 데이터(슈커톤).xlsx`)에서 PostgreSQL로 데이터를 마이그레이션했습니다.
 
-**Migration Steps**:
+**마이그레이션 완료 상태**:
+- ✅ 2,223개 자산 데이터 마이그레이션 완료
+- ✅ 23개 Excel 컬럼 전체 보존 (무손실)
+- ✅ 6가지 실제 상태 enum 적용
+- ✅ 자동 등급(A/B/C) 계산
+- ✅ 카테고리 및 위치 마스터 데이터 생성
+- ✅ 사용자 데이터 매핑
 
-1. **데이터 정제 (Data Cleaning)**
-   - 중복 제거
-   - 데이터 형식 통일 (날짜, 숫자)
-   - NULL 값 처리
-   - 유효성 검증
+**Migration Script**: `apps/backend/scripts/migrate_excel.py`
 
-2. **카테고리 및 위치 마스터 데이터 생성**
-   ```sql
-   INSERT INTO categories (name, code) VALUES
-       ('데스크탑', '11'),
-       ('노트북', '12'),
-       ('모니터', '14');
+**주요 기능**:
+1. **데이터 정제**
+   - 공백 제거 및 NULL 처리
+   - 날짜 형식 변환 (YYYY.MM.DD → DATE)
+   - 가격 정보 파싱 (₩/원 제거)
+   - 위치 정보 분리 (판교/대전 + 상세 위치)
 
-   INSERT INTO locations (name, code, site) VALUES
-       ('판교 본사', 'PG-HQ', 'pangyo'),
-       ('대전 사무소', 'DJ-OFF', 'daejeon');
+2. **자동 매핑**
+   - 카테고리: Excel 시트명 → 카테고리 코드 (11, 12, 14)
+   - 사용자: 이름 → users 테이블 UUID
+   - 위치: "판교/대전 + 상세" → locations 테이블 UUID
+   - 상태: Excel 상태 문자열 → AssetStatus enum
+
+3. **등급 자동 계산**
+   ```python
+   if purchase_year >= 2022:
+       grade = AssetGrade.A
+   elif purchase_year >= 2018:
+       grade = AssetGrade.B
+   else:
+       grade = AssetGrade.C
    ```
 
-3. **자산 데이터 임포트**
-   - Python 스크립트 사용 (openpyxl + psycopg2)
-   - 배치 INSERT (1000건씩)
-   - 트랜잭션 관리
+4. **전체 컬럼 보존** (23개)
+   - 기본 정보: asset_tag, name, model, serial_number
+   - 구매 정보: purchase_price, purchase_date, purchase_request, tax_invoice_date, supplier
+   - 분류: furniture_category, detailed_category
+   - 사용자: assigned_to, previous_user_1, previous_user_2, first_user
+   - 위치: location_id, checkout_date, return_date
+   - 상태: status, grade
+   - 기타: old_asset_number, qr_code_exists, notes, special_notes
 
-4. **이력 데이터 생성**
-   - 기존 사용자 변경 이력을 `asset_history`에 기록
-   - "이전 사용자 1", "이전 사용자 2" 필드 파싱
+**실행 방법**:
+```bash
+# 드라이런 (실제 DB 변경 없이 미리보기)
+cd apps/backend
+uv run python scripts/migrate_excel.py --dry-run
 
-**Migration Script Outline**:
-```python
-import openpyxl
-import psycopg2
+# 실제 마이그레이션 (DB 초기화 + 전체 데이터 임포트)
+uv run python scripts/migrate_excel.py
 
-# Excel 읽기
-wb = openpyxl.load_workbook('자산관리 데이터(슈커톤).xlsx')
+# 특정 Excel 파일 지정
+uv run python scripts/migrate_excel.py --file "path/to/excel.xlsx"
+```
 
-# 각 시트별 처리
-for sheet_name in ['데스크탑(11)', '노트북(12)', '모니터(14)']:
-    ws = wb[sheet_name]
+**마이그레이션 결과 요약**:
+```
+✅ Total: 2,223 assets migrated successfully
 
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        asset_number, current_user, ... = row
+By Category:
+- 데스크탑 (11): 497 assets
+- 노트북 (12): 700 assets  
+- 모니터 (14): 1,026 assets
 
-        # 데이터 정제
-        # INSERT INTO assets ...
+By Status:
+- [지급장비] issued: 1,053 assets
+- [대여용] loaned: 769 assets
+- [불용] disposed: 211 assets
+- [일반장비] general: 129 assets
+- [서버실] server_room: 32 assets
+- [재고] stock: 29 assets
 ```
 
 ---
@@ -513,7 +590,7 @@ for sheet_name in ['데스크탑(11)', '노트북(12)', '모니터(14)']:
 ### Secondary Indexes
 - **Foreign Keys**: 모든 외래키에 인덱스
 - **Query Optimization**: 자주 조회되는 컬럼
-  - `assets.status`, `assets.category_id`
+  - `assets.asset_tag`, `assets.status`, `assets.category_id`, `assets.assigned_to`
   - `workflows.status`, `workflows.requester_id`
   - `asset_history.created_at`
 
@@ -521,7 +598,7 @@ for sheet_name in ['데스크탑(11)', '노트북(12)', '모니터(14)']:
 ```sql
 -- 자산 검색 최적화
 CREATE INDEX idx_assets_search
-ON assets(category_id, status, current_user_id);
+ON assets(category_id, status, assigned_to);
 
 -- 이력 조회 최적화
 CREATE INDEX idx_history_asset_date
