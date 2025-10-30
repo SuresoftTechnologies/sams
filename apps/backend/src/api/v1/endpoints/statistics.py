@@ -374,7 +374,7 @@ async def get_workflow_timeline(
     # Fill in actual data
     for row in rows:
         if row.date in timeline_dict:
-            timeline_dict[row.date][row.type.value] = row.count
+            timeline_dict[row.date][row.type] = row.count
 
     # Convert to sorted list
     timeline = [timeline_dict[d] for d in sorted(timeline_dict.keys())]
