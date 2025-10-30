@@ -8,6 +8,7 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.schemas.asset import Asset
+from src.schemas.user import User
 
 
 class WorkflowType(str, Enum):
@@ -45,8 +46,11 @@ class Workflow(BaseModel):
     asset_id: str = Field(..., description="Asset ID")
     asset: Asset | None = Field(None, description="Asset information")
     requester_id: str = Field(..., description="Requester user ID")
+    requester: User | None = Field(None, description="Requester user information")
     assignee_id: str | None = Field(None, description="Target assignee user ID")
+    assignee: User | None = Field(None, description="Assignee user information")
     approver_id: str | None = Field(None, description="Approver user ID")
+    approver: User | None = Field(None, description="Approver user information")
 
     # Request details
     reason: str | None = Field(None, description="Reason for request")
