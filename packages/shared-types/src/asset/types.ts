@@ -219,6 +219,24 @@ export interface AssetFilterParams {
 }
 
 /**
+ * Asset history action enum
+ */
+export enum AssetHistoryAction {
+  CREATED = 'created',
+  UPDATED = 'updated',
+  ASSIGNED = 'assigned',
+  UNASSIGNED = 'unassigned',
+  TRANSFERRED = 'transferred',
+  LOCATION_CHANGED = 'location_changed',
+  STATUS_CHANGED = 'status_changed',
+  MAINTENANCE_START = 'maintenance_start',
+  MAINTENANCE_END = 'maintenance_end',
+  DISPOSED = 'disposed',
+  DELETED = 'deleted',
+  RESTORED = 'restored',
+}
+
+/**
  * Asset history entry
  * Note: Using snake_case to match Python backend API
  */
@@ -226,25 +244,24 @@ export interface AssetHistory {
   id: string;
   asset_id: string;
   action: AssetHistoryAction;
+  description?: string | null;
+  performed_by: string;
+  user_name?: string | null;
+  user_email?: string | null;
   from_user_id?: string | null;
   to_user_id?: string | null;
   from_location_id?: string | null;
   to_location_id?: string | null;
-  old_values?: Record<string, any>;
-  new_values?: Record<string, any>;
-  created_by: string;
+  old_values?: Record<string, any> | null;
+  new_values?: Record<string, any> | null;
+  workflow_id?: string | null;
   created_at: string;
 }
 
 /**
- * Asset history action enum
+ * Asset history list response
  */
-export enum AssetHistoryAction {
-  CREATE = 'create',
-  UPDATE = 'update',
-  ASSIGN = 'assign',
-  UNASSIGN = 'unassign',
-  RELOCATE = 'relocate',
-  DISPOSE = 'dispose',
-  RESTORE = 'restore',
+export interface AssetHistoryListResponse {
+  items: AssetHistory[];
+  total: number;
 }

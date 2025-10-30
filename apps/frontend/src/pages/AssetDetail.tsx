@@ -29,8 +29,16 @@ import {
   Tag,
   CheckCircle2,
 } from 'lucide-react';
-import { useGetAsset, useDeleteAsset } from '@/hooks/useAssets';
-import { format } from 'date-fns';
+import { useGetAsset, useDeleteAsset, useGetAssetHistory } from '@/hooks/useAssets';
+import { format, formatDistanceToNow } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import {
+  getHistoryActionIcon,
+  getHistoryActionColor,
+  getHistoryActionLabel,
+  formatChangeValue,
+  getFieldLabel,
+} from '@/lib/asset-history-utils';
 
 /**
  * Asset Detail Page
@@ -42,6 +50,7 @@ export default function AssetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: asset, isLoading, error } = useGetAsset(id!);
+  const { data: historyData, isLoading: isHistoryLoading } = useGetAssetHistory(id!, { limit: 10 });
   const deleteMutation = useDeleteAsset();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -469,15 +478,6 @@ export default function AssetDetail() {
                 <Button
                   variant="outline"
                   className="w-full justify-start gap-2"
-                  onClick={() => navigate(`/assets/${id}/history`)}
-                  disabled
-                >
-                  <History className="h-4 w-4" />
-                  변경 이력 보기
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-2"
                   onClick={() => navigate(`/assets/${id}/checkout`)}
                 >
                   <CheckCircle2 className="h-4 w-4" />
@@ -496,16 +496,102 @@ export default function AssetDetail() {
           </div>
         </div>
 
-        {/* Activity History (placeholder) */}
+        {/* Activity History */}
         <Card>
           <CardHeader>
             <CardTitle>활동 이력</CardTitle>
             <CardDescription>자산의 변경 및 이동 기록</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground text-center py-8">
-              활동 이력이 아직 없습니다. 변경 추적 기능은 곧 추가 예정입니다.
-            </p>
+            {isHistoryLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : historyData && historyData.items.length > 0 ? (
+              <div className="space-y-4">
+                {historyData.items.map((event) => {
+                  const Icon = getHistoryActionIcon(event.action);
+                  const colorClass = getHistoryActionColor(event.action);
+                  const timeAgo = formatDistanceToNow(new Date(event.created_at), {
+                    addSuffix: true,
+                    locale: ko,
+                  });
+
+                  return (
+                    <div key={event.id} className="flex gap-4 pb-4 border-b last:border-0">
+                      <div className={`p-2 rounded-full h-fit ${colorClass}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-sm">
+                              {event.description || getHistoryActionLabel(event.action)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {event.user_name} · {timeAgo}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {getHistoryActionLabel(event.action)}
+                          </Badge>
+                        </div>
+
+                        {/* Show change details if available */}
+                        {event.old_values && event.new_values && (
+                          <div className="mt-2 p-2 bg-muted/50 rounded-md text-xs space-y-1">
+                            {Object.keys(event.new_values).map((key) => {
+                              const oldVal = event.old_values?.[key];
+                              const newVal = event.new_values?.[key];
+
+                              if (oldVal === newVal) return null;
+
+                              return (
+                                <div key={key} className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">{getFieldLabel(key)}:</span>
+                                  <span className="line-through text-muted-foreground">
+                                    {formatChangeValue(key, oldVal)}
+                                  </span>
+                                  <span>→</span>
+                                  <span className="font-medium">
+                                    {formatChangeValue(key, newVal)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {historyData.total > 10 && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      // TODO: Show all history in a modal or separate page
+                      alert('전체 이력 보기 기능은 준비 중입니다.');
+                    }}
+                  >
+                    전체 이력 보기 ({historyData.total}개)
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                활동 이력이 없습니다.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -276,7 +276,7 @@ export class ApiClient {
     history: (
       id: string,
       params?: { skip?: number; limit?: number }
-    ): Promise<any[]> => {
+    ): Promise<{ items: any[]; total: number }> => {
       const searchParams = new URLSearchParams();
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
@@ -285,7 +285,7 @@ export class ApiClient {
           }
         });
       }
-      return this.request<any[]>(
+      return this.request<{ items: any[]; total: number }>(
         `/api/v1/assets/${id}/history?${searchParams}`
       );
     },

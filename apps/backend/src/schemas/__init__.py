@@ -14,6 +14,13 @@ from src.schemas.asset import (
     UpdateAssetRequest,
 )
 
+# Asset history schemas
+from src.schemas.asset_history import (
+    AssetHistory,
+    AssetHistoryListResponse,
+    HistoryAction,
+)
+
 # Auth schemas
 from src.schemas.auth import (
     LoginRequest,
@@ -75,6 +82,10 @@ __all__ = [
     "UpdateAssetRequest",
     "AssetFilterParams",
     "AssetListResponse",
+    # Asset History
+    "AssetHistory",
+    "AssetHistoryListResponse",
+    "HistoryAction",
     # Category
     "Category",
     "CreateCategoryRequest",

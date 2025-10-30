@@ -24,6 +24,8 @@ from src.schemas.asset import (
     CreateAssetRequest,
     UpdateAssetRequest,
 )
+from src.schemas.asset_history import AssetHistoryListResponse
+from src.schemas.asset_history import AssetHistory as AssetHistorySchema
 from src.schemas.common import PaginatedResponse
 from src.services.asset_service import AssetService
 
@@ -507,16 +509,16 @@ async def delete_asset(
     await db.commit()
 
 
-@router.get("/{asset_id}/history", response_model=list[dict])
+@router.get("/{asset_id}/history", response_model=AssetHistoryListResponse)
 async def get_asset_history(
     asset_id: str,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
-) -> list[dict]:
+) -> AssetHistoryListResponse:
     """
-    Get asset history.
+    Get asset history with user information.
 
     Args:
         asset_id: Asset ID
@@ -526,7 +528,7 @@ async def get_asset_history(
         current_user: Current authenticated user
 
     Returns:
-        List of history entries
+        AssetHistoryListResponse with paginated history events
 
     Raises:
         HTTPException: 404 if asset not found
@@ -541,30 +543,50 @@ async def get_asset_history(
             detail="Asset not found",
         )
 
-    # Query history
+    # Get total count
+    count_query = select(func.count(AssetHistory.id)).where(AssetHistory.asset_id == asset_id)
+    total_result = await db.execute(count_query)
+    total = total_result.scalar_one()
+
+    # Query history with user join
     query = (
-        select(AssetHistory)
+        select(
+            AssetHistory,
+            UserModel.name.label("user_name"),
+            UserModel.email.label("user_email"),
+        )
+        .join(UserModel, AssetHistory.performed_by == UserModel.id)
         .where(AssetHistory.asset_id == asset_id)
         .order_by(AssetHistory.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
     result = await db.execute(query)
-    history_entries = result.scalars().all()
+    rows = result.all()
 
-    # Convert to dict for response
-    return [
-        {
-            "id": entry.id,
-            "action": entry.action,
-            "description": entry.description,
-            "performed_by": entry.performed_by,
-            "old_values": entry.old_values,
-            "new_values": entry.new_values,
-            "created_at": entry.created_at,
+    # Convert to response schema
+    items = []
+    for history, user_name, user_email in rows:
+        history_dict = {
+            "id": history.id,
+            "asset_id": history.asset_id,
+            "action": history.action,
+            "description": history.description,
+            "performed_by": history.performed_by,
+            "user_name": user_name,
+            "user_email": user_email,
+            "from_user_id": history.from_user_id,
+            "to_user_id": history.to_user_id,
+            "from_location_id": history.from_location_id,
+            "to_location_id": history.to_location_id,
+            "old_values": history.old_values,
+            "new_values": history.new_values,
+            "workflow_id": history.workflow_id,
+            "created_at": history.created_at,
         }
-        for entry in history_entries
-    ]
+        items.append(AssetHistorySchema(**history_dict))
+
+    return AssetHistoryListResponse(items=items, total=total)
 
 
 @router.patch("/{asset_id}/status", response_model=Asset)

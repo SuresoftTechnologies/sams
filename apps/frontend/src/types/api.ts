@@ -68,21 +68,72 @@ export type UserCreate = Omit<User, 'id' | 'created_at' | 'updated_at'> & { pass
 export type UserUpdate = Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>;
 export type UserRead = User;
 
+/**
+ * Asset Event/History Action Types
+ * Matches backend HistoryAction enum
+ */
+export type HistoryAction =
+  | 'created'
+  | 'updated'
+  | 'assigned'
+  | 'unassigned'
+  | 'transferred'
+  | 'location_changed'
+  | 'status_changed'
+  | 'maintenance_start'
+  | 'maintenance_end'
+  | 'disposed'
+  | 'deleted'
+  | 'restored';
+
+/**
+ * Asset Event/History Action Labels (Korean)
+ */
+export const HistoryActionLabels: Record<HistoryAction, string> = {
+  created: '생성됨',
+  updated: '수정됨',
+  assigned: '할당됨',
+  unassigned: '반납됨',
+  transferred: '이전됨',
+  location_changed: '위치 변경',
+  status_changed: '상태 변경',
+  maintenance_start: '유지보수 시작',
+  maintenance_end: '유지보수 완료',
+  disposed: '폐기됨',
+  deleted: '삭제됨',
+  restored: '복원됨',
+};
+
+/**
+ * Asset Event/History Entry
+ */
 export interface AssetHistory {
   id: string;
   asset_id: string;
-  action: string;
+  action: HistoryAction;
+  description?: string | null;
+  performed_by: string;
+  user_name?: string | null;
+  user_email?: string | null;
   from_user_id?: string | null;
   to_user_id?: string | null;
   from_location_id?: string | null;
   to_location_id?: string | null;
   old_values?: Record<string, unknown> | null;
   new_values?: Record<string, unknown> | null;
-  created_by: string;
+  workflow_id?: string | null;
   created_at: string;
 }
 
-export type AssetHistoryCreate = Omit<AssetHistory, 'id' | 'created_at'>;
+/**
+ * Asset History List Response
+ */
+export interface AssetHistoryListResponse {
+  items: AssetHistory[];
+  total: number;
+}
+
+export type AssetHistoryCreate = Omit<AssetHistory, 'id' | 'created_at' | 'user_name' | 'user_email'>;
 
 export interface Category {
   id: string;

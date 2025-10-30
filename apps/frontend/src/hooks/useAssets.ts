@@ -91,8 +91,9 @@ export function useCreateAsset() {
       return api.assets.create(createDto);
     },
     onSuccess: (data) => {
-      // Invalidate assets list to refetch
+      // Invalidate assets list and history to refetch
       queryClient.invalidateQueries({ queryKey: ['assets'] });
+      queryClient.invalidateQueries({ queryKey: ['asset-history', data.id] });
 
       toast.success('Asset created successfully', {
         description: `Asset ${data.asset_tag} has been added to the system.`,
@@ -122,9 +123,10 @@ export function useUpdateAsset(id: string) {
       return api.assets.update(id, updateDto);
     },
     onSuccess: (data) => {
-      // Invalidate both list and detail queries
+      // Invalidate list, detail, and history queries
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       queryClient.invalidateQueries({ queryKey: ['asset', id] });
+      queryClient.invalidateQueries({ queryKey: ['asset-history', id] });
 
       toast.success('Asset updated successfully', {
         description: `Asset ${data.asset_tag} has been updated.`,
@@ -177,9 +179,10 @@ export function useChangeAssetStatus() {
     mutationFn: ({ id, status, reason }: { id: string; status: AssetStatus; reason?: string }) =>
       api.assets.changeStatus(id, status, reason),
     onSuccess: (data) => {
-      // Invalidate queries
+      // Invalidate queries including history
       queryClient.invalidateQueries({ queryKey: ['assets'] });
       queryClient.invalidateQueries({ queryKey: ['asset', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['asset-history', data.id] });
 
       toast.success('Asset status updated successfully');
     },
