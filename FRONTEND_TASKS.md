@@ -315,20 +315,20 @@ src/
 - [ ] 토글 버튼
 - [ ] localStorage에 저장
 
-### 10.2 로딩 상태
-- [ ] Skeleton 컴포넌트
-- [ ] Spinner 컴포넌트
-- [ ] TanStack Query isPending 활용
+### 10.2 로딩 상태 ✅
+- [x] Skeleton 컴포넌트
+- [x] Spinner 컴포넌트
+- [x] TanStack Query isPending 활용
 
-### 10.3 에러 핸들링
-- [ ] Error Boundary
-- [ ] Toast 알림 (sonner)
-- [ ] 에러 페이지
+### 10.3 에러 핸들링 ✅
+- [x] Error Boundary
+- [x] Toast 알림 (sonner)
+- [x] 에러 페이지
 
-### 10.4 반응형 디자인
-- [ ] 모바일 레이아웃
-- [ ] 태블릿 레이아웃
-- [ ] Tailwind breakpoints 활용
+### 10.4 반응형 디자인 ✅
+- [x] 모바일 레이아웃
+- [x] 태블릿 레이아웃
+- [x] Tailwind breakpoints 활용
 
 ---
 
