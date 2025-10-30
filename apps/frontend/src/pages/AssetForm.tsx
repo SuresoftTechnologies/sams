@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -72,6 +72,8 @@ const MOCK_USERS = [
   { id: 'user-4', name: '정수진' },
 ];
 
+const LOCATION_UNASSIGNED = '__location-unassigned__';
+
 // Helper function to calculate grade from purchase date
 const calculateGrade = (purchaseDate?: string): string => {
   if (!purchaseDate) return '';
@@ -84,6 +86,7 @@ const calculateGrade = (purchaseDate?: string): string => {
 interface BulkEditableLineItem {
   id: string;
   name: string;
+  extractedName: string;
   quantity: number;
   unitPrice: string;
   categoryId: string;
@@ -91,6 +94,8 @@ interface BulkEditableLineItem {
   model: string;
   specifications: string;
   itemType: string;
+  locationId: string;
+  isSelected: boolean;
 }
 
 const normalizeUnitPrice = (value?: string | null): string => {
@@ -145,6 +150,8 @@ export default function AssetForm() {
   const [bulkIsAnalyzing, setBulkIsAnalyzing] = useState(false);
   const [bulkResult, setBulkResult] = useState<AnalyzeReceiptFromImageResponse | null>(null);
   const [bulkEditableItems, setBulkEditableItems] = useState<BulkEditableLineItem[]>([]);
+  const [bulkDefaultLocationId, setBulkDefaultLocationId] = useState<string | null>(null);
+  const initialBulkItemsRef = useRef<BulkEditableLineItem[]>([]);
 
   const validateBulkFile = (file: File): string | null => {
     const extension = file.name?.split('.').pop()?.toLowerCase() ?? '';
@@ -291,13 +298,16 @@ export default function AssetForm() {
       setBulkMessage(null);
       setBulkResult(null);
       setBulkEditableItems([]);
+      setBulkDefaultLocationId(null);
       setBulkIsAnalyzing(false);
+      initialBulkItemsRef.current = [];
     }
   }, [bulkDialogOpen]);
 
   useEffect(() => {
     if (!bulkResult) {
       setBulkEditableItems([]);
+      initialBulkItemsRef.current = [];
       return;
     }
 
@@ -306,15 +316,17 @@ export default function AssetForm() {
       ? bulkResult.analysis.line_items
       : [];
 
-    setBulkEditableItems(
-      lineItems.map((item, index) => {
+    const initialItems = lineItems.map((item, index) => {
         const initialQuantity = Number.isFinite(item.quantity) && item.quantity > 0
           ? Math.floor(item.quantity)
           : 1;
 
+      const extractedName = item.name?.trim() || `항목 ${index + 1}`;
+
         return {
-          id: `${index}-${item.name || 'line-item'}`,
-          name: item.name?.trim() || `항목 ${index + 1}`,
+        id: `${index}-${extractedName || 'line-item'}`,
+        name: '',
+        extractedName,
           quantity: initialQuantity,
           unitPrice: normalizeUnitPrice(item.unit_price),
           categoryId: '',
@@ -322,46 +334,66 @@ export default function AssetForm() {
           model: item.model ?? '',
           specifications: item.specifications ?? '',
           itemType: item.item_type ?? '',
+        locationId: '',
+        isSelected: true,
         } satisfies BulkEditableLineItem;
-      })
-    );
+    });
+
+    initialBulkItemsRef.current = initialItems.map((item) => ({ ...item }));
+    setBulkEditableItems(initialItems);
+    setBulkDefaultLocationId(null);
   }, [bulkResult]);
 
   useEffect(() => {
-    if (!bulkResult?.suggested_category_code || categories.length === 0) {
-      return;
-    }
-
-    const matchedCategory = categories.find(
-      (category) => category.code === bulkResult.suggested_category_code
-    );
-
-    if (!matchedCategory) {
+    if (!bulkResult || categories.length === 0) {
       return;
     }
 
     setBulkEditableItems((prev) =>
-      prev.map((item) =>
-        item.categoryId
-          ? item
-          : {
+      prev.map((item) => {
+        if (item.categoryId) {
+          return item;
+        }
+
+        const matchedCategory =
+          categories.find((category) => category.code === bulkResult.suggested_category_code) ??
+          categories.find((category) => {
+            const normalizedCategoryName = category.name.trim();
+            const candidates = [item.extractedName, item.itemType]
+              .map((value) => value?.trim())
+              .filter((value): value is string => Boolean(value));
+            return candidates.some((candidate) => candidate === normalizedCategoryName);
+          });
+
+    if (!matchedCategory) {
+          return item;
+    }
+
+        return {
               ...item,
               categoryId: matchedCategory.id,
-            }
-      )
+        };
+      })
     );
   }, [bulkResult, categories]);
 
   const totalBulkAssetCount = useMemo(
     () =>
       bulkEditableItems.reduce((sum, item) => {
-        if (!Number.isFinite(item.quantity)) {
+        if (!item.isSelected || !Number.isFinite(item.quantity)) {
           return sum;
         }
         return sum + Math.max(0, item.quantity);
       }, 0),
     [bulkEditableItems]
   );
+
+  const selectedBulkItemCount = useMemo(
+    () => bulkEditableItems.filter((item) => item.isSelected).length,
+    [bulkEditableItems]
+  );
+
+  const hasBulkSelection = selectedBulkItemCount > 0;
 
   const updateBulkItem = (
     itemId: string,
@@ -370,6 +402,127 @@ export default function AssetForm() {
     setBulkEditableItems((prev) =>
       prev.map((item) => (item.id === itemId ? updater(item) : item))
     );
+  };
+
+  const toggleBulkItemSelection = (itemId: string) => {
+    setBulkEditableItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              isSelected: !item.isSelected,
+            }
+          : item
+      )
+    );
+  };
+
+  const applyBulkLocationToSelected = () => {
+    if (bulkDefaultLocationId === null) {
+      toast.error('적용할 위치를 선택해 주세요.');
+      return;
+    }
+
+    if (!hasBulkSelection) {
+      toast.error('위치를 적용할 항목을 먼저 선택해 주세요.');
+      return;
+    }
+
+    setBulkEditableItems((prev) =>
+      prev.map((item) =>
+        item.isSelected
+          ? {
+              ...item,
+              locationId: bulkDefaultLocationId || '',
+            }
+          : item
+      )
+    );
+
+    const locationLabel =
+      !bulkDefaultLocationId
+        ? '미지정'
+        : locations.find((location) => location.id === bulkDefaultLocationId)?.name || '선택된 위치';
+
+    setBulkMessage({
+      tone: 'success',
+      text: `선택된 항목에 "${locationLabel}" 위치를 적용했습니다.`,
+    });
+
+    toast.success('위치를 적용했습니다.', {
+      description: `선택된 항목에 ${locationLabel} 위치를 일괄 지정했어요.`,
+    });
+  };
+
+  const clearLocationsFromSelected = () => {
+    if (!hasBulkSelection) {
+      toast.error('위치를 초기화할 항목을 먼저 선택해 주세요.');
+      return;
+    }
+
+    setBulkEditableItems((prev) =>
+      prev.map((item) =>
+        item.isSelected
+          ? {
+              ...item,
+              locationId: '',
+            }
+          : item
+      )
+    );
+
+    setBulkMessage({
+      tone: 'info',
+      text: '선택된 항목의 위치를 초기화했습니다.',
+    });
+
+    toast.info('위치를 초기화했습니다.', {
+      description: '선택된 항목이 다시 위치 미지정 상태가 되었습니다.',
+    });
+  };
+
+  const resetBulkItemsToInitial = () => {
+    if (initialBulkItemsRef.current.length === 0) {
+      return;
+    }
+
+    setBulkEditableItems(initialBulkItemsRef.current.map((item) => ({ ...item })));
+    setBulkDefaultLocationId('');
+    setBulkMessage({
+      tone: 'info',
+      text: '모든 항목을 초기 분석 상태로 되돌렸습니다.',
+    });
+
+    toast.info('초기 상태로 복원했습니다.', {
+      description: '분석 직후 상태로 항목과 위치 선택을 되돌렸어요.',
+    });
+  };
+
+  const handleBulkConfirmSelection = () => {
+    if (!hasBulkSelection) {
+      toast.error('등록할 항목을 최소 한 개 이상 선택해 주세요.');
+      return;
+    }
+
+    const itemsWithoutLocation = bulkEditableItems.filter(
+      (item) => item.isSelected && !item.locationId
+    );
+
+    if (itemsWithoutLocation.length > 0) {
+      toast.error('선택된 항목 중 위치가 지정되지 않은 항목이 있습니다.', {
+        description: '각 항목별 위치를 지정하거나 공용 위치를 적용해 주세요.',
+      });
+      return;
+    }
+
+    setBulkMessage({
+      tone: 'success',
+      text: `선택된 ${selectedBulkItemCount}개 항목 등록 준비가 완료되었습니다. (${totalBulkAssetCount}개 자산 생성 예정)`,
+    });
+
+    toast.success('선택 항목 등록 준비 완료', {
+      description: '자산 생성 API 연동 시 이 항목들을 활용하면 됩니다.',
+    });
   };
 
   const handleBulkAnalyze = async () => {
@@ -1123,7 +1276,7 @@ export default function AssetForm() {
       </Form>
 
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] overflow-hidden">
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>세금계산서 기반 자산 일괄 등록</DialogTitle>
             <DialogDescription>
@@ -1131,7 +1284,7 @@ export default function AssetForm() {
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[65vh] pr-2">
+          <ScrollArea className="max-h-[70vh] pr-2">
             <div className="space-y-5 pb-4 sm:pb-6">
             <div className="space-y-2">
               <Label htmlFor="bulk-receipt-file">세금계산서 파일 업로드</Label>
@@ -1254,26 +1407,106 @@ export default function AssetForm() {
                       <div>
                         <p className="text-sm font-medium">추출된 자산 항목</p>
                         <p className="text-xs text-muted-foreground">
-                          {bulkEditableItems.length}건 • 총 {totalBulkAssetCount}개 생성 예정
+                          {bulkEditableItems.length}건 • 선택 {selectedBulkItemCount}건 • 총 {totalBulkAssetCount}개 생성 예정
                         </p>
                       </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="whitespace-nowrap">
+                          선택 {selectedBulkItemCount}건
+                        </Badge>
                       <Badge variant="outline" className="whitespace-nowrap">
-                        총 자산 수 {totalBulkAssetCount}개
+                          생성 예정 {totalBulkAssetCount}개
                       </Badge>
+                      </div>
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      각 항목의 이름, 카테고리, 수량, 단가, 구매일을 검토하고 필요 시 수정하세요.
+                      각 항목의 카테고리, 수량, 단가, 구매일을 검토하고 필요 시 수정하세요.
                     </p>
 
-                    <ScrollArea className="h-72 rounded-md border">
-                      <div className="min-w-[760px]">
+                    <div className="space-y-2 rounded-md border border-dashed border-muted-foreground/40 bg-muted/10 p-3">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-1 flex-wrap items-center gap-2">
+                          <Select
+                            value={
+                              bulkDefaultLocationId === null
+                                ? LOCATION_UNASSIGNED
+                                : bulkDefaultLocationId === ''
+                                ? LOCATION_UNASSIGNED
+                                : bulkDefaultLocationId
+                            }
+                            onValueChange={(value) =>
+                              setBulkDefaultLocationId(value === LOCATION_UNASSIGNED ? '' : value)
+                            }
+                            disabled={locationsLoading || locations.length === 0}
+                          >
+                            <SelectTrigger className="w-full sm:w-[260px]">
+                              <SelectValue
+                                placeholder={
+                                  locationsLoading
+                                    ? '위치 목록 로딩 중...'
+                                    : '공용으로 적용할 위치를 선택하세요'
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                              {locations.length === 0 ? (
+                                <SelectItem value="__no-location" disabled>
+                                  등록된 위치가 없습니다
+                                </SelectItem>
+                              ) : (
+                                <>
+                                  <SelectItem value={LOCATION_UNASSIGNED}>위치 미지정</SelectItem>
+                                  {locations.map((location) => (
+                                    <SelectItem key={location.id} value={location.id}>
+                                      {location.name}
+                                    </SelectItem>
+                                  ))}
+                                </>
+                              )}
+                            </SelectContent>
+                          </Select>
+
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={applyBulkLocationToSelected}
+                            disabled={
+                              locations.length === 0 ||
+                              locationsLoading ||
+                              !hasBulkSelection ||
+                              bulkDefaultLocationId === null
+                            }
+                          >
+                            선택 항목에 적용
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={clearLocationsFromSelected}
+                            disabled={!hasBulkSelection}
+                          >
+                            선택 항목 위치 초기화
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground sm:max-w-sm sm:text-right">
+                          위치 열을 제거한 대신 공용 위치를 선택해 적용합니다. 필요 시 선택된 항목의 위치를 초기화할 수 있습니다.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="max-h-72 overflow-auto rounded-md border">
+                      <div className="min-w-[900px]">
                         <Table>
                           <TableHeader>
                             <TableRow>
+                              <TableHead className="w-16 text-center">등록</TableHead>
                               <TableHead className="w-12 text-center">#</TableHead>
-                              <TableHead>항목명</TableHead>
-                              <TableHead className="w-48">카테고리</TableHead>
+                              <TableHead className="w-64">카테고리</TableHead>
+                              <TableHead className="w-48">모델/규격</TableHead>
                               <TableHead className="w-28">수량</TableHead>
                               <TableHead className="w-32">단가(원)</TableHead>
                               <TableHead className="w-36">구매일</TableHead>
@@ -1285,28 +1518,18 @@ export default function AssetForm() {
 
                               return (
                                 <TableRow key={item.id}>
-                                  <TableCell className="text-center align-top">{index + 1}</TableCell>
-                                  <TableCell className="align-top">
-                                    <Input
-                                      value={item.name}
-                                      placeholder="항목명을 입력하세요"
-                                      onChange={(event) =>
-                                        updateBulkItem(item.id, (current) => ({
-                                          ...current,
-                                          name: event.target.value,
-                                        }))
-                                      }
-                                    />
-                                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                      {item.itemType && (
-                                        <Badge variant="secondary" className="uppercase tracking-tight">
-                                          {item.itemType}
-                                        </Badge>
-                                      )}
-                                      {item.model && <span>모델: {item.model}</span>}
-                                      {item.specifications && <span>규격: {item.specifications}</span>}
-                                    </div>
+                                  <TableCell className="text-center align-middle">
+                                    <label className="flex h-full items-center justify-center">
+                                      <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border border-input accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        aria-label={`${item.extractedName || `항목 ${index + 1}`} 항목 등록 여부`}
+                                        checked={item.isSelected}
+                                        onChange={() => toggleBulkItemSelection(item.id)}
+                                      />
+                                    </label>
                                   </TableCell>
+                                  <TableCell className="text-center align-top">{index + 1}</TableCell>
                                   <TableCell className="align-top">
                                     <Select
                                       value={item.categoryId}
@@ -1318,12 +1541,14 @@ export default function AssetForm() {
                                       }
                                       disabled={categoriesLoading || categories.length === 0}
                                     >
-                                      <SelectTrigger>
-                                        <SelectValue placeholder={
+                                      <SelectTrigger title={item.extractedName || undefined}>
+                                        <SelectValue
+                                          placeholder={
                                           categoriesLoading
                                             ? '카테고리 로딩 중...'
                                             : '카테고리를 선택하세요'
-                                        } />
+                                          }
+                                        />
                                       </SelectTrigger>
                                       <SelectContent className="max-h-60">
                                         {categories.length === 0 ? (
@@ -1339,6 +1564,28 @@ export default function AssetForm() {
                                         )}
                                       </SelectContent>
                                     </Select>
+                                  </TableCell>
+                                  <TableCell className="align-top">
+                                    <div className="space-y-1 text-sm">
+                                      {item.model && (
+                                        <p className="text-muted-foreground">
+                                          <span className="font-medium text-foreground">모델</span>: {item.model}
+                                        </p>
+                                      )}
+                                      {item.specifications && (
+                                        <p className="text-muted-foreground">
+                                          <span className="font-medium text-foreground">규격</span>: {item.specifications}
+                                        </p>
+                                      )}
+                                      {item.itemType && (
+                                        <Badge variant="secondary" className="uppercase tracking-tight">
+                                          {item.itemType}
+                                        </Badge>
+                                      )}
+                                      {!item.model && !item.specifications && !item.itemType && (
+                                        <span className="text-xs text-muted-foreground">-</span>
+                                      )}
+                                    </div>
                                   </TableCell>
                                   <TableCell className="align-top">
                                     <Input
@@ -1393,7 +1640,7 @@ export default function AssetForm() {
                           </TableBody>
                         </Table>
                       </div>
-                    </ScrollArea>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
@@ -1405,7 +1652,30 @@ export default function AssetForm() {
             </div>
           </ScrollArea>
 
-          <DialogFooter className="pt-2 sm:pt-4 pb-2">
+          <DialogFooter className="flex flex-col gap-2 pt-2 pb-2 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
+            <div className="flex flex-wrap gap-2">
+              {bulkEditableItems.length > 0 && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={resetBulkItemsToInitial}
+                    disabled={bulkEditableItems.length === 0}
+                  >
+                    초기화
+                  </Button>
+                  <Button
+                    type="button"
+                    className="gap-2"
+                    onClick={handleBulkConfirmSelection}
+                    disabled={!hasBulkSelection}
+                  >
+                    선택 항목 등록
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
             <Button variant="ghost" onClick={() => setBulkDialogOpen(false)}>
               단일 자산 등록 계속
             </Button>
@@ -1427,6 +1697,7 @@ export default function AssetForm() {
                 </>
               )}
             </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
