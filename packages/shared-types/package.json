@@ -1,0 +1,36 @@
+{
+  "name": "@ams/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for AMS",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./asset": {
+      "import": "./dist/asset/index.js",
+      "types": "./dist/asset/index.d.ts"
+    },
+    "./user": {
+      "import": "./dist/user/index.js",
+      "types": "./dist/user/index.d.ts"
+    },
+    "./workflow": {
+      "import": "./dist/workflow/index.js",
+      "types": "./dist/workflow/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@ams/config": "workspace:*",
+    "typescript": "^5.3.0"
+  }
+}

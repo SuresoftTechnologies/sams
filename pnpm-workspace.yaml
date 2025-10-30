@@ -1,0 +1,7 @@
+# pnpm workspace configuration
+packages:
+  # Applications
+  - 'apps/*'
+
+  # Shared packages
+  - 'packages/*'

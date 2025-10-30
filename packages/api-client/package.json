@@ -1,0 +1,25 @@
+{
+  "name": "@ams/api-client",
+  "version": "1.0.0",
+  "description": "Auto-generated TypeScript API client from FastAPI OpenAPI spec",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "build": "pnpm generate && tsc",
+    "dev": "pnpm generate && tsc --watch",
+    "clean": "rm -rf dist src/generated"
+  },
+  "dependencies": {
+    "@ams/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@ams/config": "workspace:*",
+    "openapi-typescript": "^6.7.0",
+    "typescript": "^5.3.0"
+  },
+  "files": [
+    "dist",
+    "openapi.json"
+  ]
+}

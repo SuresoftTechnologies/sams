@@ -1,0 +1,22 @@
+{
+  "name": "@ams/backend",
+  "version": "1.0.0",
+  "description": "SureSoft AMS Backend API (FastAPI)",
+  "private": true,
+  "scripts": {
+    "setup": "uv sync",
+    "dev": "uv run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "uv run uvicorn src.main:app --host 0.0.0.0 --port 8000",
+    "generate:openapi": "uv run python scripts/export_openapi.py",
+    "test": "uv run pytest",
+    "test:watch": "uv run pytest-watch",
+    "lint": "uv run ruff check src tests",
+    "format": "uv run ruff format src tests",
+    "typecheck": "uv run mypy src",
+    "db:migrate": "uv run alembic upgrade head",
+    "db:migrate:create": "uv run alembic revision --autogenerate -m",
+    "db:reset": "uv run alembic downgrade base && uv run alembic upgrade head",
+    "db:seed": "uv run python scripts/seed.py",
+    "clean": "rm -rf dist .venv .pytest_cache .coverage htmlcov .mypy_cache .ruff_cache uv.lock"
+  }
+}
