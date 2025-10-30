@@ -25,6 +25,10 @@ export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authService.login(credentials),
     onSuccess: (data) => {
+      console.log('[useLogin] Login API response:', data);
+      console.log('[useLogin] User from API:', data.user);
+      console.log('[useLogin] User role:', data.user.role);
+
       // Store tokens and user in auth store
       login(
         {
@@ -38,9 +42,11 @@ export function useLogin() {
       // Cache user data in react-query
       queryClient.setQueryData(['currentUser'], data.user);
 
+      console.log('[useLogin] User stored in auth store');
+
       // Show success message
       toast.success('로그인 성공', {
-        description: `${data.user.full_name}님, 다시 오신 것을 환영합니다!`,
+        description: `${data.user.name}님, 다시 오신 것을 환영합니다!`,
       });
 
       // Navigate to dashboard

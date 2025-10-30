@@ -479,7 +479,6 @@ export default function AssetDetail() {
                   variant="outline"
                   className="w-full justify-start gap-2"
                   onClick={() => navigate(`/assets/${id}/checkout`)}
-                  disabled
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   반출/반납 신청

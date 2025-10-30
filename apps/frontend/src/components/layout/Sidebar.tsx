@@ -14,6 +14,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { useRole } from '@/hooks/useRole';
+import { useAuthStore } from '@/stores/auth-store';
 
 /**
  * Sidebar Component
@@ -110,6 +111,14 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const location = useLocation();
   const { hasRole, role } = useRole();
+  const user = useAuthStore((state) => state.user);
+
+  // Debug: Log user and role on component render
+  console.log('[Sidebar] User state:', {
+    user,
+    role,
+    hasRoleFunction: hasRole,
+  });
 
   // Filter nav items based on user role
   const visibleNavItems = navItems.filter((item) => {
@@ -122,11 +131,13 @@ export default function Sidebar() {
 
     // Debug logging for "신청 관리" menu
     if (item.title === '신청 관리') {
-      console.log('[Sidebar Debug] 신청 관리 menu check:', {
+      console.log('[Sidebar] 신청 관리 menu check:', {
         userRole: role,
+        userObject: user,
         requiredRoles: item.requiredRoles,
         hasAccess: hasAccess,
-        hasRoleFunction: hasRole,
+        roleIncludesAdmin: item.requiredRoles.includes('admin'),
+        roleIncludesManager: item.requiredRoles.includes('manager'),
       });
     }
 

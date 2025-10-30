@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   Package,
   FileText,
+  GitPullRequest,
 } from 'lucide-react';
 import { useUser, useLogout } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
@@ -66,7 +67,13 @@ const navItems: NavItem[] = [
     title: '신청',
     href: '/requests',
     icon: FileText,
-    requiredRoles: ['employee'],
+    // 모든 사용자가 신청할 수 있음
+  },
+  {
+    title: '신청 관리',
+    href: '/workflows',
+    icon: GitPullRequest,
+    requiredRoles: ['admin', 'manager'],
   },
 ];
 
@@ -261,7 +268,7 @@ export default function Header() {
               <Button variant="ghost" className="relative gap-2">
                 <User className="h-5 w-5" />
                 <span className="hidden md:inline-block text-sm font-medium">
-                  {user.full_name}
+                  {user.name}
                 </span>
                 <span className="sr-only">User menu</span>
               </Button>
@@ -269,7 +276,7 @@ export default function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.full_name}</p>
+                  <p className="text-sm font-medium leading-none">{user.name}</p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.email}
                   </p>

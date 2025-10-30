@@ -55,9 +55,10 @@ export type AssetRead = Asset;
 export interface User {
   id: string;
   email: string;
-  full_name: string;
+  name: string;
   role: 'admin' | 'manager' | 'employee';
-  department_id?: string | null;
+  department?: string | null;
+  employee_id?: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -116,7 +117,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  full_name: string;
+  name: string;
 }
 
 export interface TokenResponse {

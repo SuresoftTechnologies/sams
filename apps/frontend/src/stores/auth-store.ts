@@ -27,11 +27,12 @@ import { authStorage, type TokenResponse } from '@/lib/auth-storage';
  * User data structure (from backend /auth/me endpoint)
  */
 export interface User {
-  id: number;
+  id: string;
   email: string;
-  full_name: string;
+  name: string;
   role: 'admin' | 'manager' | 'employee';
-  department_id?: number | null;
+  department?: string | null;
+  employee_id?: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -90,6 +91,10 @@ export const useAuthStore = create<AuthState>((set) => ({
    */
   login: (tokens, user) => {
     try {
+      console.log('[Auth Store] Login called with user:', user);
+      console.log('[Auth Store] User role:', user.role);
+      console.log('[Auth Store] User name:', user.name);
+
       // Store tokens in localStorage
       authStorage.setTokens(tokens);
 
@@ -99,8 +104,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      console.log('[Auth Store] Login successful, state updated');
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('[Auth Store] Login failed:', error);
       throw error;
     }
   },
