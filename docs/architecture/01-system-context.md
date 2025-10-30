@@ -207,16 +207,16 @@ sequenceDiagram
     User->>Mobile: QR코드 스캔 (대여/반납용)
     Mobile->>Mobile: QR 디코딩
     Note over Mobile: 결과: "14-2022-23"
-    Mobile->>AMS: GET /api/assets/by-number/14-2022-23
-    SAMS->>DB: asset_number로 자산 조회
-    DB-->>AMS: 자산 상세 정보
+    Mobile->>SAMS: GET /api/assets/by-tag/14-2022-23
+    SAMS->>DB: asset_tag로 자산 조회
+    DB-->>SAMS: 자산 상세 정보
     SAMS-->>Mobile: 자산 정보 반환
     Mobile-->>User: 대여/반납 화면 표시
     
     User->>Mobile: "대여" 버튼 클릭
-    Mobile->>AMS: POST /api/workflows/checkout
+    Mobile->>SAMS: POST /api/workflows/checkout
     SAMS->>DB: 대여 요청 생성
-    DB-->>AMS: 성공
+    DB-->>SAMS: 성공
     SAMS-->>Mobile: 요청 완료
     Mobile-->>User: "대여 요청이 제출되었습니다"
 ```

@@ -585,7 +585,7 @@ By Status:
 
 ### Primary Indexes
 - **Primary Keys**: 모든 테이블에 UUID 기본키
-- **Unique Constraints**: email, asset_number, serial_number
+- **Unique Constraints**: email, asset_tag, serial_number
 
 ### Secondary Indexes
 - **Foreign Keys**: 모든 외래키에 인덱스

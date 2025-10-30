@@ -284,8 +284,8 @@ SecRule ARGS "@rx <script" \
   "assetId": "uuid",
   "userId": "uuid",
   "changes": {
-    "status": { "from": "available", "to": "assigned" },
-    "currentUserId": { "from": null, "to": "uuid" }
+    "status": { "from": "stock", "to": "issued" },
+    "assignedTo": { "from": null, "to": "uuid" }
   }
 }
 ```

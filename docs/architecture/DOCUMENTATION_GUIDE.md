@@ -108,10 +108,10 @@ export class CreateAssetDto {
 
   @ApiProperty({
     description: 'Asset status',
-    enum: ['available', 'assigned', 'maintenance', 'disposed'],
-    example: 'available',
+    enum: ['issued', 'loaned', 'general', 'stock', 'server_room', 'disposed'],
+    example: 'stock',
   })
-  @IsEnum(['available', 'assigned', 'maintenance', 'disposed'])
+  @IsEnum(['issued', 'loaned', 'general', 'stock', 'server_room', 'disposed'])
   status: string;
 
   @ApiProperty({
@@ -177,7 +177,7 @@ npm install --save-dev typedoc
  * const asset = await assetsService.create({
  *   assetTag: 'SRS-LAP-2024-0001',
  *   model: 'MacBook Pro 16',
- *   status: 'available'
+ *   status: 'stock'
  * });
  * ```
  */
@@ -224,14 +224,14 @@ model Asset {
   model       String
 
   /// Current asset status
-  status      AssetStatus @default(AVAILABLE)
+  status      AssetStatus @default(STOCK)
 
   /// Asset grade (A/B/C based on purchase year)
   grade       AssetGrade?
 
   /// Current user assignment
-  currentUser User?   @relation("AssignedAssets", fields: [currentUserId], references: [id])
-  currentUserId String? @map("current_user_id")
+  assignedTo  User?   @relation("AssignedAssets", fields: [assignedToId], references: [id])
+  assignedToId String? @map("assigned_to")
 
   /// Asset location
   location    Location @relation(fields: [locationId], references: [id])
