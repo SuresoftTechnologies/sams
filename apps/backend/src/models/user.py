@@ -54,7 +54,12 @@ class User(Base):
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Relationships
-    department: Mapped["Department"] = relationship("Department", lazy="select")
+    department: Mapped["Department | None"] = relationship(
+        "Department", foreign_keys=[department_id], back_populates="members", lazy="select"
+    )
+    managed_department: Mapped["Department | None"] = relationship(
+        "Department", foreign_keys="Department.manager_id", back_populates="manager", lazy="select"
+    )
     # assets: Mapped[list["Asset"]] = relationship("Asset", back_populates="assigned_user")
     # workflows_requested: Mapped[list["Workflow"]] = relationship(
     #     "Workflow", foreign_keys="Workflow.requester_id", back_populates="requester"

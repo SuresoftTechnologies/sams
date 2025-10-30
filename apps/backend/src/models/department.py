@@ -51,7 +51,12 @@ class Department(Base):
     children: Mapped[list["Department"]] = relationship(
         "Department", back_populates="parent", lazy="select"
     )
-    manager: Mapped["User"] = relationship("User", lazy="select")
+    manager: Mapped["User | None"] = relationship(
+        "User", foreign_keys=[manager_id], back_populates="managed_department", lazy="select"
+    )
+    members: Mapped[list["User"]] = relationship(
+        "User", foreign_keys="User.department_id", back_populates="department", lazy="select"
+    )
 
     def __repr__(self) -> str:
         return f"<Department(id={self.id}, name={self.name}, code={self.code})>"
