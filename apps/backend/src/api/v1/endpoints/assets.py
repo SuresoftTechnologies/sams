@@ -113,6 +113,52 @@ async def get_assets(
     )
 
 
+@router.get("/by-number/{asset_number}", response_model=Asset)
+async def get_asset_by_number(
+    asset_number: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> Asset:
+    """
+    Get asset by asset number (for QR code scanning).
+
+    This endpoint is used when scanning QR codes that contain the asset number
+    (e.g., "14-2022-23"). It allows quick lookup for rental/return workflows.
+
+    Args:
+        asset_number: Asset number from QR code scan (e.g., "14-2022-23")
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Asset object
+
+    Raises:
+        HTTPException: 404 if asset not found
+
+    Example:
+        QR scan result: "14-2022-23"
+        GET /api/v1/assets/by-number/14-2022-23
+    """
+    result = await db.execute(
+        select(AssetModel).where(
+            and_(
+                AssetModel.asset_tag == asset_number,
+                AssetModel.deleted_at.is_(None)
+            )
+        )
+    )
+    asset = result.scalar_one_or_none()
+
+    if asset is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Asset with number '{asset_number}' not found",
+        )
+
+    return Asset.model_validate(asset)
+
+
 @router.get("/{asset_id}", response_model=Asset)
 async def get_asset(
     asset_id: str,

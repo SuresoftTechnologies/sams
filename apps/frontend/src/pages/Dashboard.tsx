@@ -1,69 +1,178 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Package, CheckCircle, XCircle, Clock, Loader2, TrendingUp } from 'lucide-react';
+import { useGetAssets } from '@/hooks/useAssets';
+import { format } from 'date-fns';
 
 /**
- * Dashboard Page (Placeholder)
+ * Dashboard Page
  *
- * TODO Phase 7:
- * - Fetch statistics from API using useQuery
- * - Display total assets, available, in-use counts
- * - Show recent activity timeline
- * - Add charts (optional)
+ * Features:
+ * - Asset statistics cards (total, available, in-use, maintenance)
+ * - Recent activity list
+ * - Loading and error states
+ * - Real-time data from TanStack Query
  */
 export default function Dashboard() {
-  // Placeholder data
-  const stats = [
-    { label: 'Total Assets', value: 0, icon: Package, color: 'text-blue-500' },
-    { label: 'Available', value: 0, icon: CheckCircle, color: 'text-green-500' },
-    { label: 'In Use', value: 0, icon: Clock, color: 'text-yellow-500' },
-    { label: 'Maintenance', value: 0, icon: XCircle, color: 'text-red-500' },
-  ];
+  const { data, isLoading, error } = useGetAssets();
+
+  // Calculate statistics from assets data
+  const stats = data
+    ? [
+        {
+          label: 'Total Assets',
+          value: data.total,
+          icon: Package,
+          color: 'text-blue-500',
+          bgColor: 'bg-blue-50',
+          description: 'All registered assets',
+        },
+        {
+          label: 'Available',
+          value: data.data.filter((a) => a.status === 'available').length,
+          icon: CheckCircle,
+          color: 'text-green-500',
+          bgColor: 'bg-green-50',
+          description: 'Ready to use',
+        },
+        {
+          label: 'In Use',
+          value: data.data.filter((a) => a.status === 'in_use').length,
+          icon: Clock,
+          color: 'text-yellow-500',
+          bgColor: 'bg-yellow-50',
+          description: 'Currently checked out',
+        },
+        {
+          label: 'Maintenance',
+          value: data.data.filter((a) => a.status === 'maintenance').length,
+          icon: XCircle,
+          color: 'text-red-500',
+          bgColor: 'bg-red-50',
+          description: 'Under maintenance',
+        },
+      ]
+    : [];
+
+  // Get recent assets (latest 5)
+  const recentAssets = data?.data.slice(0, 5) || [];
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome to SureSoft Asset Management System</p>
+        </div>
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <p className="text-destructive text-center">
+              Failed to load dashboard data. Please try again.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to SureSoft Asset Management System
-          </p>
+          <p className="text-muted-foreground">Welcome to SureSoft Asset Management System</p>
         </div>
-        <Badge variant="secondary">Phase 5 Complete</Badge>
+        <Badge variant="secondary" className="gap-2">
+          <TrendingUp className="h-3 w-3" />
+          Phase 7 Complete
+        </Badge>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.label}>
+        {isLoading ? (
+          // Loading skeleton
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {/* TODO: Add comparison with previous period */}
-                  No data available yet
-                </p>
+                <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-3 w-32 bg-muted animate-pulse rounded" />
               </CardContent>
             </Card>
-          );
-        })}
+          ))
+        ) : (
+          stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground">{stat.description}</p>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Latest asset transactions and updates</CardDescription>
+          <CardTitle>Recent Assets</CardTitle>
+          <CardDescription>Latest assets added to the system</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No recent activity. Connect to backend API to see data.
-          </p>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : recentAssets.length > 0 ? (
+            <div className="space-y-4">
+              {recentAssets.map((asset) => (
+                <div
+                  key={asset.id}
+                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-none">{asset.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {asset.categoryName} • {asset.locationName}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={
+                        asset.status === 'available'
+                          ? 'default'
+                          : asset.status === 'in_use'
+                            ? 'secondary'
+                            : 'destructive'
+                      }
+                    >
+                      {asset.status.replace('_', ' ')}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(asset.createdAt), 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No assets found. Create your first asset to get started.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

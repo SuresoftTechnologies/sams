@@ -532,7 +532,7 @@ apps/backend/
   - [x] 쿼리 파라미터: skip, limit, search, category_id, status, location_id, grade
   - [x] 정렬: sort_by, sort_order
 - [x] GET /assets/:id - 자산 상세
-- [ ] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용, MVP)
+- [x] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용, MVP)
 - [x] POST /assets - 자산 생성 (Admin/Manager)
 - [x] PUT /assets/:id - 자산 수정 (Admin/Manager)
 - [x] DELETE /assets/:id - 자산 삭제 (소프트 삭제, Admin)
@@ -564,8 +564,8 @@ apps/backend/
 - [x] PATCH /workflows/:id/reject - 요청 거부 (Manager/Admin)
 - [x] PATCH /workflows/:id/cancel - 요청 취소
 
-### 7.7 QR코드 기능 (MVP: assets.py에 통합)
-- [ ] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용)
+### 7.7 QR코드 기능 (MVP: assets.py에 통합) ✅
+- [x] GET /assets/by-number/:assetNumber - 자산번호로 조회 (QR 스캔용)
   - QR 스캔 결과(예: "14-2022-23")로 자산 정보 조회
   - 대여/반납 화면 연결용
   - 기존 QR 코드 활용 (새로 생성하지 않음)
