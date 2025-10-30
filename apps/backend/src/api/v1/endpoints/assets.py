@@ -428,15 +428,25 @@ async def update_asset(
             detail="Asset not found",
         )
 
-    # Store old values for history
+    # Store old and new values for history
     old_values: dict[str, Any] = {}
+    new_values: dict[str, Any] = {}
     update_data = request.model_dump(exclude_unset=True)
+
+    # Helper function to serialize values for JSON storage
+    def serialize_value(value: Any) -> str | None:
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return str(value)
 
     # Update fields if provided
     for field, value in update_data.items():
         old_value = getattr(asset, field)
         if old_value != value:
-            old_values[field] = str(old_value) if old_value else None
+            old_values[field] = serialize_value(old_value)
+            new_values[field] = serialize_value(value)
             setattr(asset, field, value)
 
     # Create history entry if there were changes
@@ -448,7 +458,7 @@ async def update_asset(
             action=HistoryAction.UPDATED,
             description=f"Asset updated by {current_user.name}",
             old_values=old_values,
-            new_values=update_data,
+            new_values=new_values,
         )
         db.add(history)
 
