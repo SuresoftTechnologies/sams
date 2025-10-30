@@ -44,7 +44,7 @@ async def create_test_user(
             print(f"⚠️  User with email {email} already exists!")
             print(f"   ID: {existing_user.id}")
             print(f"   Name: {existing_user.name}")
-            print(f"   Role: {existing_user.role.value}")
+            print(f"   Role: {existing_user.role if isinstance(existing_user.role, str) else existing_user.role.value}")
             return existing_user
 
         # Create new user
@@ -70,7 +70,7 @@ async def create_test_user(
         print(f"   Email: {new_user.email}")
         print(f"   Password: {password}")
         print(f"   Name: {new_user.name}")
-        print(f"   Role: {new_user.role.value}")
+        print(f"   Role: {new_user.role if isinstance(new_user.role, str) else new_user.role.value}")
         print(f"\n📝 You can now login with:")
         print(f"   Email: {email}")
         print(f"   Password: {password}")

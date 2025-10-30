@@ -12,9 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Search, Package, Loader2, Eye } from 'lucide-react';
+import { Plus, Search, Package, Loader2, Eye, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { useGetAssets } from '@/hooks/useAssets';
+import { useUser } from '@/hooks/useAuth';
 import { format } from 'date-fns';
+import { RentalDialog } from '@/components/dialogs/RentalDialog';
+import { ReturnDialog } from '@/components/dialogs/ReturnDialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import type { Asset } from '@/types/api';
 
 /**
  * Assets List Page
@@ -29,7 +39,11 @@ import { format } from 'date-fns';
 export default function Assets() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useGetAssets();
+  const currentUser = useUser();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [showRentalDialog, setShowRentalDialog] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
 
   // Filter assets by search query
   const filteredAssets = data?.items.filter((asset) => {
@@ -66,6 +80,32 @@ export default function Assets() {
         {labels[status as keyof typeof labels] || status}
       </Badge>
     );
+  };
+
+  // Check if user can rent this asset
+  const canRentAsset = (asset: Asset): boolean => {
+    if (!currentUser) return false;
+    if (currentUser.role !== 'employee') return false; // Only employees can rent
+    const assignedTo = asset.assigned_to || asset.assignee_id; // Support both field names
+    return asset.status === 'loaned' && !assignedTo;
+  };
+
+  // Check if user can return this asset
+  const canReturnAsset = (asset: Asset): boolean => {
+    if (!currentUser) return false;
+    if (currentUser.role !== 'employee') return false; // Only employees can return
+    const assignedTo = asset.assigned_to || asset.assignee_id; // Support both field names
+    return assignedTo === currentUser.id;
+  };
+
+  const handleRentalClick = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setShowRentalDialog(true);
+  };
+
+  const handleReturnClick = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setShowReturnDialog(true);
   };
 
   return (
@@ -153,18 +193,73 @@ export default function Assets() {
                         {format(new Date(asset.created_at), 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/assets/${asset.id}`);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <TooltipProvider>
+                            {/* Rental button */}
+                            {canRentAsset(asset) && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRentalClick(asset);
+                                    }}
+                                  >
+                                    <ArrowDownToLine className="h-4 w-4" />
+                                    대여 신청
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>이 자산을 대여 신청합니다</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+
+                            {/* Return button */}
+                            {canReturnAsset(asset) && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleReturnClick(asset);
+                                    }}
+                                  >
+                                    <ArrowUpFromLine className="h-4 w-4" />
+                                    반납 신청
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>이 자산을 반납 신청합니다</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+
+                            {/* View button */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/assets/${asset.id}`);
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                  상세
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>자산 상세 정보 보기</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -192,6 +287,32 @@ export default function Assets() {
           )}
         </CardContent>
       </Card>
+
+      {/* Rental Dialog */}
+      {selectedAsset && (
+        <RentalDialog
+          open={showRentalDialog}
+          onOpenChange={setShowRentalDialog}
+          asset={selectedAsset}
+          onSuccess={() => {
+            setSelectedAsset(null);
+            setShowRentalDialog(false);
+          }}
+        />
+      )}
+
+      {/* Return Dialog */}
+      {selectedAsset && (
+        <ReturnDialog
+          open={showReturnDialog}
+          onOpenChange={setShowReturnDialog}
+          asset={selectedAsset}
+          onSuccess={() => {
+            setSelectedAsset(null);
+            setShowReturnDialog(false);
+          }}
+        />
+      )}
     </div>
   );
 }
