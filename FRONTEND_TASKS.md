@@ -249,27 +249,27 @@ src/
 ## 🎯 Phase 8: 기능별 컴포넌트 구현
 
 ### 8.1 자산 관련 컴포넌트
-- [ ] components/features/AssetTable.tsx
-- [ ] components/features/AssetCard.tsx
-- [ ] components/features/AssetFilters.tsx
-- [ ] components/features/AssetQRCode.tsx (qrcode.react)
+- [x] components/features/AssetTable.tsx
+- [x] components/features/AssetCard.tsx
+- [x] components/features/AssetFilters.tsx
+- [x] components/features/AssetQRCode.tsx (qrcode.react)
 
 ### 8.2 Custom Hooks
-- [ ] hooks/useAssets.ts
-  - [ ] useGetAssets (목록)
-  - [ ] useGetAsset (상세)
-  - [ ] useCreateAsset (생성)
-  - [ ] useUpdateAsset (수정)
-  - [ ] useDeleteAsset (삭제)
-- [ ] hooks/useAuth.ts
-  - [ ] useLogin
-  - [ ] useLogout
-  - [ ] useCurrentUser
+- [x] hooks/useAssets.ts
+  - [x] useGetAssets (목록)
+  - [x] useGetAsset (상세)
+  - [x] useCreateAsset (생성)
+  - [x] useUpdateAsset (수정)
+  - [x] useDeleteAsset (삭제)
+- [x] hooks/useAuth.ts
+  - [x] useLogin
+  - [x] useLogout
+  - [x] useCurrentUser
 
 ### 8.3 유틸리티 함수
-- [ ] lib/format.ts (날짜, 숫자 포맷팅)
-- [ ] lib/constants.ts (상수 정의)
-- [ ] lib/validators.ts (Zod 스키마)
+- [x] lib/format.ts (날짜, 숫자 포맷팅)
+- [x] lib/constants.ts (상수 정의)
+- [x] lib/validators.ts (Zod 스키마)
 
 ---
 
