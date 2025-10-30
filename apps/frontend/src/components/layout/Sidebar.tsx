@@ -51,7 +51,7 @@ const navItems: NavItem[] = [
     title: '신청',
     href: '/requests',
     icon: FileText,
-    requiredRoles: ['employee'],
+    // 모든 사용자가 신청할 수 있음
   },
   {
     title: '신청 관리',
@@ -109,7 +109,10 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
   const location = useLocation();
-  const { hasRole } = useRole();
+  const { hasRole, role } = useRole();
+
+  // Debug: Log current user role
+  console.log('[Sidebar] Current user role:', role);
 
   // Filter nav items based on user role
   const visibleNavItems = navItems.filter((item) => {
@@ -118,7 +121,12 @@ export default function Sidebar() {
       return true;
     }
     // Check if user has required role
-    return hasRole(...item.requiredRoles);
+    const hasAccess = hasRole(...item.requiredRoles);
+
+    // Debug: Log filtering results for items with role requirements
+    console.log(`[Sidebar] Item: "${item.title}", Required: [${item.requiredRoles.join(', ')}], Has Access: ${hasAccess}`);
+
+    return hasAccess;
   });
 
   return (

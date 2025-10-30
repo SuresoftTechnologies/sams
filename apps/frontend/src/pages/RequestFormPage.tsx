@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,11 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { workflowService, type WorkflowType, type CreateWorkflowRequest } from '@/services/workflow-service';
 import { assetService } from '@/services/asset-service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useRole } from '@/hooks/useRole';
+import type { Asset } from '@/types/api';
 
 interface WorkflowTypeOption {
   value: WorkflowType;
@@ -105,28 +108,54 @@ export default function RequestFormPage() {
     return hasRole(...type.requiredRoles as any);
   });
 
-  // Query for available assets
-  const { data: assetsData, isLoading: assetsLoading } = useQuery({
-    queryKey: ['assets', 'available'],
+  // Query for all assets - we'll filter client-side based on the workflow type
+  const { data: assetsData, isLoading: assetsLoading, error: assetsError } = useQuery({
+    queryKey: ['assets', 'all'],
     queryFn: () => assetService.getAssets({
-      status: 'general', // Use a valid status
-      limit: 100,
+      limit: 200, // Get more assets to ensure we have enough after filtering
     }),
-    enabled: !!selectedType && selectedType !== 'return' && selectedType !== 'checkin',
+    enabled: !!selectedType,
   });
 
-  // Query for user's checked-out assets (for return/checkin)
-  const { data: userAssetsData, isLoading: userAssetsLoading } = useQuery({
-    queryKey: ['assets', 'user', user?.id],
-    queryFn: async () => {
-      // This would need to be implemented in the backend
-      // For now, we'll use all assets as a placeholder
-      return assetService.getAssets({
-        limit: 100,
-      });
-    },
-    enabled: selectedType === 'return' || selectedType === 'checkin',
-  });
+  // Filter assets based on workflow type and user
+  const filteredAssets = useMemo(() => {
+    if (!assetsData?.items) return [];
+
+    const assets = assetsData.items;
+    const currentUserId = user?.id?.toString();
+
+    switch (selectedType) {
+      case 'rental':
+        // RENTAL: 대여 가능한 자산 (loaned 상태 + 미할당)
+        return assets.filter((asset: Asset) =>
+          asset.status === 'loaned' &&
+          (!asset.assigned_to || asset.assigned_to === null)
+        );
+
+      case 'return':
+      case 'checkin':
+        // RETURN/CHECKIN: 현재 사용자에게 할당된 자산
+        if (!currentUserId) return [];
+        return assets.filter((asset: Asset) =>
+          asset.assigned_to === currentUserId
+        );
+
+      case 'checkout':
+        // CHECKOUT: 반출 가능한 자산 (loaned/stock 상태 + 미할당)
+        return assets.filter((asset: Asset) =>
+          (asset.status === 'loaned' || asset.status === 'stock') &&
+          (!asset.assigned_to || asset.assigned_to === null)
+        );
+
+      case 'maintenance':
+      case 'disposal':
+        // MAINTENANCE/DISPOSAL: 모든 자산
+        return assets;
+
+      default:
+        return assets;
+    }
+  }, [assetsData?.items, selectedType, user?.id]);
 
   // Mutation for creating workflow
   const createMutation = useMutation({
@@ -192,14 +221,6 @@ export default function RequestFormPage() {
 
     createMutation.mutate(requestData);
   };
-
-  const assets = selectedType === 'return' || selectedType === 'checkin'
-    ? userAssetsData?.items || []
-    : assetsData?.items || [];
-
-  const isLoading = selectedType === 'return' || selectedType === 'checkin'
-    ? userAssetsLoading
-    : assetsLoading;
 
   const requiresReturnDate = selectedType === 'rental' || selectedType === 'checkout';
   const requiresReason = selectedType === 'maintenance' || selectedType === 'disposal';
@@ -289,34 +310,100 @@ export default function RequestFormPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Error Alert */}
+              {assetsError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    자산 목록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Asset Selection */}
               <div className="space-y-2">
                 <Label htmlFor="asset">자산 *</Label>
                 <Select
                   value={selectedAsset}
                   onValueChange={setSelectedAsset}
-                  disabled={isLoading}
+                  disabled={assetsLoading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={isLoading ? '자산 목록 로딩 중...' : '자산을 선택하세요'} />
+                    <SelectValue placeholder={
+                      assetsLoading
+                        ? '자산 목록 로딩 중...'
+                        : filteredAssets.length === 0
+                        ? '선택 가능한 자산이 없습니다'
+                        : '자산을 선택하세요'
+                    } />
                   </SelectTrigger>
-                  <SelectContent>
-                    {assets.map((asset) => (
-                      <SelectItem key={asset.id} value={asset.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{asset.model || 'Unknown Model'}</span>
-                          <span className="text-sm text-muted-foreground">
-                            ({asset.asset_tag})
+                  <SelectContent className="max-h-[250px] overflow-y-auto">
+                    {assetsLoading ? (
+                      <SelectItem value="loading" disabled>
+                        자산 목록 로딩 중...
+                      </SelectItem>
+                    ) : filteredAssets.length === 0 ? (
+                      <SelectItem value="empty" disabled>
+                        <div className="py-2">
+                          <span className="text-muted-foreground">
+                            {selectedType === 'return' || selectedType === 'checkin'
+                              ? '반납 가능한 자산이 없습니다'
+                              : selectedType === 'rental'
+                              ? '대여 가능한 자산이 없습니다'
+                              : selectedType === 'checkout'
+                              ? '반출 가능한 자산이 없습니다'
+                              : '선택 가능한 자산이 없습니다'}
                           </span>
                         </div>
                       </SelectItem>
-                    ))}
-                    {assets.length === 0 && !isLoading && (
-                      <div className="py-2 px-3 text-sm text-muted-foreground">
-                        선택 가능한 자산이 없습니다
-                      </div>
+                    ) : (
+                      filteredAssets.map((asset) => (
+                        <SelectItem key={asset.id} value={asset.id}>
+                          <div className="flex flex-col py-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {asset.model || asset.manufacturer || 'Unknown Model'}
+                              </span>
+                              {asset.serial_number && (
+                                <span className="text-xs text-muted-foreground">
+                                  S/N: {asset.serial_number}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-muted-foreground">
+                                자산태그: {asset.asset_tag}
+                              </span>
+                              {asset.status && (
+                                <span className={`
+                                  text-xs px-1.5 py-0.5 rounded-full
+                                  ${asset.status === 'loaned' ? 'bg-blue-100 text-blue-700' :
+                                    asset.status === 'stock' ? 'bg-green-100 text-green-700' :
+                                    asset.status === 'disposed' ? 'bg-red-100 text-red-700' :
+                                    asset.status === 'general' ? 'bg-purple-100 text-purple-700' :
+                                    'bg-gray-100 text-gray-700'}
+                                `}>
+                                  {asset.status === 'loaned' ? '대여가능' :
+                                   asset.status === 'stock' ? '재고' :
+                                   asset.status === 'disposed' ? '폐기' :
+                                   asset.status === 'general' ? '일반' :
+                                   asset.status}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))
                     )}
                   </SelectContent>
                 </Select>
+
+                {/* Helper text */}
+                {!assetsLoading && filteredAssets.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    총 {filteredAssets.length}개의 자산을 선택할 수 있습니다.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

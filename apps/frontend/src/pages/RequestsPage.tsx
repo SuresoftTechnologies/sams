@@ -31,6 +31,12 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { workflowService, type Workflow } from '@/services/workflow-service';
 
@@ -127,7 +133,8 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <TooltipProvider>
+      <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">내 신청 내역</h1>
@@ -170,11 +177,11 @@ export default function RequestsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">유형</TableHead>
-                  <TableHead>자산명</TableHead>
-                  <TableHead>자산코드</TableHead>
-                  <TableHead>사유</TableHead>
+                  <TableHead className="min-w-[180px] max-w-[250px]">자산명</TableHead>
+                  <TableHead className="w-[140px]">자산코드</TableHead>
+                  <TableHead className="min-w-[200px] max-w-[300px]">사유</TableHead>
                   <TableHead className="w-[100px]">상태</TableHead>
-                  <TableHead className="w-[180px]">신청일시</TableHead>
+                  <TableHead className="w-[160px]">신청일시</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -191,15 +198,67 @@ export default function RequestsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">
-                      {workflow.asset?.name || '-'}
+                      {(() => {
+                        const assetName = workflow.asset?.name || workflow.asset?.model || workflow.asset?.manufacturer || '-';
+                        const isLongName = assetName.length > 25;
+
+                        return isLongName ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="truncate block cursor-help">
+                                {assetName}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[300px]">
+                              <p>{assetName}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="truncate block">{assetName}</span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {workflow.asset?.asset_code || '-'}
+                      {(() => {
+                        const assetCode = workflow.asset?.asset_code || workflow.asset?.asset_tag || '-';
+                        const isLongCode = assetCode.length > 15;
+
+                        return isLongCode ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="truncate block cursor-help">
+                                {assetCode}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{assetCode}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="truncate block">{assetCode}</span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
-                      <span className="line-clamp-1">
-                        {workflow.reason || '-'}
-                      </span>
+                      {(() => {
+                        const reason = workflow.reason || '-';
+                        const isLongReason = reason.length > 30;
+
+                        return isLongReason ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="line-clamp-2 cursor-help">
+                                {reason}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[400px]">
+                              <p className="whitespace-pre-wrap">{reason}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="line-clamp-2">{reason}</span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -266,6 +325,7 @@ export default function RequestsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
