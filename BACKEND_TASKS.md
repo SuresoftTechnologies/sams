@@ -589,31 +589,31 @@ apps/backend/
 
 ---
 
-## 💼 Phase 8: 비즈니스 로직 구현
+## 💼 Phase 8: 비즈니스 로직 구현 ✅
 
-### 8.1 자산 서비스 (src/services/asset_service.py)
-- [ ] create_asset() - 자산 생성 로직
-  - [ ] 자산 번호 자동 생성 (YY-CATEGORY-SEQ)
-  - [ ] 등급 자동 계산 (구매 연도 기반)
-  - [ ] 이력 생성
-- [ ] update_asset() - 자산 수정 로직
-  - [ ] 변경 사항 추적
-  - [ ] 이력 기록
-- [ ] delete_asset() - 소프트 삭제
-- [ ] assign_asset() - 자산 배정
-- [ ] unassign_asset() - 자산 회수
-- [ ] get_asset_history() - 이력 조회
+### 8.1 자산 서비스 (src/services/asset_service.py) ✅
+- [x] create_asset() - 자산 생성 로직
+  - [x] 자산 번호 자동 생성 (YY-CATEGORY-SEQ)
+  - [x] 등급 자동 계산 (구매 연도 기반)
+  - [x] 이력 생성
+- [x] update_asset() - 자산 수정 로직
+  - [x] 변경 사항 추적
+  - [x] 이력 기록
+- [x] delete_asset() - 소프트 삭제
+- [x] assign_asset() - 자산 배정
+- [x] unassign_asset() - 자산 회수
+- [x] get_asset_history() - 이력 조회
 
-### 8.2 워크플로우 서비스 (src/services/workflow_service.py)
-- [ ] create_checkout_request() - 반출 요청 생성
-- [ ] create_checkin_request() - 반납 요청 생성
-- [ ] approve_workflow() - 요청 승인
-  - [ ] 자산 상태 변경
-  - [ ] 사용자 배정
+### 8.2 워크플로우 서비스 (src/services/workflow_service.py) ✅
+- [x] create_checkout_request() - 반출 요청 생성
+- [x] create_checkin_request() - 반납 요청 생성
+- [x] approve_workflow() - 요청 승인
+  - [x] 자산 상태 변경
+  - [x] 사용자 배정
   - [ ] 이메일 알림 (선택적)
-- [ ] reject_workflow() - 요청 거부
-- [ ] cancel_workflow() - 요청 취소
-- [ ] get_user_workflows() - 사용자 요청 목록
+- [x] reject_workflow() - 요청 거부
+- [x] cancel_workflow() - 요청 취소
+- [x] get_user_workflows() - 사용자 요청 목록
 
 ### 8.3 QR코드 서비스 (MVP 범위 밖 - Phase 2+)
 
@@ -626,15 +626,15 @@ apps/backend/
 - [ ] generate_bulk_qr_codes() - 대량 재발급
 - [ ] generate_printable_label() - 인쇄용 라벨 생성
 
-### 8.4 통계 서비스 (src/services/statistics_service.py)
-- [ ] get_dashboard_overview() - 대시보드 통계
-  - [ ] 총 자산 수
-  - [ ] 상태별 자산 수
-  - [ ] 최근 활동
-  - [ ] 대기 중인 요청 수
-- [ ] get_assets_by_category() - 카테고리별 통계
-- [ ] get_assets_by_location() - 위치별 통계
-- [ ] get_workflow_statistics() - 워크플로우 통계
+### 8.4 통계 서비스 (src/services/statistics_service.py) ✅
+- [x] get_dashboard_overview() - 대시보드 통계
+  - [x] 총 자산 수
+  - [x] 상태별 자산 수
+  - [x] 최근 활동
+  - [x] 대기 중인 요청 수
+- [x] get_assets_by_category() - 카테고리별 통계
+- [x] get_assets_by_location() - 위치별 통계
+- [x] get_workflow_statistics() - 워크플로우 통계
 
 ---
 
