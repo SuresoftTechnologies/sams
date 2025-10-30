@@ -12,13 +12,14 @@ from src.schemas.common import PaginatedResponse
 
 
 class AssetStatus(str, Enum):
-    """Asset status enum - matches @sams/shared-types."""
+    """Asset status enum - based on actual Excel data."""
 
-    AVAILABLE = "available"
-    ASSIGNED = "assigned"
-    IN_TRANSIT = "in_transit"
-    MAINTENANCE = "maintenance"
-    DISPOSED = "disposed"
+    ISSUED = "issued"  # [지급장비] - 직원에게 지급된 장비
+    LOANED = "loaned"  # [대여용] - 대여 가능한 장비
+    GENERAL = "general"  # [일반장비] - 일반 사용 장비
+    STOCK = "stock"  # [재고] - 재고/보관 중
+    SERVER_ROOM = "server_room"  # [서버실] - 서버실 장비
+    DISPOSED = "disposed"  # [불용] - 폐기/불용 처리
 
 
 class AssetGrade(str, Enum):
@@ -41,7 +42,7 @@ class Asset(BaseModel):
                 "id": "550e8400-e29b-41d4-a716-446655440000",
                 "asset_tag": "SRS-11-2024-0001",
                 "name": "Dell Latitude 5420",
-                "status": "available",
+                "status": "stock",
                 "category_id": "550e8400-e29b-41d4-a716-446655440001",
                 "location_id": "550e8400-e29b-41d4-a716-446655440002",
                 "purchase_date": "2024-01-15T00:00:00Z",
@@ -60,7 +61,7 @@ class Asset(BaseModel):
     model: str | None = Field(None, description="Asset model")
     serial_number: str | None = Field(None, description="Serial number")
     manufacturer: str | None = Field(None, description="Manufacturer")
-    status: AssetStatus = Field(default=AssetStatus.AVAILABLE, description="Current status")
+    status: AssetStatus = Field(default=AssetStatus.STOCK, description="Current status")
 
     # Relations
     category_id: str = Field(..., description="Category ID")
@@ -97,7 +98,7 @@ class CreateAssetRequest(BaseModel):
     asset_tag: str = Field(..., min_length=1, max_length=50, description="Asset tag")
     name: str = Field(..., min_length=1, max_length=200, description="Asset name")
     category_id: str = Field(..., description="Category ID")
-    status: AssetStatus = Field(default=AssetStatus.AVAILABLE, description="Initial status")
+    status: AssetStatus = Field(default=AssetStatus.STOCK, description="Initial status")
 
     location_id: str | None = Field(None, description="Location ID")
     purchase_date: datetime | None = None
@@ -111,7 +112,7 @@ class CreateAssetRequest(BaseModel):
                 "asset_tag": "SRS-11-2024-0001",
                 "name": "Dell Latitude 5420",
                 "category_id": "550e8400-e29b-41d4-a716-446655440001",
-                "status": "available",
+                "status": "stock",
                 "location_id": "550e8400-e29b-41d4-a716-446655440002",
                 "purchase_date": "2024-01-15T00:00:00Z",
                 "purchase_price": "1200000",
@@ -152,7 +153,7 @@ class AssetFilterParams(BaseModel):
         json_schema_extra={
             "example": {
                 "search": "Dell",
-                "status": "available",
+                "status": "stock",
                 "category_id": "550e8400-e29b-41d4-a716-446655440001",
                 "sort_by": "created_at",
                 "sort_order": "desc",
@@ -172,7 +173,7 @@ class AssetListResponse(PaginatedResponse[Asset]):
                         "id": "550e8400-e29b-41d4-a716-446655440000",
                         "asset_tag": "SRS-11-2024-0001",
                         "name": "Dell Latitude 5420",
-                        "status": "available",
+                        "status": "stock",
                         "category_id": "550e8400-e29b-41d4-a716-446655440001",
                         "grade": "A",
                         "created_at": "2024-01-15T09:00:00Z",

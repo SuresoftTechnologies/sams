@@ -13,13 +13,14 @@ from src.database import Base
 
 
 class AssetStatus(str, Enum):
-    """Asset status enum."""
+    """Asset status enum - based on actual Excel data."""
 
-    AVAILABLE = "available"
-    ASSIGNED = "assigned"
-    IN_TRANSIT = "in_transit"
-    MAINTENANCE = "maintenance"
-    DISPOSED = "disposed"
+    ISSUED = "issued"  # [지급장비] - 직원에게 지급된 장비
+    LOANED = "loaned"  # [대여용] - 대여 가능한 장비
+    GENERAL = "general"  # [일반장비] - 일반 사용 장비
+    STOCK = "stock"  # [재고] - 재고/보관 중
+    SERVER_ROOM = "server_room"  # [서버실] - 서버실 장비
+    DISPOSED = "disposed"  # [불용] - 폐기/불용 처리
 
 
 class AssetGrade(str, Enum):
@@ -49,7 +50,7 @@ class Asset(Base):
 
     # Status and grade
     status: Mapped[AssetStatus] = mapped_column(
-        String(20), default=AssetStatus.AVAILABLE, nullable=False, index=True
+        String(20), default=AssetStatus.STOCK, nullable=False, index=True
     )
     grade: Mapped[AssetGrade] = mapped_column(String(1), default=AssetGrade.A, nullable=False)
 

@@ -6,11 +6,12 @@
  * Asset status enum
  */
 export enum AssetStatus {
-  AVAILABLE = 'available',
-  ASSIGNED = 'assigned',
-  IN_TRANSIT = 'in_transit',
-  MAINTENANCE = 'maintenance',
-  DISPOSED = 'disposed',
+  ISSUED = 'issued',           // 지급장비
+  LOANED = 'loaned',           // 대여용
+  GENERAL = 'general',         // 일반장비
+  STOCK = 'stock',             // 재고
+  SERVER_ROOM = 'server_room', // 서버실
+  DISPOSED = 'disposed',       // 불용
 }
 
 /**
