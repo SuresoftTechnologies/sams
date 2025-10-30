@@ -63,8 +63,13 @@ async def get_assets(
     Returns:
         Paginated list of assets
     """
-    # Build query - exclude soft-deleted assets
-    query = select(AssetModel).where(AssetModel.deleted_at.is_(None))
+    # Build query with joins - exclude soft-deleted assets
+    query = (
+        select(AssetModel, Category.name.label("category_name"), Location.name.label("location_name"))
+        .outerjoin(Category, AssetModel.category_id == Category.id)
+        .outerjoin(Location, AssetModel.location_id == Location.id)
+        .where(AssetModel.deleted_at.is_(None))
+    )
 
     # Apply search filter
     if search:
@@ -89,7 +94,11 @@ async def get_assets(
         query = query.where(AssetModel.grade == grade)
 
     # Get total count
-    count_query = select(func.count()).select_from(query.subquery())
+    count_query = select(func.count()).select_from(
+        select(AssetModel)
+        .where(AssetModel.deleted_at.is_(None))
+        .subquery()
+    )
     total_result = await db.execute(count_query)
     total = total_result.scalar_one()
 
@@ -103,10 +112,22 @@ async def get_assets(
     # Apply pagination and execute
     query = query.offset(skip).limit(limit)
     result = await db.execute(query)
-    assets = result.scalars().all()
+    rows = result.all()
+
+    # Build Asset responses with joined data
+    items = []
+    for row in rows:
+        asset_model = row[0]
+        category_name = row[1]
+        location_name = row[2]
+
+        asset_dict = Asset.model_validate(asset_model, from_attributes=True).model_dump()
+        asset_dict["category_name"] = category_name
+        asset_dict["location_name"] = location_name
+        items.append(Asset(**asset_dict))
 
     return PaginatedResponse(
-        items=[Asset.model_validate(asset, from_attributes=True) for asset in assets],
+        items=items,
         total=total,
         skip=skip,
         limit=limit,

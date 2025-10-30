@@ -30,7 +30,7 @@ export default function Dashboard() {
         },
         {
           label: 'Available',
-          value: data.data.filter((a) => a.status === 'available').length,
+          value: data.items.filter((a) => a.status === 'available').length,
           icon: CheckCircle,
           color: 'text-green-500',
           bgColor: 'bg-green-50',
@@ -38,7 +38,7 @@ export default function Dashboard() {
         },
         {
           label: 'In Use',
-          value: data.data.filter((a) => a.status === 'in_use').length,
+          value: data.items.filter((a) => a.status === 'in_use').length,
           icon: Clock,
           color: 'text-yellow-500',
           bgColor: 'bg-yellow-50',
@@ -46,7 +46,7 @@ export default function Dashboard() {
         },
         {
           label: 'Maintenance',
-          value: data.data.filter((a) => a.status === 'maintenance').length,
+          value: data.items.filter((a) => a.status === 'maintenance').length,
           icon: XCircle,
           color: 'text-red-500',
           bgColor: 'bg-red-50',
@@ -56,7 +56,7 @@ export default function Dashboard() {
     : [];
 
   // Get recent assets (latest 5)
-  const recentAssets = data?.data.slice(0, 5) || [];
+  const recentAssets = data?.items.slice(0, 5) || [];
 
   if (error) {
     return (
@@ -160,7 +160,7 @@ export default function Dashboard() {
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">{asset.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {asset.categoryName} • {asset.locationName}
+                      Asset Tag: {asset.asset_tag || 'N/A'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

@@ -41,7 +41,7 @@ export default function AssetList() {
   const deleteAssetMutation = useDeleteAsset();
 
   // Filter assets based on filters
-  const filteredAssets = data?.data.filter((asset) => {
+  const filteredAssets = data?.items.filter((asset) => {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       const matchesName = asset.name.toLowerCase().includes(searchLower);
@@ -75,7 +75,7 @@ export default function AssetList() {
   };
 
   const handleViewQR = (id: string) => {
-    const asset = data?.data.find((a) => a.id === id);
+    const asset = data?.items.find((a) => a.id === id);
     if (asset) {
       setQrAsset(asset);
     }

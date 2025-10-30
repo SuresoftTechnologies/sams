@@ -67,6 +67,10 @@ class Asset(BaseModel):
     location_id: str | None = Field(None, description="Location ID")
     assigned_to: str | None = Field(None, description="User ID of assignee")
 
+    # Computed fields (joined from relations)
+    category_name: str | None = Field(None, description="Category name (from join)")
+    location_name: str | None = Field(None, description="Location name (from join)")
+
     # Purchase info
     purchase_date: datetime | None = Field(None, description="Purchase date")
     purchase_price: Decimal | None = Field(None, description="Purchase price")
