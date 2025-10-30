@@ -501,18 +501,37 @@ src/
 - [x] 컴포넌트 JSDoc 주석
 
 ### 14.6 백엔드 통합 요구사항 정리 ✅
-**필요한 백엔드 변경사항**:
-- [ ] PaginatedResponse에 `total` 필드 추가
-- [ ] 검색 파라미터 지원 (`?search=...`)
-- [ ] 데이터베이스 인덱스 추가:
+**완료일**: 2025-10-30
+
+**구현 완료**:
+- [x] PaginatedResponse에 `total` 필드 추가 (이미 존재)
+- [x] 검색 파라미터 지원 (`?search=...`) (이미 구현)
+- [x] **버그 수정**: total count가 필터/검색 적용된 결과 반영하도록 수정
+- [x] 데이터베이스 인덱스 추가 (마이그레이션: 97b54c3e6d34):
   ```sql
+  -- 검색 최적화
   CREATE INDEX idx_assets_asset_tag ON assets(asset_tag);
   CREATE INDEX idx_assets_name ON assets(name);
   CREATE INDEX idx_assets_serial_number ON assets(serial_number);
+  CREATE INDEX idx_assets_model ON assets(model);
+
+  -- 필터링 최적화
   CREATE INDEX idx_assets_status ON assets(status);
-  CREATE INDEX idx_assets_category ON assets(category_id);
-  CREATE INDEX idx_assets_location ON assets(location_id);
+  CREATE INDEX idx_assets_category_id ON assets(category_id);
+  CREATE INDEX idx_assets_location_id ON assets(location_id);
+  CREATE INDEX idx_assets_assigned_to ON assets(assigned_to);
+  CREATE INDEX idx_assets_grade ON assets(grade);
+
+  -- 복합 인덱스 (공통 쿼리 패턴)
+  CREATE INDEX idx_assets_deleted_status ON assets(deleted_at, status);
   ```
+
+**테스트 결과** (2,213개 자산):
+- ✅ 기본 페이지네이션: Total 2213, Items 10 (정확)
+- ✅ 필터링 (status=assigned): Total 797 (필터 적용 정확)
+- ✅ 검색 (prefix '11'): Total 652 (검색 적용 정확)
+- ✅ total 필드 정확성: 전체/필터/검색 모두 일치
+- ✅ category_name, location_name 응답 포함
 
 ### 14.7 다음 단계 (우선순위 2) 📋
 **예정일**: 2025-11월 1-2주차
